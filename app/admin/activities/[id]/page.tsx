@@ -30,7 +30,7 @@ import { OptionFormData } from "../_components/types";
 import { buildOptionPayload } from "../_components/utils";
 import { createEmptyCandidate, createEmptyOption } from "../_components/formHelpers";
 import { useAdminAccess, useAdminActivity } from "@/hooks";
-import { Option } from "@/lib/activities";
+import { Option } from "@/types";
 
 function ActivityDetailPageContent() {
   const params = useParams();

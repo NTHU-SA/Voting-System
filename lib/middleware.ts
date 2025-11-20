@@ -3,10 +3,6 @@ import { isAdmin, verifyToken } from "@/lib/auth";
 import { JWTPayload } from "@/types";
 import { API_CONSTANTS } from "@/lib/constants";
 
-export interface AuthenticatedRequest extends NextRequest {
-  user?: JWTPayload;
-}
-
 /**
  * Extracts JWT token from request (Authorization header or cookie)
  */

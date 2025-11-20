@@ -25,21 +25,22 @@ import {
   ClipboardCheck,
   AlertCircle,
 } from "lucide-react";
-import { useAdminAccess, useAdminActivities, useActivityStatusBadge, getActivityStatusType } from "@/hooks";
+import { useAdminAccess, useAdminActivities } from "@/hooks";
+import { ActivityStatusBadge } from "@/components/ActivityStatusBadge";
+import { getActivityStatus } from "@/lib/activities";
 
 function AdminDashboardContent() {
   const { activities, loading, error, refetch } = useAdminActivities();
-  const { getStatusBadge } = useActivityStatusBadge();
 
   // Check admin access and fetch activities on success
   useAdminAccess();
 
   const activeCount = activities.filter((a) => 
-    getActivityStatusType(a) === "active"
+    getActivityStatus(a) === "active"
   ).length;
 
   const completedCount = activities.filter(
-    (a) => getActivityStatusType(a) === "ended"
+    (a) => getActivityStatus(a) === "ended"
   ).length;
 
   if (loading) {
@@ -200,7 +201,7 @@ function AdminDashboardContent() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{getStatusBadge(activity)}</TableCell>
+                      <TableCell><ActivityStatusBadge activity={activity} /></TableCell>
                       <TableCell className="text-sm">
                         {activity.rule === "choose_all" ? "多選評分" : "單選"}
                       </TableCell>

@@ -9,4 +9,4 @@ export { useAdminActivities } from "./useAdminActivities";
 export { useAdminActivity } from "./useAdminActivity";
 
 // UI/Status hooks
-export { useActivityStatusBadge, getActivityStatusType } from "./useActivityStatus";
+export { useActivityStatusBadge, getActivityStatus } from "./useActivityStatus";

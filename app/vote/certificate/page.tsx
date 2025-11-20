@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Download, Home, Copy, Check, User } from "lucide-react";
-import { loadVotingHistory, VotingHistory } from "@/lib/votingHistory";
+import { loadVotingHistory } from "@/lib/votingHistory";
+import { VotingHistory } from "@/types";
 import { useUser } from "@/hooks";
 
 export default function CompletionPage() {

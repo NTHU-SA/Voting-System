@@ -1,20 +1,6 @@
 import axios from "axios";
 import { getRequiredEnvVar } from "./config";
-
-export interface OAuthTokenResponse {
-  access_token: string;
-  expires_in: number;
-  token_type: string;
-  scope: string;
-  refresh_token?: string;
-}
-
-export interface OAuthUserInfo {
-  Userid: string; // Maps to student_id in our system
-  name?: string;
-  inschool?: string;
-  uuid?: string; // Used for anonymous voting
-}
+import { OAuthTokenResponse, OAuthUserInfo } from "@/types";
 
 export function getAuthorizationURL(redirect?: string): string {
   const OAUTH_CLIENT_ID = getRequiredEnvVar("OAUTH_CLIENT_ID");

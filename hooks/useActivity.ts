@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { fetchActivity, ActivityWithOptions } from "@/lib/activities";
+import { ActivityWithOptions } from "@/types";
+import { fetchActivity } from "@/lib/activities";
 
 interface UseActivityReturn {
   activity: ActivityWithOptions | null;

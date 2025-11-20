@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { Activity as BaseActivity, Option } from "@/lib/activities";
+import { Activity, Option } from "@/types";
 
 // Extend Activity to include options array
-interface Activity extends BaseActivity {
+interface ActivityWithFullOptions extends Activity {
   options: Option[];
 }
 
 interface UseAdminActivityReturn {
-  activity: Activity | null;
+  activity: ActivityWithFullOptions | null;
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
@@ -18,7 +18,7 @@ interface UseAdminActivityReturn {
  * @param activityId - The ID of the activity to fetch
  */
 export function useAdminActivity(activityId: string): UseAdminActivityReturn {
-  const [activity, setActivity] = useState<Activity | null>(null);
+  const [activity, setActivity] = useState<ActivityWithFullOptions | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

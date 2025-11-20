@@ -1,25 +1,5 @@
 // Activity fetching and filtering utilities
-import { IActivity, IOption, ICandidate } from "@/types";
-
-// Client-side Activity type (serialized from database)
-export interface Activity extends Omit<IActivity, "_id" | "options" | "open_from" | "open_to" | "created_at" | "updated_at"> {
-  _id: string;
-  subtitle?: string; // Additional client field
-  open_from: string;
-  open_to: string;
-}
-
-export interface ActivityWithOptions extends Activity {
-  options: Option[];
-}
-
-// Client-side Option type (serialized from database)
-export type Option = Omit<IOption, "_id" | "activity_id" | "created_at" | "updated_at"> & {
-  _id: string;
-};
-
-// Re-export Candidate from types
-export type Candidate = ICandidate;
+import { Activity, ActivityWithOptions } from "@/types";
 
 /**
  * Check if an activity is currently active (within its time window)

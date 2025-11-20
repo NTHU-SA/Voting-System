@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { saveVotingRecord } from "@/lib/votingHistory";
-import { Candidate } from "@/lib/activities";
+import { Candidate } from "@/types";
 import { useActivity, useUser } from "@/hooks";
 
 export default function VotingPage() {

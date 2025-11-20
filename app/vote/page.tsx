@@ -14,12 +14,12 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { hasVoted } from "@/lib/votingHistory";
-import { useActivities, useUser, useActivityStatusBadge } from "@/hooks";
+import { useActivities, useUser } from "@/hooks";
+import { ActivityStatusBadge } from "@/components/ActivityStatusBadge";
 
 export default function VotePage() {
   const { activities, loading, error } = useActivities();
   const { user } = useUser();
-  const { getStatusBadge } = useActivityStatusBadge();
 
   const currentStudentId = user?.student_id || "";
 
@@ -90,7 +90,7 @@ export default function VotePage() {
                         </p>
                       )}
                     </div>
-                    {getStatusBadge(activity)}
+                    <ActivityStatusBadge activity={activity} />
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
