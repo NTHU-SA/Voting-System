@@ -287,8 +287,12 @@ export default function VotingPage() {
               <Separator />
               <CardContent className="pt-6">
                 {option.candidate && renderCandidate(option.candidate)}
-                {option.vice1 && renderCandidate(option.vice1)}
-                {option.vice2 && renderCandidate(option.vice2)}
+                {option.vice &&
+                  option.vice.map((vice, viceIndex) => (
+                    <div key={viceIndex}>
+                      {renderCandidate(vice)}
+                    </div>
+                  ))}
 
                 {/* Vote Selection */}
                 <div className="mt-6 border-t pt-6">

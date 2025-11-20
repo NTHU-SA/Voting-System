@@ -40,11 +40,11 @@ export function buildOptionPayload(option: OptionFormData): Record<string, unkno
   const candidatePayload = buildCandidatePayload(option.candidate);
   if (candidatePayload) payload.candidate = candidatePayload;
 
-  const vice1Payload = buildCandidatePayload(option.vice1);
-  if (vice1Payload) payload.vice1 = vice1Payload;
-
-  const vice2Payload = buildCandidatePayload(option.vice2);
-  if (vice2Payload) payload.vice2 = vice2Payload;
+  // Build vice array from all vice candidates
+  const vicePayloads = option.vice
+    .map(buildCandidatePayload)
+    .filter((v) => v !== null);
+  payload.vice = vicePayloads; // Always include vice field, even if empty array
 
   return payload;
 }

@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { ArrowLeft, TrendingUp, Users, Award, AlertCircle } from "lucide-react";
 import { useAdminAccess } from "@/hooks";
+import { formatDateTime } from "@/utils/formatDate";
 
 interface ActivityStats {
   activity: {
@@ -141,8 +142,8 @@ function ResultsPageContent() {
               <div>
                 <span className="text-muted-foreground">活動期間：</span>
                 <span className="font-semibold">
-                  {new Date(stats.activity.open_from).toLocaleString("zh-TW")}{" "}
-                  至 {new Date(stats.activity.open_to).toLocaleString("zh-TW")}
+                  {formatDateTime(stats.activity.open_from)}{" "}
+                  至 {formatDateTime(stats.activity.open_to)}
                 </span>
               </div>
             </div>

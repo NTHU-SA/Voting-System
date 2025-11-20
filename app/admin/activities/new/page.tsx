@@ -18,6 +18,7 @@ import { useOptionForm } from "../_components/useOptionForm";
 import { OptionFormSection } from "../_components/OptionFormSection";
 import { ActivityFormFields } from "../_components/ActivityFormFields";
 import { buildOptionPayload } from "../_components/utils";
+import { fromDateTimeLocalString } from "@/utils/formatDate";
 
 function NewActivityWizard() {
   const router = useRouter();
@@ -108,14 +109,20 @@ function NewActivityWizard() {
     setError("");
 
     try {
-      // Create activity
+      // Create activity - convert datetime-local strings to UTC ISO strings
+      const activityPayload = {
+        ...activityData,
+        open_from: fromDateTimeLocalString(activityData.open_from).toISOString(),
+        open_to: fromDateTimeLocalString(activityData.open_to).toISOString(),
+      };
+      
       const activityResponse = await fetch("/api/activities", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify(activityData),
+        body: JSON.stringify(activityPayload),
       });
 
       const activityResult = await activityResponse.json();
@@ -245,11 +252,10 @@ function NewActivityWizard() {
                   currentOption={optionFormHook.currentOption}
                   setCurrentOption={optionFormHook.setCurrentOption}
                   editingIndex={optionFormHook.editingIndex}
-                  showVice1={optionFormHook.showVice1}
-                  setShowVice1={optionFormHook.setShowVice1}
-                  showVice2={optionFormHook.showVice2}
-                  setShowVice2={optionFormHook.setShowVice2}
                   updateCandidate={optionFormHook.updateCandidate}
+                  addVice={optionFormHook.addVice}
+                  removeVice={optionFormHook.removeVice}
+                  updateVice={optionFormHook.updateVice}
                   addOrUpdateOption={optionFormHook.addOrUpdateOption}
                   editOption={optionFormHook.editOption}
                   removeOption={optionFormHook.removeOption}

@@ -31,6 +31,7 @@ import { buildOptionPayload } from "../_components/utils";
 import { createEmptyCandidate, createEmptyOption } from "../_components/formHelpers";
 import { useAdminAccess, useAdminActivity } from "@/hooks";
 import { Option } from "@/types";
+import { toDateTimeLocalString, fromDateTimeLocalString } from "@/utils/formatDate";
 
 function ActivityDetailPageContent() {
   const params = useParams();
@@ -57,8 +58,6 @@ function ActivityDetailPageContent() {
   const [showNewOption, setShowNewOption] = useState(false);
   const [editingOptionId, setEditingOptionId] = useState<string | null>(null);
   const [currentOption, setCurrentOption] = useState<OptionFormData>(createEmptyOption());
-  const [showVice1, setShowVice1] = useState(false);
-  const [showVice2, setShowVice2] = useState(false);
 
   // Check admin access
   useAdminAccess();
@@ -66,25 +65,13 @@ function ActivityDetailPageContent() {
   // Update form data when activity loads
   useEffect(() => {
     if (activity) {
-      const openFromDate = new Date(activity.open_from);
-      const openToDate = new Date(activity.open_to);
-
-      const formatLocalDateTime = (date: Date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        const hours = String(date.getHours()).padStart(2, "0");
-        const minutes = String(date.getMinutes()).padStart(2, "0");
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-      };
-
       setFormData({
         name: activity.name,
         type: activity.type,
         description: activity.description || "",
         rule: activity.rule,
-        open_from: formatLocalDateTime(openFromDate),
-        open_to: formatLocalDateTime(openToDate),
+        open_from: toDateTimeLocalString(activity.open_from),
+        open_to: toDateTimeLocalString(activity.open_to),
       });
     }
   }, [activity]);
@@ -105,13 +92,20 @@ function ActivityDetailPageContent() {
     setSuccessMessage("");
 
     try {
+      // Convert datetime-local strings to UTC ISO strings before sending
+      const activityPayload = {
+        ...formData,
+        open_from: fromDateTimeLocalString(formData.open_from).toISOString(),
+        open_to: fromDateTimeLocalString(formData.open_to).toISOString(),
+      };
+      
       const response = await fetch(`/api/activities/${activityId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify(formData),
+        body: JSON.stringify(activityPayload),
       });
 
       const data = await response.json();
@@ -131,23 +125,47 @@ function ActivityDetailPageContent() {
   };
 
   const updateCandidate = (
-    type: "candidate" | "vice1" | "vice2",
     field: keyof typeof currentOption.candidate,
     value: string
   ) => {
     setCurrentOption((prev) => ({
       ...prev,
-      [type]: {
-        ...prev[type],
+      candidate: {
+        ...prev.candidate,
         [field]: value,
       },
     }));
   };
 
+  const addVice = () => {
+    setCurrentOption((prev) => ({
+      ...prev,
+      vice: [...prev.vice, createEmptyCandidate()],
+    }));
+  };
+
+  const removeVice = (index: number) => {
+    setCurrentOption((prev) => ({
+      ...prev,
+      vice: prev.vice.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateVice = (
+    index: number,
+    field: keyof typeof currentOption.candidate,
+    value: string
+  ) => {
+    setCurrentOption((prev) => ({
+      ...prev,
+      vice: prev.vice.map((v, i) =>
+        i === index ? { ...v, [field]: value } : v
+      ),
+    }));
+  };
+
   const resetOptionForm = () => {
     setCurrentOption(createEmptyOption());
-    setShowVice1(false);
-    setShowVice2(false);
     setEditingOptionId(null);
     setShowNewOption(false);
   };
@@ -169,25 +187,15 @@ function ActivityDetailPageContent() {
         experiences: option.candidate?.personal_experiences?.join("\n") || "",
         opinions: option.candidate?.political_opinions?.join("\n") || "",
       },
-      vice1: {
-        name: option.vice1?.name || "",
-        department: option.vice1?.department || "",
-        college: option.vice1?.college || "",
-        avatar_url: option.vice1?.avatar_url || "",
-        experiences: option.vice1?.personal_experiences?.join("\n") || "",
-        opinions: option.vice1?.political_opinions?.join("\n") || "",
-      },
-      vice2: {
-        name: option.vice2?.name || "",
-        department: option.vice2?.department || "",
-        college: option.vice2?.college || "",
-        avatar_url: option.vice2?.avatar_url || "",
-        experiences: option.vice2?.personal_experiences?.join("\n") || "",
-        opinions: option.vice2?.political_opinions?.join("\n") || "",
-      },
+      vice: (option.vice || []).map((v) => ({
+        name: v.name || "",
+        department: v.department || "",
+        college: v.college || "",
+        avatar_url: v.avatar_url || "",
+        experiences: v.personal_experiences?.join("\n") || "",
+        opinions: v.political_opinions?.join("\n") || "",
+      })),
     });
-    setShowVice1(!!option.vice1?.name);
-    setShowVice2(!!option.vice2?.name);
   };
 
   const handleSaveOption = async (e: React.FormEvent) => {
@@ -471,34 +479,16 @@ function ActivityDetailPageContent() {
 
                     <CandidateFormFields
                       candidate={currentOption.candidate}
-                      onChange={(field, value) => updateCandidate("candidate", field, value)}
+                      onChange={(field, value) => updateCandidate(field, value)}
                       label="正選候選人"
                       required
                     />
 
                     <ViceCandidateSection
-                      vice1={currentOption.vice1}
-                      vice2={currentOption.vice2}
-                      showVice1={showVice1}
-                      showVice2={showVice2}
-                      onShowVice1={() => setShowVice1(true)}
-                      onShowVice2={() => setShowVice2(true)}
-                      onHideVice1={() => {
-                        setShowVice1(false);
-                        setCurrentOption({
-                          ...currentOption,
-                          vice1: createEmptyCandidate(),
-                        });
-                      }}
-                      onHideVice2={() => {
-                        setShowVice2(false);
-                        setCurrentOption({
-                          ...currentOption,
-                          vice2: createEmptyCandidate(),
-                        });
-                      }}
-                      onVice1Change={(field, value) => updateCandidate("vice1", field, value)}
-                      onVice2Change={(field, value) => updateCandidate("vice2", field, value)}
+                      vices={currentOption.vice}
+                      onAddVice={addVice}
+                      onRemoveVice={removeVice}
+                      onViceChange={updateVice}
                     />
 
                     <div className="flex justify-end gap-2">
@@ -567,35 +557,21 @@ function ActivityDetailPageContent() {
                             </div>
                           )}
 
-                          {option.vice1 && (
-                            <div className="ml-4 mb-1 text-sm">
-                              <span className="text-muted-foreground">
-                                副選 1:{" "}
-                              </span>
-                              <span>{option.vice1.name}</span>
-                              {option.vice1.department && (
+                          {option.vice &&
+                            option.vice.map((vice, viceIndex) => (
+                              <div key={viceIndex} className="ml-4 mb-1 text-sm">
                                 <span className="text-muted-foreground">
-                                  {" "}
-                                  ({option.vice1.department})
+                                  副選 {viceIndex + 1}:{" "}
                                 </span>
-                              )}
-                            </div>
-                          )}
-
-                          {option.vice2 && (
-                            <div className="ml-4 text-sm">
-                              <span className="text-muted-foreground">
-                                副選 2:{" "}
-                              </span>
-                              <span>{option.vice2.name}</span>
-                              {option.vice2.department && (
-                                <span className="text-muted-foreground">
-                                  {" "}
-                                  ({option.vice2.department})
-                                </span>
-                              )}
-                            </div>
-                          )}
+                                <span>{vice.name}</span>
+                                {vice.department && (
+                                  <span className="text-muted-foreground">
+                                    {" "}
+                                    ({vice.department})
+                                  </span>
+                                )}
+                              </div>
+                            ))}
                         </div>
 
                         <div className="flex gap-2">

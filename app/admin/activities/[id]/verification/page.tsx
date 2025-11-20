@@ -23,6 +23,7 @@ import {
   AlertCircle,
   Download,
 } from "lucide-react";
+import { formatDateTime } from "@/utils/formatDate";
 
 interface VerificationData {
   activity_id: string;
@@ -111,7 +112,7 @@ function VerificationPageContent() {
       ["投票憑證 UUID", "投票時間"],
       ...data.voted_tokens.map((token) => [
         token.uuid,
-        new Date(token.voted_at).toLocaleString("zh-TW"),
+        formatDateTime(token.voted_at),
       ]),
     ]
       .map((row) => row.join(","))
@@ -267,7 +268,7 @@ function VerificationPageContent() {
                       </code>
                     </div>
                     <span className="text-muted-foreground">
-                      {new Date(token.voted_at).toLocaleString("zh-TW")}
+                      {formatDateTime(token.voted_at)}
                     </span>
                   </div>
                 ))}

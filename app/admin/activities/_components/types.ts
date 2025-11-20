@@ -14,6 +14,5 @@ export interface CandidateForm {
 export interface OptionFormData {
   label: string;
   candidate: CandidateForm;
-  vice1: CandidateForm;
-  vice2: CandidateForm;
+  vice: CandidateForm[];
 }

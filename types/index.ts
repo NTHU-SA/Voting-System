@@ -28,8 +28,7 @@ export interface IOption {
   activity_id: Types.ObjectId | string;
   label?: string; // Optional label for the candidate
   candidate?: ICandidate;
-  vice1?: ICandidate;
-  vice2?: ICandidate;
+  vice?: ICandidate[];
   created_at: Date;
   updated_at: Date;
 }
@@ -94,8 +93,7 @@ export interface CreateOptionRequest {
   activity_id: string;
   label?: string;
   candidate?: ICandidate;
-  vice1?: ICandidate;
-  vice2?: ICandidate;
+  vice?: ICandidate[];
 }
 
 export interface CreateVoteRequest {
