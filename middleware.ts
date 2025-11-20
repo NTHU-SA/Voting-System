@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyToken } from "@/lib/jwt";
+import { isProduction } from "@/lib/config";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -77,7 +78,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
 
   // HSTS header for production
-  if (process.env.NODE_ENV === "production") {
+  if (isProduction()) {
     response.headers.set(
       "Strict-Transport-Security",
       "max-age=31536000; includeSubDomains"

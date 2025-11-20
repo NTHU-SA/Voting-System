@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { isDevelopment } from "@/lib/config";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -9,9 +10,7 @@ interface LoginModalProps {
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const isDev =
-    process.env.NODE_ENV === "development" ||
-    process.env.NEXT_PUBLIC_BASE_URL?.includes("localhost");
+  const isDev = isDevelopment();
 
   useEffect(() => {
     // Prevent scrolling when modal is open

@@ -22,6 +22,8 @@ services:
 
       # Application
       - NODE_ENV=production
+      - PORT=${PORT:-3000}
+      - APP_HOSTNAME=${APP_HOSTNAME}
       - TOKEN_SECRET=${TOKEN_SECRET}
 
       # OAuth Configuration (required)

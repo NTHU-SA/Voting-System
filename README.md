@@ -106,6 +106,12 @@ OAUTH_TOKEN_URL=https://oauth.ccxp.nthu.edu.tw/v1.1/token.php
 OAUTH_RESOURCE_URL=https://oauth.ccxp.nthu.edu.tw/v1.1/resource.php
 OAUTH_CALLBACK_URL=https://your-domain.com/api/auth/callback
 OAUTH_SCOPE=userid name inschool uuid
+
+# Application Settings
+NODE_ENV=production
+PORT=3000
+# External hostname for building URLs (without protocol)
+APP_HOSTNAME=your-domain.com
 ```
 
 **Generate strong TOKEN_SECRET:**
