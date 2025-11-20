@@ -1,4 +1,4 @@
-import { CandidateForm } from "./types";
+import { CandidateForm, OptionFormData } from "./types";
 
 /**
  * Builds API payload for a candidate with optional fields
@@ -156,4 +156,84 @@ export function emptyFlatForm(): FlatOptionForm {
     vice2_experiences: "",
     vice2_opinions: "",
   };
+}
+
+/**
+ * Converts OptionFormData to FlatOptionForm
+ */
+export function optionFormToFlat(option: OptionFormData): FlatOptionForm {
+  return {
+    label: option.label,
+    candidate_name: option.candidate.name,
+    candidate_department: option.candidate.department,
+    candidate_college: option.candidate.college,
+    candidate_avatar_url: option.candidate.avatar_url,
+    candidate_experiences: option.candidate.experiences,
+    candidate_opinions: option.candidate.opinions,
+    vice1_name: option.vice1.name,
+    vice1_department: option.vice1.department,
+    vice1_college: option.vice1.college,
+    vice1_avatar_url: option.vice1.avatar_url,
+    vice1_experiences: option.vice1.experiences,
+    vice1_opinions: option.vice1.opinions,
+    vice2_name: option.vice2.name,
+    vice2_department: option.vice2.department,
+    vice2_college: option.vice2.college,
+    vice2_avatar_url: option.vice2.avatar_url,
+    vice2_experiences: option.vice2.experiences,
+    vice2_opinions: option.vice2.opinions,
+  };
+}
+
+/**
+ * Converts FlatOptionForm to OptionFormData
+ */
+export function flatFormToOption(flat: FlatOptionForm): OptionFormData {
+  return {
+    label: flat.label,
+    candidate: {
+      name: flat.candidate_name,
+      department: flat.candidate_department,
+      college: flat.candidate_college,
+      avatar_url: flat.candidate_avatar_url,
+      experiences: flat.candidate_experiences,
+      opinions: flat.candidate_opinions,
+    },
+    vice1: {
+      name: flat.vice1_name,
+      department: flat.vice1_department,
+      college: flat.vice1_college,
+      avatar_url: flat.vice1_avatar_url,
+      experiences: flat.vice1_experiences,
+      opinions: flat.vice1_opinions,
+    },
+    vice2: {
+      name: flat.vice2_name,
+      department: flat.vice2_department,
+      college: flat.vice2_college,
+      avatar_url: flat.vice2_avatar_url,
+      experiences: flat.vice2_experiences,
+      opinions: flat.vice2_opinions,
+    },
+  };
+}
+
+/**
+ * Builds option payload from OptionFormData
+ */
+export function buildOptionPayload(option: OptionFormData): Record<string, unknown> {
+  const payload: Record<string, unknown> = {};
+
+  if (option.label) payload.label = option.label;
+
+  const candidatePayload = buildCandidatePayload(option.candidate);
+  if (candidatePayload) payload.candidate = candidatePayload;
+
+  const vice1Payload = buildCandidatePayload(option.vice1);
+  if (vice1Payload) payload.vice1 = vice1Payload;
+
+  const vice2Payload = buildCandidatePayload(option.vice2);
+  if (vice2Payload) payload.vice2 = vice2Payload;
+
+  return payload;
 }

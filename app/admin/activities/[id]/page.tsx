@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Loading } from "@/components/ui/loader";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
@@ -21,9 +20,15 @@ import {
   BarChart3,
   ClipboardCheck,
   Eye,
+  Check,
+  X,
 } from "lucide-react";
-import { buildOptionPayloadFromFlat, emptyFlatForm, FlatOptionForm } from "../_components/utils";
 import { Activity as BaseActivity, Option } from "@/lib/activities";
+import { ActivityFormFields } from "../_components/ActivityFormFields";
+import { CandidateFormFields } from "../_components/CandidateFormFields";
+import { ViceCandidateSection } from "../_components/ViceCandidateSection";
+import { OptionFormData, emptyCandidateForm, emptyOptionForm } from "../_components/types";
+import { buildOptionPayload } from "../_components/utils";
 
 // Extend Activity to include options array
 interface Activity extends BaseActivity {
@@ -51,13 +56,12 @@ function ActivityDetailPageContent() {
     open_to: "",
   });
 
-  // New option form
+  // New/Edit option form state
   const [showNewOption, setShowNewOption] = useState(false);
-  const [newOption, setNewOption] = useState<FlatOptionForm>(emptyFlatForm());
-
-  // Edit option form
   const [editingOptionId, setEditingOptionId] = useState<string | null>(null);
-  const [editOption, setEditOption] = useState<FlatOptionForm>(emptyFlatForm());
+  const [currentOption, setCurrentOption] = useState<OptionFormData>(emptyOptionForm());
+  const [showVice1, setShowVice1] = useState(false);
+  const [showVice2, setShowVice2] = useState(false);
 
   useEffect(() => {
     checkAdminAccess();
@@ -70,7 +74,6 @@ function ActivityDetailPageContent() {
       const data = await response.json();
 
       if (!data.authenticated || !data.user?.isAdmin) {
-        // Not authenticated or not an admin, redirect to home
         router.push("/?error=admin_required");
         return;
       }
@@ -94,12 +97,9 @@ function ActivityDetailPageContent() {
 
       if (data.success) {
         setActivity(data.data);
-        // Convert to local datetime format for datetime-local input
-        // by removing timezone offset adjustment
         const openFromDate = new Date(data.data.open_from);
         const openToDate = new Date(data.data.open_to);
 
-        // Format as YYYY-MM-DDTHH:MM in local time
         const formatLocalDateTime = (date: Date) => {
           const year = date.getFullYear();
           const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -128,6 +128,15 @@ function ActivityDetailPageContent() {
     }
   };
 
+  const handleActivityChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleUpdateActivity = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -148,7 +157,6 @@ function ActivityDetailPageContent() {
 
       if (data.success) {
         setSuccessMessage("活動資訊已更新");
-        // Don't refetch to avoid datetime jumping - just update activity
         setActivity(data.data);
       } else {
         setError(data.error || "更新活動失敗");
@@ -161,38 +169,126 @@ function ActivityDetailPageContent() {
     }
   };
 
-  const handleAddOption = async (e: React.FormEvent) => {
+  const updateCandidate = (
+    type: "candidate" | "vice1" | "vice2",
+    field: keyof typeof currentOption.candidate,
+    value: string
+  ) => {
+    setCurrentOption((prev) => ({
+      ...prev,
+      [type]: {
+        ...prev[type],
+        [field]: value,
+      },
+    }));
+  };
+
+  const resetOptionForm = () => {
+    setCurrentOption(emptyOptionForm());
+    setShowVice1(false);
+    setShowVice2(false);
+    setEditingOptionId(null);
+    setShowNewOption(false);
+  };
+
+  const handleStartAddOption = () => {
+    resetOptionForm();
+    setShowNewOption(true);
+  };
+
+  const handleStartEditOption = (option: Option) => {
+    setEditingOptionId(option._id);
+    setCurrentOption({
+      label: option.label || "",
+      candidate: {
+        name: option.candidate?.name || "",
+        department: option.candidate?.department || "",
+        college: option.candidate?.college || "",
+        avatar_url: option.candidate?.avatar_url || "",
+        experiences: option.candidate?.personal_experiences?.join("\n") || "",
+        opinions: option.candidate?.political_opinions?.join("\n") || "",
+      },
+      vice1: {
+        name: option.vice1?.name || "",
+        department: option.vice1?.department || "",
+        college: option.vice1?.college || "",
+        avatar_url: option.vice1?.avatar_url || "",
+        experiences: option.vice1?.personal_experiences?.join("\n") || "",
+        opinions: option.vice1?.political_opinions?.join("\n") || "",
+      },
+      vice2: {
+        name: option.vice2?.name || "",
+        department: option.vice2?.department || "",
+        college: option.vice2?.college || "",
+        avatar_url: option.vice2?.avatar_url || "",
+        experiences: option.vice2?.personal_experiences?.join("\n") || "",
+        opinions: option.vice2?.political_opinions?.join("\n") || "",
+      },
+    });
+    setShowVice1(!!option.vice1?.name);
+    setShowVice2(!!option.vice2?.name);
+  };
+
+  const handleSaveOption = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!currentOption.candidate.name) {
+      setError("請至少填寫正選候選人姓名");
+      return;
+    }
+
     setSaving(true);
     setError("");
     setSuccessMessage("");
 
     try {
-      const optionData = buildOptionPayloadFromFlat(newOption);
-      optionData.activity_id = activityId;
+      const optionData = buildOptionPayload(currentOption);
 
-      const response = await fetch("/api/options", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(optionData),
-      });
+      if (editingOptionId) {
+        // Update existing option
+        const response = await fetch(`/api/options/${editingOptionId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(optionData),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (data.success) {
-        setSuccessMessage("候選人已新增");
-        setShowNewOption(false);
-        setNewOption(emptyFlatForm());
-        fetchActivity();
+        if (data.success) {
+          setSuccessMessage("候選人已更新");
+          resetOptionForm();
+          fetchActivity();
+        } else {
+          setError(data.error || "更新候選人失敗");
+        }
       } else {
-        setError(data.error || "新增候選人失敗");
+        // Add new option
+        optionData.activity_id = activityId;
+
+        const response = await fetch("/api/options", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(optionData),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          setSuccessMessage("候選人已新增");
+          resetOptionForm();
+          fetchActivity();
+        } else {
+          setError(data.error || "新增候選人失敗");
+        }
       }
     } catch (err) {
-      console.error("Error adding option:", err);
-      setError("新增候選人時發生錯誤");
+      console.error("Error saving option:", err);
+      setError("儲存候選人時發生錯誤");
     } finally {
       setSaving(false);
     }
@@ -222,70 +318,6 @@ function ActivityDetailPageContent() {
     } catch (err) {
       console.error("Error deleting option:", err);
       setError("刪除候選人時發生錯誤");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleStartEdit = (option: Option) => {
-    setEditingOptionId(option._id);
-    setEditOption({
-      label: option.label || "",
-      candidate_name: option.candidate?.name || "",
-      candidate_department: option.candidate?.department || "",
-      candidate_college: option.candidate?.college || "",
-      candidate_avatar_url: option.candidate?.avatar_url || "",
-      candidate_experiences:
-        option.candidate?.personal_experiences?.join("\n") || "",
-      candidate_opinions:
-        option.candidate?.political_opinions?.join("\n") || "",
-      vice1_name: option.vice1?.name || "",
-      vice1_department: option.vice1?.department || "",
-      vice1_college: option.vice1?.college || "",
-      vice1_avatar_url: option.vice1?.avatar_url || "",
-      vice1_experiences: option.vice1?.personal_experiences?.join("\n") || "",
-      vice1_opinions: option.vice1?.political_opinions?.join("\n") || "",
-      vice2_name: option.vice2?.name || "",
-      vice2_department: option.vice2?.department || "",
-      vice2_college: option.vice2?.college || "",
-      vice2_avatar_url: option.vice2?.avatar_url || "",
-      vice2_experiences: option.vice2?.personal_experiences?.join("\n") || "",
-      vice2_opinions: option.vice2?.political_opinions?.join("\n") || "",
-    });
-  };
-
-  const handleUpdateOption = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingOptionId) return;
-
-    setSaving(true);
-    setError("");
-    setSuccessMessage("");
-
-    try {
-      const optionData = buildOptionPayloadFromFlat(editOption);
-
-      const response = await fetch(`/api/options/${editingOptionId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(optionData),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setSuccessMessage("候選人已更新");
-        setEditingOptionId(null);
-        fetchActivity();
-      } else {
-        setError(data.error || "更新候選人失敗");
-      }
-    } catch (err) {
-      console.error("Error updating option:", err);
-      setError("更新候選人時發生錯誤");
     } finally {
       setSaving(false);
     }
@@ -406,92 +438,11 @@ function ActivityDetailPageContent() {
           <Separator />
           <CardContent className="pt-6">
             <form onSubmit={handleUpdateActivity} className="space-y-6">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="name">活動名稱</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    disabled={saving}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="type">活動類型</Label>
-                  <Input
-                    id="type"
-                    value={formData.type}
-                    onChange={(e) =>
-                      setFormData({ ...formData, type: e.target.value })
-                    }
-                    disabled={saving}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">活動說明</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  disabled={saving}
-                  placeholder="選填，將顯示在投票頁面作為活動說明"
-                  rows={4}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="rule">投票方式</Label>
-                <select
-                  id="rule"
-                  value={formData.rule}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      rule: e.target.value as "choose_one" | "choose_all",
-                    })
-                  }
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  disabled={saving}
-                >
-                  <option value="choose_one">單選</option>
-                  <option value="choose_all">多選評分</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="open_from">開始時間</Label>
-                  <Input
-                    id="open_from"
-                    type="datetime-local"
-                    value={formData.open_from}
-                    onChange={(e) =>
-                      setFormData({ ...formData, open_from: e.target.value })
-                    }
-                    disabled={saving}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="open_to">結束時間</Label>
-                  <Input
-                    id="open_to"
-                    type="datetime-local"
-                    value={formData.open_to}
-                    onChange={(e) =>
-                      setFormData({ ...formData, open_to: e.target.value })
-                    }
-                    disabled={saving}
-                  />
-                </div>
-              </div>
+              <ActivityFormFields
+                formData={formData}
+                onChange={handleActivityChange}
+                disabled={saving}
+              />
 
               <div className="flex justify-end gap-4">
                 <Button
@@ -519,256 +470,97 @@ function ActivityDetailPageContent() {
               <CardTitle>
                 候選人管理 ({activity.options?.length || 0})
               </CardTitle>
-              <Button
-                onClick={() => setShowNewOption(!showNewOption)}
-                size="sm"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                新增候選人
-              </Button>
+              {!showNewOption && !editingOptionId && (
+                <Button
+                  onClick={handleStartAddOption}
+                  size="sm"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  新增候選人
+                </Button>
+              )}
             </div>
           </CardHeader>
           <Separator />
           <CardContent className="pt-6">
-            {/* Add New Option Form */}
-            {showNewOption && (
+            {/* Add/Edit Option Form */}
+            {(showNewOption || editingOptionId) && (
               <Card className="mb-6 border-primary/20 bg-primary/5">
                 <CardHeader>
-                  <CardTitle className="text-lg">新增候選人</CardTitle>
+                  <CardTitle className="text-lg">
+                    {editingOptionId ? "編輯候選人" : "新增候選人"}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleAddOption} className="space-y-4">
+                  <form onSubmit={handleSaveOption} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="label">標籤（選填）</Label>
                       <Input
                         id="label"
-                        value={newOption.label}
+                        value={currentOption.label}
                         onChange={(e) =>
-                          setNewOption({ ...newOption, label: e.target.value })
+                          setCurrentOption({ ...currentOption, label: e.target.value })
                         }
                         placeholder="例：候選人組合、會長候選人"
                       />
                       <p className="text-xs text-muted-foreground">
-                        標籤將顯示在投票頁面，若不填寫則不顯示
+                        標籤將顯示在投票頁面，若不填寫則顯示為「候選人 N」
                       </p>
                     </div>
 
-                    <div className="space-y-3">
-                      <h4 className="font-semibold">正選候選人</h4>
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                        <Input
-                          placeholder="姓名 *"
-                          value={newOption.candidate_name}
-                          onChange={(e) =>
-                            setNewOption({
-                              ...newOption,
-                              candidate_name: e.target.value,
-                            })
-                          }
-                          required
-                        />
-                        <Input
-                          placeholder="系所（選填）"
-                          value={newOption.candidate_department}
-                          onChange={(e) =>
-                            setNewOption({
-                              ...newOption,
-                              candidate_department: e.target.value,
-                            })
-                          }
-                        />
-                        <Input
-                          placeholder="學院（選填）"
-                          value={newOption.candidate_college}
-                          onChange={(e) =>
-                            setNewOption({
-                              ...newOption,
-                              candidate_college: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <Input
-                        placeholder="照片網址（選填）- 請輸入外部圖片連結"
-                        value={newOption.candidate_avatar_url}
-                        onChange={(e) =>
-                          setNewOption({
-                            ...newOption,
-                            candidate_avatar_url: e.target.value,
-                          })
-                        }
-                      />
-                      <Textarea
-                        placeholder="個人經歷（選填，一行一項）"
-                        value={newOption.candidate_experiences}
-                        onChange={(e) =>
-                          setNewOption({
-                            ...newOption,
-                            candidate_experiences: e.target.value,
-                          })
-                        }
-                        rows={3}
-                      />
-                      <Textarea
-                        placeholder="政見（選填，一行一項）"
-                        value={newOption.candidate_opinions}
-                        onChange={(e) =>
-                          setNewOption({
-                            ...newOption,
-                            candidate_opinions: e.target.value,
-                          })
-                        }
-                        rows={3}
-                      />
-                    </div>
+                    <CandidateFormFields
+                      candidate={currentOption.candidate}
+                      onChange={(field, value) => updateCandidate("candidate", field, value)}
+                      label="正選候選人"
+                      required
+                    />
 
-                    <div className="space-y-3">
-                      <h4 className="font-semibold">副選候選人 1（選填）</h4>
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                        <Input
-                          placeholder="姓名"
-                          value={newOption.vice1_name}
-                          onChange={(e) =>
-                            setNewOption({
-                              ...newOption,
-                              vice1_name: e.target.value,
-                            })
-                          }
-                        />
-                        <Input
-                          placeholder="系所（選填）"
-                          value={newOption.vice1_department}
-                          onChange={(e) =>
-                            setNewOption({
-                              ...newOption,
-                              vice1_department: e.target.value,
-                            })
-                          }
-                        />
-                        <Input
-                          placeholder="學院（選填）"
-                          value={newOption.vice1_college}
-                          onChange={(e) =>
-                            setNewOption({
-                              ...newOption,
-                              vice1_college: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <Input
-                        placeholder="照片網址（選填）- 請輸入外部圖片連結"
-                        value={newOption.vice1_avatar_url}
-                        onChange={(e) =>
-                          setNewOption({
-                            ...newOption,
-                            vice1_avatar_url: e.target.value,
-                          })
-                        }
-                      />
-                      <Textarea
-                        placeholder="個人經歷（選填，一行一項）"
-                        value={newOption.vice1_experiences}
-                        onChange={(e) =>
-                          setNewOption({
-                            ...newOption,
-                            vice1_experiences: e.target.value,
-                          })
-                        }
-                        rows={3}
-                      />
-                      <Textarea
-                        placeholder="政見（選填，一行一項）"
-                        value={newOption.vice1_opinions}
-                        onChange={(e) =>
-                          setNewOption({
-                            ...newOption,
-                            vice1_opinions: e.target.value,
-                          })
-                        }
-                        rows={3}
-                      />
-                    </div>
-
-                    <div className="space-y-3">
-                      <h4 className="font-semibold">副選候選人 2（選填）</h4>
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                        <Input
-                          placeholder="姓名"
-                          value={newOption.vice2_name}
-                          onChange={(e) =>
-                            setNewOption({
-                              ...newOption,
-                              vice2_name: e.target.value,
-                            })
-                          }
-                        />
-                        <Input
-                          placeholder="系所（選填）"
-                          value={newOption.vice2_department}
-                          onChange={(e) =>
-                            setNewOption({
-                              ...newOption,
-                              vice2_department: e.target.value,
-                            })
-                          }
-                        />
-                        <Input
-                          placeholder="學院（選填）"
-                          value={newOption.vice2_college}
-                          onChange={(e) =>
-                            setNewOption({
-                              ...newOption,
-                              vice2_college: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <Input
-                        placeholder="照片網址（選填）- 請輸入外部圖片連結"
-                        value={newOption.vice2_avatar_url}
-                        onChange={(e) =>
-                          setNewOption({
-                            ...newOption,
-                            vice2_avatar_url: e.target.value,
-                          })
-                        }
-                      />
-                      <Textarea
-                        placeholder="個人經歷（選填，一行一項）"
-                        value={newOption.vice2_experiences}
-                        onChange={(e) =>
-                          setNewOption({
-                            ...newOption,
-                            vice2_experiences: e.target.value,
-                          })
-                        }
-                        rows={3}
-                      />
-                      <Textarea
-                        placeholder="政見（選填，一行一項）"
-                        value={newOption.vice2_opinions}
-                        onChange={(e) =>
-                          setNewOption({
-                            ...newOption,
-                            vice2_opinions: e.target.value,
-                          })
-                        }
-                        rows={3}
-                      />
-                    </div>
+                    <ViceCandidateSection
+                      vice1={currentOption.vice1}
+                      vice2={currentOption.vice2}
+                      showVice1={showVice1}
+                      showVice2={showVice2}
+                      onShowVice1={() => setShowVice1(true)}
+                      onShowVice2={() => setShowVice2(true)}
+                      onHideVice1={() => {
+                        setShowVice1(false);
+                        setCurrentOption({
+                          ...currentOption,
+                          vice1: emptyCandidateForm(),
+                        });
+                      }}
+                      onHideVice2={() => {
+                        setShowVice2(false);
+                        setCurrentOption({
+                          ...currentOption,
+                          vice2: emptyCandidateForm(),
+                        });
+                      }}
+                      onVice1Change={(field, value) => updateCandidate("vice1", field, value)}
+                      onVice2Change={(field, value) => updateCandidate("vice2", field, value)}
+                    />
 
                     <div className="flex justify-end gap-2">
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => setShowNewOption(false)}
+                        onClick={resetOptionForm}
                       >
+                        <X className="mr-2 h-4 w-4" />
                         取消
                       </Button>
                       <Button type="submit" disabled={saving}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        新增
+                        {editingOptionId ? (
+                          <>
+                            <Check className="mr-2 h-4 w-4" />
+                            更新
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="mr-2 h-4 w-4" />
+                            新增
+                          </>
+                        )}
                       </Button>
                     </div>
                   </form>
@@ -782,343 +574,98 @@ function ActivityDetailPageContent() {
                 {activity.options.map((option, index) => (
                   <Card key={option._id}>
                     <CardContent className="pt-6">
-                      {editingOptionId === option._id ? (
-                        // Edit Form
-                        <form
-                          onSubmit={handleUpdateOption}
-                          className="space-y-4"
-                        >
-                          <div className="space-y-2">
-                            <Label htmlFor="edit-label">標籤（選填）</Label>
-                            <Input
-                              id="edit-label"
-                              value={editOption.label}
-                              onChange={(e) =>
-                                setEditOption({
-                                  ...editOption,
-                                  label: e.target.value,
-                                })
-                              }
-                              placeholder="例：候選人組合、會長候選人"
-                            />
-                          </div>
-
-                          <div className="space-y-3">
-                            <h4 className="font-semibold">正選候選人</h4>
-                            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                              <Input
-                                placeholder="姓名 *"
-                                value={editOption.candidate_name}
-                                onChange={(e) =>
-                                  setEditOption({
-                                    ...editOption,
-                                    candidate_name: e.target.value,
-                                  })
-                                }
-                                required
-                              />
-                              <Input
-                                placeholder="系所（選填）"
-                                value={editOption.candidate_department}
-                                onChange={(e) =>
-                                  setEditOption({
-                                    ...editOption,
-                                    candidate_department: e.target.value,
-                                  })
-                                }
-                              />
-                              <Input
-                                placeholder="學院（選填）"
-                                value={editOption.candidate_college}
-                                onChange={(e) =>
-                                  setEditOption({
-                                    ...editOption,
-                                    candidate_college: e.target.value,
-                                  })
-                                }
-                              />
-                            </div>
-                            <Input
-                              placeholder="照片網址（選填）- 請輸入外部圖片連結"
-                              value={editOption.candidate_avatar_url}
-                              onChange={(e) =>
-                                setEditOption({
-                                  ...editOption,
-                                  candidate_avatar_url: e.target.value,
-                                })
-                              }
-                            />
-                            <Textarea
-                              placeholder="個人經歷（選填，一行一項）"
-                              value={editOption.candidate_experiences}
-                              onChange={(e) =>
-                                setEditOption({
-                                  ...editOption,
-                                  candidate_experiences: e.target.value,
-                                })
-                              }
-                              rows={3}
-                            />
-                            <Textarea
-                              placeholder="政見（選填，一行一項）"
-                              value={editOption.candidate_opinions}
-                              onChange={(e) =>
-                                setEditOption({
-                                  ...editOption,
-                                  candidate_opinions: e.target.value,
-                                })
-                              }
-                              rows={3}
-                            />
-                          </div>
-
-                          <div className="space-y-3">
-                            <h4 className="font-semibold">
-                              副選候選人 1（選填）
-                            </h4>
-                            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                              <Input
-                                placeholder="姓名"
-                                value={editOption.vice1_name}
-                                onChange={(e) =>
-                                  setEditOption({
-                                    ...editOption,
-                                    vice1_name: e.target.value,
-                                  })
-                                }
-                              />
-                              <Input
-                                placeholder="系所（選填）"
-                                value={editOption.vice1_department}
-                                onChange={(e) =>
-                                  setEditOption({
-                                    ...editOption,
-                                    vice1_department: e.target.value,
-                                  })
-                                }
-                              />
-                              <Input
-                                placeholder="學院（選填）"
-                                value={editOption.vice1_college}
-                                onChange={(e) =>
-                                  setEditOption({
-                                    ...editOption,
-                                    vice1_college: e.target.value,
-                                  })
-                                }
-                              />
-                            </div>
-                            <Input
-                              placeholder="照片網址（選填）- 請輸入外部圖片連結"
-                              value={editOption.vice1_avatar_url}
-                              onChange={(e) =>
-                                setEditOption({
-                                  ...editOption,
-                                  vice1_avatar_url: e.target.value,
-                                })
-                              }
-                            />
-                            <Textarea
-                              placeholder="個人經歷（選填，一行一項）"
-                              value={editOption.vice1_experiences}
-                              onChange={(e) =>
-                                setEditOption({
-                                  ...editOption,
-                                  vice1_experiences: e.target.value,
-                                })
-                              }
-                              rows={3}
-                            />
-                            <Textarea
-                              placeholder="政見（選填，一行一項）"
-                              value={editOption.vice1_opinions}
-                              onChange={(e) =>
-                                setEditOption({
-                                  ...editOption,
-                                  vice1_opinions: e.target.value,
-                                })
-                              }
-                              rows={3}
-                            />
-                          </div>
-
-                          <div className="space-y-3">
-                            <h4 className="font-semibold">
-                              副選候選人 2（選填）
-                            </h4>
-                            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                              <Input
-                                placeholder="姓名"
-                                value={editOption.vice2_name}
-                                onChange={(e) =>
-                                  setEditOption({
-                                    ...editOption,
-                                    vice2_name: e.target.value,
-                                  })
-                                }
-                              />
-                              <Input
-                                placeholder="系所（選填）"
-                                value={editOption.vice2_department}
-                                onChange={(e) =>
-                                  setEditOption({
-                                    ...editOption,
-                                    vice2_department: e.target.value,
-                                  })
-                                }
-                              />
-                              <Input
-                                placeholder="學院（選填）"
-                                value={editOption.vice2_college}
-                                onChange={(e) =>
-                                  setEditOption({
-                                    ...editOption,
-                                    vice2_college: e.target.value,
-                                  })
-                                }
-                              />
-                            </div>
-                            <Input
-                              placeholder="照片網址（選填）- 請輸入外部圖片連結"
-                              value={editOption.vice2_avatar_url}
-                              onChange={(e) =>
-                                setEditOption({
-                                  ...editOption,
-                                  vice2_avatar_url: e.target.value,
-                                })
-                              }
-                            />
-                            <Textarea
-                              placeholder="個人經歷（選填，一行一項）"
-                              value={editOption.vice2_experiences}
-                              onChange={(e) =>
-                                setEditOption({
-                                  ...editOption,
-                                  vice2_experiences: e.target.value,
-                                })
-                              }
-                              rows={3}
-                            />
-                            <Textarea
-                              placeholder="政見（選填，一行一項）"
-                              value={editOption.vice2_opinions}
-                              onChange={(e) =>
-                                setEditOption({
-                                  ...editOption,
-                                  vice2_opinions: e.target.value,
-                                })
-                              }
-                              rows={3}
-                            />
-                          </div>
-
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => setEditingOptionId(null)}
-                            >
-                              取消
-                            </Button>
-                            <Button type="submit" disabled={saving}>
-                              <Save className="mr-2 h-4 w-4" />
-                              儲存
-                            </Button>
-                          </div>
-                        </form>
-                      ) : (
-                        // Display View
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="mb-2 flex items-center gap-2">
-                              <span className="rounded-full bg-primary px-3 py-1 text-sm font-bold text-primary-foreground">
-                                {index + 1}
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="mb-2 flex items-center gap-2">
+                            <span className="rounded-full bg-primary px-3 py-1 text-sm font-bold text-primary-foreground">
+                              {index + 1}
+                            </span>
+                            {option.label && (
+                              <span className="text-sm text-muted-foreground">
+                                {option.label}
                               </span>
-                              {option.label && (
-                                <span className="text-sm text-muted-foreground">
-                                  {option.label}
+                            )}
+                          </div>
+
+                          {option.candidate && (
+                            <div className="mb-2">
+                              <p className="font-semibold">
+                                {option.candidate.name}
+                              </p>
+                              {(option.candidate.department ||
+                                option.candidate.college) && (
+                                <p className="text-sm text-muted-foreground">
+                                  {[
+                                    option.candidate.department,
+                                    option.candidate.college,
+                                  ]
+                                    .filter(Boolean)
+                                    .join(" | ")}
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          {option.vice1 && (
+                            <div className="ml-4 mb-1 text-sm">
+                              <span className="text-muted-foreground">
+                                副選 1:{" "}
+                              </span>
+                              <span>{option.vice1.name}</span>
+                              {option.vice1.department && (
+                                <span className="text-muted-foreground">
+                                  {" "}
+                                  ({option.vice1.department})
                                 </span>
                               )}
                             </div>
+                          )}
 
-                            {option.candidate && (
-                              <div className="mb-2">
-                                <p className="font-semibold">
-                                  {option.candidate.name}
-                                </p>
-                                {(option.candidate.department ||
-                                  option.candidate.college) && (
-                                  <p className="text-sm text-muted-foreground">
-                                    {[
-                                      option.candidate.department,
-                                      option.candidate.college,
-                                    ]
-                                      .filter(Boolean)
-                                      .join(" | ")}
-                                  </p>
-                                )}
-                              </div>
-                            )}
-
-                            {option.vice1 && (
-                              <div className="ml-4 mb-1 text-sm">
+                          {option.vice2 && (
+                            <div className="ml-4 text-sm">
+                              <span className="text-muted-foreground">
+                                副選 2:{" "}
+                              </span>
+                              <span>{option.vice2.name}</span>
+                              {option.vice2.department && (
                                 <span className="text-muted-foreground">
-                                  副選 1:{" "}
+                                  {" "}
+                                  ({option.vice2.department})
                                 </span>
-                                <span>{option.vice1.name}</span>
-                                {option.vice1.department && (
-                                  <span className="text-muted-foreground">
-                                    {" "}
-                                    ({option.vice1.department})
-                                  </span>
-                                )}
-                              </div>
-                            )}
-
-                            {option.vice2 && (
-                              <div className="ml-4 text-sm">
-                                <span className="text-muted-foreground">
-                                  副選 2:{" "}
-                                </span>
-                                <span>{option.vice2.name}</span>
-                                {option.vice2.department && (
-                                  <span className="text-muted-foreground">
-                                    {" "}
-                                    ({option.vice2.department})
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleStartEdit(option)}
-                              disabled={saving}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDeleteOption(option._id)}
-                              disabled={saving}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                              )}
+                            </div>
+                          )}
                         </div>
-                      )}
+
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleStartEditOption(option)}
+                            disabled={saving || showNewOption || editingOptionId !== null}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteOption(option._id)}
+                            disabled={saving || showNewOption || editingOptionId !== null}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
             ) : (
-              <p className="py-8 text-center text-muted-foreground">
-                尚未新增任何候選人
-              </p>
+              !showNewOption && (
+                <p className="py-8 text-center text-muted-foreground">
+                  尚未新增任何候選人
+                </p>
+              )
             )}
           </CardContent>
         </Card>
