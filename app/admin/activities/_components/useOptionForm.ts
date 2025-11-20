@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { OptionFormData, emptyOptionForm, Candidate } from "./types";
+import { OptionFormData, emptyOptionForm, CandidateForm } from "./types";
 
 export function useOptionForm() {
   const [options, setOptions] = useState<OptionFormData[]>([]);
@@ -12,7 +12,7 @@ export function useOptionForm() {
 
   const updateCandidate = (
     type: "candidate" | "vice1" | "vice2",
-    field: keyof Candidate,
+    field: keyof CandidateForm,
     value: string
   ) => {
     setCurrentOption((prev) => ({

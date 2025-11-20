@@ -27,20 +27,15 @@ import {
   ClipboardCheck,
   AlertCircle,
 } from "lucide-react";
+import { Activity } from "@/lib/activities";
 
-interface Activity {
-  _id: string;
-  name: string;
-  type: string;
-  rule: "choose_all" | "choose_one";
-  open_from: string;
-  open_to: string;
-  users: string[];
+// Extend Activity for admin dashboard with options as string array
+interface AdminActivity extends Activity {
   options: string[];
 }
 
 function AdminDashboardContent() {
-  const [activities, setActivities] = useState<Activity[]>([]);
+  const [activities, setActivities] = useState<AdminActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -85,7 +80,7 @@ function AdminDashboardContent() {
     }
   };
 
-  const getStatusBadge = (activity: Activity) => {
+  const getStatusBadge = (activity: AdminActivity) => {
     const now = new Date();
     const openFrom = new Date(activity.open_from);
     const openTo = new Date(activity.open_to);

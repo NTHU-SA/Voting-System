@@ -1,9 +1,9 @@
-import { Candidate } from "./types";
+import { CandidateForm } from "./types";
 
 /**
  * Builds API payload for a candidate with optional fields
  */
-export function buildCandidatePayload(candidate: Candidate): Record<string, unknown> | null {
+export function buildCandidatePayload(candidate: CandidateForm): Record<string, unknown> | null {
   if (!candidate.name) return null;
 
   const payload: Record<string, unknown> = {
@@ -39,7 +39,7 @@ export function candidateFromAPI(data: {
   avatar_url?: string;
   personal_experiences?: string[];
   political_opinions?: string[];
-}): Candidate {
+}): CandidateForm {
   return {
     name: data.name || "",
     department: data.department || "",
