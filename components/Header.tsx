@@ -113,7 +113,7 @@ export default function Header() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/vote/completion">
+                    <Link href="/vote/certificate">
                       <ClipboardCheck className="mr-2 h-4 w-4" />
                       投票證明
                     </Link>
