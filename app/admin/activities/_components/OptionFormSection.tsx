@@ -143,7 +143,10 @@ export function OptionFormSection({
                   <p className="text-sm text-muted-foreground">
                     {option.candidate.name}
                     {option.vice.length > 0 &&
-                      option.vice.map((v) => v.name && ` · ${v.name}`).join("")}
+                      option.vice
+                        .filter((v) => v.name)
+                        .map((v) => ` · ${v.name}`)
+                        .join("")}
                   </p>
                 </div>
                 <div className="flex gap-2">

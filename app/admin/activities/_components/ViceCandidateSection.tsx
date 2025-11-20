@@ -31,6 +31,7 @@ export function ViceCandidateSection({
             size="sm"
             onClick={() => onRemoveVice(index)}
             className="absolute top-2 right-2"
+            aria-label={`移除副選候選人 ${index + 1}`}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -49,7 +50,7 @@ export function ViceCandidateSection({
         className="w-full"
       >
         <Plus className="mr-2 h-4 w-4" />
-        新增副選候選人 {vices.length > 0 ? vices.length + 1 : ""}
+        新增副選候選人{vices.length > 0 && ` ${vices.length + 1}`}
       </Button>
     </div>
   );

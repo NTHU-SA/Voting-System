@@ -31,7 +31,7 @@ import { buildOptionPayload } from "../_components/utils";
 import { createEmptyCandidate, createEmptyOption } from "../_components/formHelpers";
 import { useAdminAccess, useAdminActivity } from "@/hooks";
 import { Option } from "@/types";
-import { toDateTimeLocalString } from "@/utils/formatDate";
+import { toDateTimeLocalString, fromDateTimeLocalString } from "@/utils/formatDate";
 
 function ActivityDetailPageContent() {
   const params = useParams();
@@ -92,13 +92,20 @@ function ActivityDetailPageContent() {
     setSuccessMessage("");
 
     try {
+      // Convert datetime-local strings to UTC ISO strings before sending
+      const activityPayload = {
+        ...formData,
+        open_from: fromDateTimeLocalString(formData.open_from).toISOString(),
+        open_to: fromDateTimeLocalString(formData.open_to).toISOString(),
+      };
+      
       const response = await fetch(`/api/activities/${activityId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify(formData),
+        body: JSON.stringify(activityPayload),
       });
 
       const data = await response.json();

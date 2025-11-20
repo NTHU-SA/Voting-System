@@ -44,7 +44,7 @@ export function buildOptionPayload(option: OptionFormData): Record<string, unkno
   const vicePayloads = option.vice
     .map(buildCandidatePayload)
     .filter((v) => v !== null);
-  if (vicePayloads.length > 0) payload.vice = vicePayloads;
+  payload.vice = vicePayloads; // Always include vice field, even if empty array
 
   return payload;
 }

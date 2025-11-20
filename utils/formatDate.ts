@@ -40,18 +40,21 @@ export function formatToTaipeiTime(
 export function toDateTimeLocalString(date: Date | string): string {
   const dateObj = typeof date === "string" ? new Date(date) : date;
   
-  // Convert to Taipei timezone
-  const taipeiDate = new Date(
-    dateObj.toLocaleString("en-US", { timeZone: TAIPEI_TIMEZONE })
-  );
-  
-  const year = taipeiDate.getFullYear();
-  const month = String(taipeiDate.getMonth() + 1).padStart(2, "0");
-  const day = String(taipeiDate.getDate()).padStart(2, "0");
-  const hours = String(taipeiDate.getHours()).padStart(2, "0");
-  const minutes = String(taipeiDate.getMinutes()).padStart(2, "0");
-  
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
+  // Get components directly in Taipei timezone
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: TAIPEI_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+
+  const parts = formatter.formatToParts(dateObj);
+  const get = (type: string) => parts.find(p => p.type === type)?.value || '';
+
+  return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`;
 }
 
 /**
