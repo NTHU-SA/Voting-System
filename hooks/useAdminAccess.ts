@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 interface UseAdminAccessReturn {
@@ -18,6 +18,11 @@ export function useAdminAccess(
   const [loading, setLoading] = useState(true);
   const [checkingAccess, setCheckingAccess] = useState(true);
   const router = useRouter();
+  const callbackRef = useRef(onAccessGranted);
+
+  useEffect(() => {
+    callbackRef.current = onAccessGranted;
+  }, [onAccessGranted]);
 
   useEffect(() => {
     const checkAdminAccess = async () => {
@@ -36,8 +41,8 @@ export function useAdminAccess(
         setLoading(false);
         
         // Call the callback if access is granted
-        if (onAccessGranted) {
-          onAccessGranted();
+        if (callbackRef.current) {
+          callbackRef.current();
         }
       } catch (err) {
         console.error("Error checking admin access:", err);
@@ -48,7 +53,7 @@ export function useAdminAccess(
     };
 
     checkAdminAccess();
-  }, [router, onAccessGranted]);
+  }, [router]);
 
   return {
     isAdmin,

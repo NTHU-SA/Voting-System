@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Activity, Option } from "@/types";
 
-// Extend Activity to include options array
-interface ActivityWithFullOptions extends Activity {
+// Extend Activity to include options array with full Option details
+interface ActivityWithFullOptions extends Omit<Activity, "options"> {
   options: Option[];
 }
 
@@ -22,7 +22,7 @@ export function useAdminActivity(activityId: string): UseAdminActivityReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchActivity = async () => {
+  const fetchActivity = useCallback(async () => {
     if (!activityId) {
       setLoading(false);
       return;
@@ -52,11 +52,11 @@ export function useAdminActivity(activityId: string): UseAdminActivityReturn {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activityId]);
 
   useEffect(() => {
     fetchActivity();
-  }, [activityId]);
+  }, [fetchActivity]);
 
   return {
     activity,

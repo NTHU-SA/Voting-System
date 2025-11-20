@@ -43,11 +43,6 @@ function ResultsPageContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Check admin access and fetch stats on success
-  useAdminAccess(() => {
-    fetchStats();
-  });
-
   const fetchStats = async () => {
     try {
       const response = await fetch(`/api/stats?activity_id=${activityId}`, {
@@ -67,6 +62,11 @@ function ResultsPageContent() {
       setLoading(false);
     }
   };
+
+  // Check admin access and fetch stats on success
+  useAdminAccess(() => {
+    fetchStats();
+  });
 
   if (loading) {
     return (

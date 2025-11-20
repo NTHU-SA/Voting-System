@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { AdminActivity } from "@/types";
 
 interface UseAdminActivitiesReturn {
@@ -17,7 +17,7 @@ export function useAdminActivities(): UseAdminActivitiesReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchActivities = async () => {
+  const fetchActivities = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -35,11 +35,11 @@ export function useAdminActivities(): UseAdminActivitiesReturn {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchActivities();
-  }, []);
+  }, [fetchActivities]);
 
   return {
     activities,

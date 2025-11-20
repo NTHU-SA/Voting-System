@@ -1,5 +1,5 @@
 // Activity fetching and filtering utilities
-import { Activity, ActivityWithOptions } from "@/types";
+import { Activity, ActivityWithOptions, AdminActivity } from "@/types";
 
 /**
  * Check if an activity is currently active (within its time window)
@@ -55,7 +55,7 @@ export async function fetchActivity(
  * Get activity status badge text
  */
 export function getActivityStatus(
-  activity: Activity,
+  activity: Activity | AdminActivity,
 ): "upcoming" | "active" | "ended" {
   const now = new Date();
   const openFrom = new Date(activity.open_from);

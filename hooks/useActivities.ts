@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Activity } from "@/types";
 import { fetchActiveActivities } from "@/lib/activities";
 
@@ -18,7 +18,7 @@ export function useActivities(): UseActivitiesReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchActivitiesData = async () => {
+  const fetchActivitiesData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -30,11 +30,11 @@ export function useActivities(): UseActivitiesReturn {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchActivitiesData();
-  }, []);
+  }, [fetchActivitiesData]);
 
   return {
     activities,

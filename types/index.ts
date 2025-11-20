@@ -125,9 +125,10 @@ export interface Activity extends Omit<IActivity, "_id" | "options" | "open_from
   subtitle?: string; // Additional client field
   open_from: string;
   open_to: string;
+  options?: string[]; // Array of option IDs (serialized)
 }
 
-export interface ActivityWithOptions extends Activity {
+export interface ActivityWithOptions extends Omit<Activity, "options"> {
   options: Option[];
 }
 
@@ -170,6 +171,8 @@ export interface OAuthUserInfo {
 }
 
 // Middleware Types
-export interface AuthenticatedRequest extends Request {
+import { NextRequest } from "next/server";
+
+export interface AuthenticatedRequest extends NextRequest {
   user?: JWTPayload;
 }
