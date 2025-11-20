@@ -2,20 +2,20 @@
 
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
-import { Candidate } from "./types";
+import { CandidateForm } from "./types";
 import { CandidateFormFields } from "./CandidateFormFields";
 
 interface ViceCandidateSectionProps {
-  vice1: Candidate;
-  vice2: Candidate;
+  vice1: CandidateForm;
+  vice2: CandidateForm;
   showVice1: boolean;
   showVice2: boolean;
   onShowVice1: () => void;
   onShowVice2: () => void;
   onHideVice1: () => void;
   onHideVice2: () => void;
-  onVice1Change: (field: keyof Candidate, value: string) => void;
-  onVice2Change: (field: keyof Candidate, value: string) => void;
+  onVice1Change: (field: keyof CandidateForm, value: string) => void;
+  onVice2Change: (field: keyof CandidateForm, value: string) => void;
 }
 
 export function ViceCandidateSection({

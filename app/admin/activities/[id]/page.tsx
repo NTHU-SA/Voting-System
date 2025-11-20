@@ -23,46 +23,11 @@ import {
   Eye,
 } from "lucide-react";
 import { buildOptionPayloadFromFlat, emptyFlatForm, FlatOptionForm } from "../_components/utils";
+import { Activity as BaseActivity, Option } from "@/lib/activities";
 
-interface Activity {
-  _id: string;
-  name: string;
-  type: string;
-  description?: string;
-  rule: "choose_one" | "choose_all";
-  open_from: string;
-  open_to: string;
-  users: string[];
+// Extend Activity to include options array
+interface Activity extends BaseActivity {
   options: Option[];
-}
-
-interface Option {
-  _id: string;
-  label?: string;
-  candidate?: {
-    name: string;
-    department?: string;
-    college?: string;
-    avatar_url?: string;
-    personal_experiences?: string[];
-    political_opinions?: string[];
-  };
-  vice1?: {
-    name: string;
-    department?: string;
-    college?: string;
-    avatar_url?: string;
-    personal_experiences?: string[];
-    political_opinions?: string[];
-  };
-  vice2?: {
-    name: string;
-    department?: string;
-    college?: string;
-    avatar_url?: string;
-    personal_experiences?: string[];
-    political_opinions?: string[];
-  };
 }
 
 function ActivityDetailPageContent() {

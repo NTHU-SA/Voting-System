@@ -2,11 +2,11 @@
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Candidate } from "./types";
+import { CandidateForm } from "./types";
 
 interface CandidateFormFieldsProps {
-  candidate: Candidate;
-  onChange: (field: keyof Candidate, value: string) => void;
+  candidate: CandidateForm;
+  onChange: (field: keyof CandidateForm, value: string) => void;
   label: string;
   required?: boolean;
 }
