@@ -13,6 +13,7 @@ export async function middleware(request: NextRequest) {
     "/api/auth/callback",
     "/api/mock",
     "/api/activities",
+    "/callback",
   ];
 
   // Check if the current path is public
@@ -79,7 +80,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
   if (process.env.NODE_ENV === "production") {
     response.headers.set(
       "Strict-Transport-Security",
-      "max-age=31536000; includeSubDomains",
+      "max-age=31536000; includeSubDomains"
     );
   }
 
