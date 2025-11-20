@@ -47,13 +47,10 @@ const OptionSchema = new Schema<IOption>({
     type: CandidateSchema,
     required: false,
   },
-  vice1: {
-    type: CandidateSchema,
+  vice: {
+    type: [CandidateSchema],
     required: false,
-  },
-  vice2: {
-    type: CandidateSchema,
-    required: false,
+    default: [],
   },
   created_at: {
     type: Date,

@@ -8,18 +8,16 @@ import { Plus, Check, Edit, Trash2 } from "lucide-react";
 import { CandidateFormFields } from "./CandidateFormFields";
 import { ViceCandidateSection } from "./ViceCandidateSection";
 import { useOptionForm } from "./useOptionForm";
-import { createEmptyCandidate } from "./formHelpers";
 
 interface OptionFormSectionProps {
   options: ReturnType<typeof useOptionForm>["options"];
   currentOption: ReturnType<typeof useOptionForm>["currentOption"];
   setCurrentOption: ReturnType<typeof useOptionForm>["setCurrentOption"];
   editingIndex: ReturnType<typeof useOptionForm>["editingIndex"];
-  showVice1: ReturnType<typeof useOptionForm>["showVice1"];
-  setShowVice1: ReturnType<typeof useOptionForm>["setShowVice1"];
-  showVice2: ReturnType<typeof useOptionForm>["showVice2"];
-  setShowVice2: ReturnType<typeof useOptionForm>["setShowVice2"];
   updateCandidate: ReturnType<typeof useOptionForm>["updateCandidate"];
+  addVice: ReturnType<typeof useOptionForm>["addVice"];
+  removeVice: ReturnType<typeof useOptionForm>["removeVice"];
+  updateVice: ReturnType<typeof useOptionForm>["updateVice"];
   addOrUpdateOption: ReturnType<typeof useOptionForm>["addOrUpdateOption"];
   editOption: ReturnType<typeof useOptionForm>["editOption"];
   removeOption: ReturnType<typeof useOptionForm>["removeOption"];
@@ -31,11 +29,10 @@ export function OptionFormSection({
   currentOption,
   setCurrentOption,
   editingIndex,
-  showVice1,
-  setShowVice1,
-  showVice2,
-  setShowVice2,
   updateCandidate,
+  addVice,
+  removeVice,
+  updateVice,
   addOrUpdateOption,
   editOption,
   removeOption,
@@ -85,34 +82,16 @@ export function OptionFormSection({
 
           <CandidateFormFields
             candidate={currentOption.candidate}
-            onChange={(field, value) => updateCandidate("candidate", field, value)}
+            onChange={(field, value) => updateCandidate(field, value)}
             label="正選候選人"
             required
           />
 
           <ViceCandidateSection
-            vice1={currentOption.vice1}
-            vice2={currentOption.vice2}
-            showVice1={showVice1}
-            showVice2={showVice2}
-            onShowVice1={() => setShowVice1(true)}
-            onShowVice2={() => setShowVice2(true)}
-            onHideVice1={() => {
-              setShowVice1(false);
-              setCurrentOption({
-                ...currentOption,
-                vice1: createEmptyCandidate(),
-              });
-            }}
-            onHideVice2={() => {
-              setShowVice2(false);
-              setCurrentOption({
-                ...currentOption,
-                vice2: createEmptyCandidate(),
-              });
-            }}
-            onVice1Change={(field, value) => updateCandidate("vice1", field, value)}
-            onVice2Change={(field, value) => updateCandidate("vice2", field, value)}
+            vices={currentOption.vice}
+            onAddVice={addVice}
+            onRemoveVice={removeVice}
+            onViceChange={updateVice}
           />
 
           <div className="flex gap-2">
@@ -163,8 +142,8 @@ export function OptionFormSection({
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {option.candidate.name}
-                    {option.vice1.name && ` · ${option.vice1.name}`}
-                    {option.vice2.name && ` · ${option.vice2.name}`}
+                    {option.vice.length > 0 &&
+                      option.vice.map((v) => v.name && ` · ${v.name}`).join("")}
                   </p>
                 </div>
                 <div className="flex gap-2">

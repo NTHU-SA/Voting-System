@@ -18,6 +18,5 @@ export const createEmptyCandidate = (): CandidateForm => ({
 export const createEmptyOption = (): OptionFormData => ({
   label: "",
   candidate: createEmptyCandidate(),
-  vice1: createEmptyCandidate(),
-  vice2: createEmptyCandidate(),
+  vice: [],
 });

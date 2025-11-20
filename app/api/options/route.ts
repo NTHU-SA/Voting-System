@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const body = await request.json();
-    const { activity_id, label, candidate, vice1, vice2 } = body;
+    const { activity_id, label, candidate, vice } = body;
 
     // Validate required fields
     if (!activity_id) {
@@ -90,8 +90,7 @@ export async function POST(request: NextRequest) {
       activity_id,
       label,
       candidate,
-      vice1,
-      vice2,
+      vice: vice || [],
       created_at: new Date(),
       updated_at: new Date(),
     });

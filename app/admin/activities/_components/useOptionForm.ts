@@ -2,26 +2,50 @@
 
 import { useState } from "react";
 import { OptionFormData, CandidateForm } from "./types";
-import { createEmptyOption } from "./formHelpers";
+import { createEmptyOption, createEmptyCandidate } from "./formHelpers";
 
 export function useOptionForm() {
   const [options, setOptions] = useState<OptionFormData[]>([]);
   const [currentOption, setCurrentOption] = useState<OptionFormData>(createEmptyOption());
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [showVice1, setShowVice1] = useState(false);
-  const [showVice2, setShowVice2] = useState(false);
 
   const updateCandidate = (
-    type: "candidate" | "vice1" | "vice2",
     field: keyof CandidateForm,
     value: string
   ) => {
     setCurrentOption((prev) => ({
       ...prev,
-      [type]: {
-        ...prev[type],
+      candidate: {
+        ...prev.candidate,
         [field]: value,
       },
+    }));
+  };
+
+  const addVice = () => {
+    setCurrentOption((prev) => ({
+      ...prev,
+      vice: [...prev.vice, createEmptyCandidate()],
+    }));
+  };
+
+  const removeVice = (index: number) => {
+    setCurrentOption((prev) => ({
+      ...prev,
+      vice: prev.vice.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateVice = (
+    index: number,
+    field: keyof CandidateForm,
+    value: string
+  ) => {
+    setCurrentOption((prev) => ({
+      ...prev,
+      vice: prev.vice.map((v, i) =>
+        i === index ? { ...v, [field]: value } : v
+      ),
     }));
   };
 
@@ -40,8 +64,6 @@ export function useOptionForm() {
   const editOption = (index: number) => {
     setCurrentOption(options[index]);
     setEditingIndex(index);
-    setShowVice1(!!options[index].vice1.name);
-    setShowVice2(!!options[index].vice2.name);
   };
 
   const removeOption = (index: number) => {
@@ -50,8 +72,6 @@ export function useOptionForm() {
 
   const resetForm = () => {
     setCurrentOption(createEmptyOption());
-    setShowVice1(false);
-    setShowVice2(false);
     setEditingIndex(null);
   };
 
@@ -60,11 +80,10 @@ export function useOptionForm() {
     currentOption,
     setCurrentOption,
     editingIndex,
-    showVice1,
-    setShowVice1,
-    showVice2,
-    setShowVice2,
     updateCandidate,
+    addVice,
+    removeVice,
+    updateVice,
     addOrUpdateOption,
     editOption,
     removeOption,
