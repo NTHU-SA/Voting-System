@@ -42,6 +42,7 @@ interface Option {
     name: string;
     department?: string;
     college?: string;
+    avatar_url?: string;
     personal_experiences?: string[];
     political_opinions?: string[];
   };
@@ -49,6 +50,7 @@ interface Option {
     name: string;
     department?: string;
     college?: string;
+    avatar_url?: string;
     personal_experiences?: string[];
     political_opinions?: string[];
   };
@@ -56,6 +58,7 @@ interface Option {
     name: string;
     department?: string;
     college?: string;
+    avatar_url?: string;
     personal_experiences?: string[];
     political_opinions?: string[];
   };
@@ -66,16 +69,19 @@ interface NewOptionForm {
   candidate_name: string;
   candidate_department: string;
   candidate_college: string;
+  candidate_avatar_url: string;
   candidate_experiences: string;
   candidate_opinions: string;
   vice1_name: string;
   vice1_department: string;
   vice1_college: string;
+  vice1_avatar_url: string;
   vice1_experiences: string;
   vice1_opinions: string;
   vice2_name: string;
   vice2_department: string;
   vice2_college: string;
+  vice2_avatar_url: string;
   vice2_experiences: string;
   vice2_opinions: string;
 }
@@ -108,16 +114,19 @@ function ActivityDetailPageContent() {
     candidate_name: "",
     candidate_department: "",
     candidate_college: "",
+    candidate_avatar_url: "",
     candidate_experiences: "",
     candidate_opinions: "",
     vice1_name: "",
     vice1_department: "",
     vice1_college: "",
+    vice1_avatar_url: "",
     vice1_experiences: "",
     vice1_opinions: "",
     vice2_name: "",
     vice2_department: "",
     vice2_college: "",
+    vice2_avatar_url: "",
     vice2_experiences: "",
     vice2_opinions: "",
   });
@@ -129,16 +138,19 @@ function ActivityDetailPageContent() {
     candidate_name: "",
     candidate_department: "",
     candidate_college: "",
+    candidate_avatar_url: "",
     candidate_experiences: "",
     candidate_opinions: "",
     vice1_name: "",
     vice1_department: "",
     vice1_college: "",
+    vice1_avatar_url: "",
     vice1_experiences: "",
     vice1_opinions: "",
     vice2_name: "",
     vice2_department: "",
     vice2_college: "",
+    vice2_avatar_url: "",
     vice2_experiences: "",
     vice2_opinions: "",
   });
@@ -265,6 +277,8 @@ function ActivityDetailPageContent() {
           candidate.department = newOption.candidate_department;
         if (newOption.candidate_college)
           candidate.college = newOption.candidate_college;
+        if (newOption.candidate_avatar_url)
+          candidate.avatar_url = newOption.candidate_avatar_url;
         if (newOption.candidate_experiences) {
           candidate.personal_experiences = newOption.candidate_experiences
             .split("\n")
@@ -285,6 +299,8 @@ function ActivityDetailPageContent() {
         if (newOption.vice1_department)
           vice1.department = newOption.vice1_department;
         if (newOption.vice1_college) vice1.college = newOption.vice1_college;
+        if (newOption.vice1_avatar_url)
+          vice1.avatar_url = newOption.vice1_avatar_url;
         if (newOption.vice1_experiences) {
           vice1.personal_experiences = newOption.vice1_experiences
             .split("\n")
@@ -305,6 +321,8 @@ function ActivityDetailPageContent() {
         if (newOption.vice2_department)
           vice2.department = newOption.vice2_department;
         if (newOption.vice2_college) vice2.college = newOption.vice2_college;
+        if (newOption.vice2_avatar_url)
+          vice2.avatar_url = newOption.vice2_avatar_url;
         if (newOption.vice2_experiences) {
           vice2.personal_experiences = newOption.vice2_experiences
             .split("\n")
@@ -337,16 +355,19 @@ function ActivityDetailPageContent() {
           candidate_name: "",
           candidate_department: "",
           candidate_college: "",
+          candidate_avatar_url: "",
           candidate_experiences: "",
           candidate_opinions: "",
           vice1_name: "",
           vice1_department: "",
           vice1_college: "",
+          vice1_avatar_url: "",
           vice1_experiences: "",
           vice1_opinions: "",
           vice2_name: "",
           vice2_department: "",
           vice2_college: "",
+          vice2_avatar_url: "",
           vice2_experiences: "",
           vice2_opinions: "",
         });
@@ -398,6 +419,7 @@ function ActivityDetailPageContent() {
       candidate_name: option.candidate?.name || "",
       candidate_department: option.candidate?.department || "",
       candidate_college: option.candidate?.college || "",
+      candidate_avatar_url: option.candidate?.avatar_url || "",
       candidate_experiences:
         option.candidate?.personal_experiences?.join("\n") || "",
       candidate_opinions:
@@ -405,11 +427,13 @@ function ActivityDetailPageContent() {
       vice1_name: option.vice1?.name || "",
       vice1_department: option.vice1?.department || "",
       vice1_college: option.vice1?.college || "",
+      vice1_avatar_url: option.vice1?.avatar_url || "",
       vice1_experiences: option.vice1?.personal_experiences?.join("\n") || "",
       vice1_opinions: option.vice1?.political_opinions?.join("\n") || "",
       vice2_name: option.vice2?.name || "",
       vice2_department: option.vice2?.department || "",
       vice2_college: option.vice2?.college || "",
+      vice2_avatar_url: option.vice2?.avatar_url || "",
       vice2_experiences: option.vice2?.personal_experiences?.join("\n") || "",
       vice2_opinions: option.vice2?.political_opinions?.join("\n") || "",
     });
@@ -436,6 +460,8 @@ function ActivityDetailPageContent() {
           candidate.department = editOption.candidate_department;
         if (editOption.candidate_college)
           candidate.college = editOption.candidate_college;
+        if (editOption.candidate_avatar_url)
+          candidate.avatar_url = editOption.candidate_avatar_url;
         if (editOption.candidate_experiences) {
           candidate.personal_experiences = editOption.candidate_experiences
             .split("\n")
@@ -456,6 +482,8 @@ function ActivityDetailPageContent() {
         if (editOption.vice1_department)
           vice1.department = editOption.vice1_department;
         if (editOption.vice1_college) vice1.college = editOption.vice1_college;
+        if (editOption.vice1_avatar_url)
+          vice1.avatar_url = editOption.vice1_avatar_url;
         if (editOption.vice1_experiences) {
           vice1.personal_experiences = editOption.vice1_experiences
             .split("\n")
@@ -476,6 +504,8 @@ function ActivityDetailPageContent() {
         if (editOption.vice2_department)
           vice2.department = editOption.vice2_department;
         if (editOption.vice2_college) vice2.college = editOption.vice2_college;
+        if (editOption.vice2_avatar_url)
+          vice2.avatar_url = editOption.vice2_avatar_url;
         if (editOption.vice2_experiences) {
           vice2.personal_experiences = editOption.vice2_experiences
             .split("\n")
@@ -812,6 +842,16 @@ function ActivityDetailPageContent() {
                           }
                         />
                       </div>
+                      <Input
+                        placeholder="照片網址（選填）- 請輸入外部圖片連結"
+                        value={newOption.candidate_avatar_url}
+                        onChange={(e) =>
+                          setNewOption({
+                            ...newOption,
+                            candidate_avatar_url: e.target.value,
+                          })
+                        }
+                      />
                       <Textarea
                         placeholder="個人經歷（選填，一行一項）"
                         value={newOption.candidate_experiences}
@@ -870,6 +910,16 @@ function ActivityDetailPageContent() {
                           }
                         />
                       </div>
+                      <Input
+                        placeholder="照片網址（選填）- 請輸入外部圖片連結"
+                        value={newOption.vice1_avatar_url}
+                        onChange={(e) =>
+                          setNewOption({
+                            ...newOption,
+                            vice1_avatar_url: e.target.value,
+                          })
+                        }
+                      />
                       <Textarea
                         placeholder="個人經歷（選填，一行一項）"
                         value={newOption.vice1_experiences}
@@ -928,6 +978,16 @@ function ActivityDetailPageContent() {
                           }
                         />
                       </div>
+                      <Input
+                        placeholder="照片網址（選填）- 請輸入外部圖片連結"
+                        value={newOption.vice2_avatar_url}
+                        onChange={(e) =>
+                          setNewOption({
+                            ...newOption,
+                            vice2_avatar_url: e.target.value,
+                          })
+                        }
+                      />
                       <Textarea
                         placeholder="個人經歷（選填，一行一項）"
                         value={newOption.vice2_experiences}
@@ -1032,6 +1092,16 @@ function ActivityDetailPageContent() {
                                 }
                               />
                             </div>
+                            <Input
+                              placeholder="照片網址（選填）- 請輸入外部圖片連結"
+                              value={editOption.candidate_avatar_url}
+                              onChange={(e) =>
+                                setEditOption({
+                                  ...editOption,
+                                  candidate_avatar_url: e.target.value,
+                                })
+                              }
+                            />
                             <Textarea
                               placeholder="個人經歷（選填，一行一項）"
                               value={editOption.candidate_experiences}
@@ -1092,6 +1162,16 @@ function ActivityDetailPageContent() {
                                 }
                               />
                             </div>
+                            <Input
+                              placeholder="照片網址（選填）- 請輸入外部圖片連結"
+                              value={editOption.vice1_avatar_url}
+                              onChange={(e) =>
+                                setEditOption({
+                                  ...editOption,
+                                  vice1_avatar_url: e.target.value,
+                                })
+                              }
+                            />
                             <Textarea
                               placeholder="個人經歷（選填，一行一項）"
                               value={editOption.vice1_experiences}
@@ -1152,6 +1232,16 @@ function ActivityDetailPageContent() {
                                 }
                               />
                             </div>
+                            <Input
+                              placeholder="照片網址（選填）- 請輸入外部圖片連結"
+                              value={editOption.vice2_avatar_url}
+                              onChange={(e) =>
+                                setEditOption({
+                                  ...editOption,
+                                  vice2_avatar_url: e.target.value,
+                                })
+                              }
+                            />
                             <Textarea
                               placeholder="個人經歷（選填，一行一項）"
                               value={editOption.vice2_experiences}
