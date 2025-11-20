@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { exchangeCodeForToken, getUserInfo } from "@/lib/oauth";
 import { generateToken } from "@/lib/auth";
 import { API_CONSTANTS } from "@/lib/constants";
-import { isProduction } from "@/lib/config";
+import { getBaseURL, isProduction } from "@/lib/config";
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,8 +11,11 @@ export async function GET(request: NextRequest) {
     const error = searchParams.get("error");
     const state = searchParams.get("state");
 
+    // Get the base URL from config
+    const baseUrl = getBaseURL();
+
     if (error === "access_denied" || !code) {
-      return NextResponse.redirect(new URL("/?error=auth_failed", request.url));
+      return NextResponse.redirect(new URL("/?error=auth_failed", baseUrl));
     }
 
     // Parse state to get redirect URL
@@ -44,7 +47,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Create response with redirect to the original destination
-    const response = NextResponse.redirect(new URL(redirectPath, request.url));
+    const response = NextResponse.redirect(new URL(redirectPath, baseUrl));
 
     // Set token in cookie
     response.cookies.set("service_token", serviceToken, {
@@ -60,6 +63,10 @@ export async function GET(request: NextRequest) {
     const errorMessage =
       error instanceof Error ? error.message : "Authentication failed";
     console.error("OAuth callback error:", errorMessage);
-    return NextResponse.redirect(new URL("/?error=auth_failed", request.url));
+
+    // Get the base URL from config
+    const baseUrl = getBaseURL();
+
+    return NextResponse.redirect(new URL("/?error=auth_failed", baseUrl));
   }
 }
