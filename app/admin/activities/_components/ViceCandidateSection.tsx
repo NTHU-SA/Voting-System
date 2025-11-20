@@ -50,7 +50,7 @@ export function ViceCandidateSection({
         className="w-full"
       >
         <Plus className="mr-2 h-4 w-4" />
-        新增副選候選人{vices.length > 0 && ` ${vices.length + 1}`}
+        新增副選候選人 {vices.length + 1}
       </Button>
     </div>
   );
