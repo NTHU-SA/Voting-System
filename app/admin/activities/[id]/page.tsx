@@ -27,8 +27,24 @@ import { Activity as BaseActivity, Option } from "@/lib/activities";
 import { ActivityFormFields } from "../_components/ActivityFormFields";
 import { CandidateFormFields } from "../_components/CandidateFormFields";
 import { ViceCandidateSection } from "../_components/ViceCandidateSection";
-import { OptionFormData, emptyCandidateForm, emptyOptionForm } from "../_components/types";
+import { OptionFormData } from "../_components/types";
 import { buildOptionPayload } from "../_components/utils";
+
+const createEmptyCandidate = () => ({
+  name: "",
+  department: "",
+  college: "",
+  avatar_url: "",
+  experiences: "",
+  opinions: "",
+});
+
+const createEmptyOption = (): OptionFormData => ({
+  label: "",
+  candidate: createEmptyCandidate(),
+  vice1: createEmptyCandidate(),
+  vice2: createEmptyCandidate(),
+});
 
 // Extend Activity to include options array
 interface Activity extends BaseActivity {
@@ -59,7 +75,7 @@ function ActivityDetailPageContent() {
   // New/Edit option form state
   const [showNewOption, setShowNewOption] = useState(false);
   const [editingOptionId, setEditingOptionId] = useState<string | null>(null);
-  const [currentOption, setCurrentOption] = useState<OptionFormData>(emptyOptionForm());
+  const [currentOption, setCurrentOption] = useState<OptionFormData>(createEmptyOption());
   const [showVice1, setShowVice1] = useState(false);
   const [showVice2, setShowVice2] = useState(false);
 
@@ -184,7 +200,7 @@ function ActivityDetailPageContent() {
   };
 
   const resetOptionForm = () => {
-    setCurrentOption(emptyOptionForm());
+    setCurrentOption(createEmptyOption());
     setShowVice1(false);
     setShowVice2(false);
     setEditingOptionId(null);
@@ -526,14 +542,14 @@ function ActivityDetailPageContent() {
                         setShowVice1(false);
                         setCurrentOption({
                           ...currentOption,
-                          vice1: emptyCandidateForm(),
+                          vice1: createEmptyCandidate(),
                         });
                       }}
                       onHideVice2={() => {
                         setShowVice2(false);
                         setCurrentOption({
                           ...currentOption,
-                          vice2: emptyCandidateForm(),
+                          vice2: createEmptyCandidate(),
                         });
                       }}
                       onVice1Change={(field, value) => updateCandidate("vice1", field, value)}

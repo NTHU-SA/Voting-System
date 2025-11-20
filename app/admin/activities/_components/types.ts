@@ -17,19 +17,3 @@ export interface OptionFormData {
   vice1: CandidateForm;
   vice2: CandidateForm;
 }
-
-export const emptyCandidateForm = (): CandidateForm => ({
-  name: "",
-  department: "",
-  college: "",
-  avatar_url: "",
-  experiences: "",
-  opinions: "",
-});
-
-export const emptyOptionForm = (): OptionFormData => ({
-  label: "",
-  candidate: emptyCandidateForm(),
-  vice1: emptyCandidateForm(),
-  vice2: emptyCandidateForm(),
-});

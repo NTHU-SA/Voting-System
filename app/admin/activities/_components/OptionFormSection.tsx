@@ -8,7 +8,6 @@ import { Plus, Check, Edit, Trash2 } from "lucide-react";
 import { CandidateFormFields } from "./CandidateFormFields";
 import { ViceCandidateSection } from "./ViceCandidateSection";
 import { useOptionForm } from "./useOptionForm";
-import { emptyCandidateForm } from "./types";
 
 interface OptionFormSectionProps {
   onOptionsChange?: (options: ReturnType<typeof useOptionForm>["options"]) => void;
@@ -105,14 +104,14 @@ export function OptionFormSection({ onOptionsChange }: OptionFormSectionProps) {
               setShowVice1(false);
               setCurrentOption({
                 ...currentOption,
-                vice1: emptyCandidateForm(),
+                vice1: { name: "", department: "", college: "", avatar_url: "", experiences: "", opinions: "" },
               });
             }}
             onHideVice2={() => {
               setShowVice2(false);
               setCurrentOption({
                 ...currentOption,
-                vice2: emptyCandidateForm(),
+                vice2: { name: "", department: "", college: "", avatar_url: "", experiences: "", opinions: "" },
               });
             }}
             onVice1Change={(field, value) => updateCandidate("vice1", field, value)}
