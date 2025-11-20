@@ -31,6 +31,7 @@ import { buildOptionPayload } from "../_components/utils";
 import { createEmptyCandidate, createEmptyOption } from "../_components/formHelpers";
 import { useAdminAccess, useAdminActivity } from "@/hooks";
 import { Option } from "@/types";
+import { toDateTimeLocalString } from "@/utils/formatDate";
 
 function ActivityDetailPageContent() {
   const params = useParams();
@@ -66,25 +67,13 @@ function ActivityDetailPageContent() {
   // Update form data when activity loads
   useEffect(() => {
     if (activity) {
-      const openFromDate = new Date(activity.open_from);
-      const openToDate = new Date(activity.open_to);
-
-      const formatLocalDateTime = (date: Date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        const hours = String(date.getHours()).padStart(2, "0");
-        const minutes = String(date.getMinutes()).padStart(2, "0");
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-      };
-
       setFormData({
         name: activity.name,
         type: activity.type,
         description: activity.description || "",
         rule: activity.rule,
-        open_from: formatLocalDateTime(openFromDate),
-        open_to: formatLocalDateTime(openToDate),
+        open_from: toDateTimeLocalString(activity.open_from),
+        open_to: toDateTimeLocalString(activity.open_to),
       });
     }
   }, [activity]);
