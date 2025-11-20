@@ -120,6 +120,9 @@ OAUTH_SCOPE=userid name inschool uuid
 # Application
 NODE_ENV=production
 PORT=3000
+# External hostname for your application (without protocol)
+# This is used for building OAuth callback URLs and other absolute URLs
+APP_HOSTNAME=voting.nthusa.tw
 ```
 
 ```bash
@@ -127,6 +130,12 @@ PORT=3000
 openssl rand -base64 32
 # Copy the output and paste as TOKEN_SECRET value
 ```
+
+**Important Notes:**
+- `APP_HOSTNAME` should be your domain name without protocol (e.g., `voting.nthusa.tw`)
+- `OAUTH_CALLBACK_URL` must match exactly what you registered with CCXP OAuth
+- The application will automatically construct URLs using `https://` for production
+- The `HOSTNAME="0.0.0.0"` in Docker is the bind address (internal), not the external hostname
 
 ### 4. Configure Voter and Admin Lists
 
