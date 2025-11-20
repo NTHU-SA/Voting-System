@@ -14,12 +14,6 @@ function getMongoDBURI(): string {
   const password = process.env.MONGO_PASSWORD;
   const database = process.env.MONGO_NAME;
 
-  if (!host || !username || !password || !database) {
-    throw new Error(
-      "Missing MongoDB configuration. Either provide MONGODB_URI or all of: MONGO_HOST, MONGO_USERNAME, MONGO_PASSWORD, MONGO_NAME",
-    );
-  }
-
   return `mongodb://${username}:${password}@${host}:${port}/${database}?authSource=admin`;
 }
 

@@ -8,6 +8,8 @@ services:
     container_name: voting-app
     ports:
       - "${PORT:-3000}:3000"
+    env_file:
+      - .env.production
     environment:
       # MongoDB Connection (required)
       - MONGODB_URI=${MONGODB_URI}
