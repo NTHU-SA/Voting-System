@@ -28,7 +28,7 @@
     "csv-parse": "^5.6.0",
     "jose": "^6.1.2",
     "lucide-react": "^0.554.0",
-    "mongodb": "^6.10.0",
+    "mongodb": "^7.0.0",
     "mongoose": "^8.9.5",
     "next": "^15.5.6",
     "react": "^19.2.0",
