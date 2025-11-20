@@ -1,12 +1,5 @@
 import axios from "axios";
-
-function getRequiredEnvVar(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`${name} environment variable is required but not set`);
-  }
-  return value;
-}
+import { getRequiredEnvVar } from "./config";
 
 export interface OAuthTokenResponse {
   access_token: string;

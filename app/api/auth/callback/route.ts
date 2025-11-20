@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { exchangeCodeForToken, getUserInfo } from "@/lib/oauth";
 import { generateToken } from "@/lib/auth";
 import { API_CONSTANTS } from "@/lib/constants";
+import { isProduction } from "@/lib/config";
 
 export async function GET(request: NextRequest) {
   try {
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
     // Set token in cookie
     response.cookies.set("service_token", serviceToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isProduction(),
       sameSite: "lax",
       maxAge: API_CONSTANTS.COOKIE_MAX_AGE,
       path: "/",

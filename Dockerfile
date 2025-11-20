@@ -40,7 +40,11 @@ USER nextjs
 
 EXPOSE 3000
 
+# Port for the Next.js server
 ENV PORT=3000
+# Bind address for Next.js server (0.0.0.0 to accept all interfaces in Docker)
 ENV HOSTNAME="0.0.0.0"
+# APP_HOSTNAME is the external hostname for building URLs (set this in docker-compose or env)
+# ENV APP_HOSTNAME=voting.nthusa.tw
 
 CMD ["node", "server.js"]
