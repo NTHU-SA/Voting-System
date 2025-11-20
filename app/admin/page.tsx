@@ -96,8 +96,8 @@ function AdminDashboardContent() {
       return <Badge variant="secondary">已結束</Badge>;
     } else {
       return (
-        <Badge variant="success" className="gap-1">
-          <CheckCircle className="h-3 w-3" />
+        <Badge variant="success" className="gap-1 bg-green-100 text-green-600 hover:bg-green-200 hover:text-green-800">
+          <CheckCircle className="h-3 w-3 text-green-600" />
           進行中
         </Badge>
       );
@@ -157,10 +157,10 @@ function AdminDashboardContent() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="mb-1 text-sm font-medium text-muted-foreground">
+                  <p className="mb-1 text-sm font-medium text-primary-foreground">
                     進行中
                   </p>
-                  <p className="text-4xl font-bold text-primary">
+                  <p className="text-4xl font-bold text-green-600">
                     {activeCount}
                   </p>
                 </div>

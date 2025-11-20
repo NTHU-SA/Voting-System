@@ -70,7 +70,11 @@ export default function VotePage() {
       case "ended":
         return <Badge variant="secondary">已結束</Badge>;
       case "active":
-        return <Badge variant="success">進行中</Badge>;
+        return (        <Badge variant="success" className="gap-1 bg-green-100 text-green-600 hover:bg-green-200 hover:text-green-800">
+
+          <CheckCircle className="h-3 w-3 text-green-600" />
+           進行中
+        </Badge>);
     }
   };
 
