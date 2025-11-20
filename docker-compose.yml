@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: voting-app
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      # MongoDB Connection (required)
+      - MONGODB_URI=${MONGODB_URI}
+      # Or use individual parameters
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT:-27017}
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_NAME=${MONGO_NAME}
+
+      # Application
+      - NODE_ENV=production
+      - TOKEN_SECRET=${TOKEN_SECRET}
+
+      # OAuth Configuration (required)
+      - OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID}
+      - OAUTH_CLIENT_SECRET=${OAUTH_CLIENT_SECRET}
+      - OAUTH_AUTHORIZE=${OAUTH_AUTHORIZE}
+      - OAUTH_TOKEN_URL=${OAUTH_TOKEN_URL}
+      - OAUTH_RESOURCE_URL=${OAUTH_RESOURCE_URL}
+      - OAUTH_CALLBACK_URL=${OAUTH_CALLBACK_URL}
+      - OAUTH_SCOPE=${OAUTH_SCOPE:-userid name inschool uuid}
+    restart: unless-stopped
+    volumes:
+      # Mount data files that may be updated
+      - ./data:/app/data:ro
