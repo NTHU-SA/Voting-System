@@ -2,22 +2,7 @@
 
 import { useState } from "react";
 import { OptionFormData, CandidateForm } from "./types";
-
-const createEmptyCandidate = (): CandidateForm => ({
-  name: "",
-  department: "",
-  college: "",
-  avatar_url: "",
-  experiences: "",
-  opinions: "",
-});
-
-const createEmptyOption = (): OptionFormData => ({
-  label: "",
-  candidate: createEmptyCandidate(),
-  vice1: createEmptyCandidate(),
-  vice2: createEmptyCandidate(),
-});
+import { createEmptyOption } from "./formHelpers";
 
 export function useOptionForm() {
   const [options, setOptions] = useState<OptionFormData[]>([]);

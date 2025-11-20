@@ -8,51 +8,48 @@ import { Plus, Check, Edit, Trash2 } from "lucide-react";
 import { CandidateFormFields } from "./CandidateFormFields";
 import { ViceCandidateSection } from "./ViceCandidateSection";
 import { useOptionForm } from "./useOptionForm";
+import { createEmptyCandidate } from "./formHelpers";
 
 interface OptionFormSectionProps {
-  onOptionsChange?: (options: ReturnType<typeof useOptionForm>["options"]) => void;
+  options: ReturnType<typeof useOptionForm>["options"];
+  currentOption: ReturnType<typeof useOptionForm>["currentOption"];
+  setCurrentOption: ReturnType<typeof useOptionForm>["setCurrentOption"];
+  editingIndex: ReturnType<typeof useOptionForm>["editingIndex"];
+  showVice1: ReturnType<typeof useOptionForm>["showVice1"];
+  setShowVice1: ReturnType<typeof useOptionForm>["setShowVice1"];
+  showVice2: ReturnType<typeof useOptionForm>["showVice2"];
+  setShowVice2: ReturnType<typeof useOptionForm>["setShowVice2"];
+  updateCandidate: ReturnType<typeof useOptionForm>["updateCandidate"];
+  addOrUpdateOption: ReturnType<typeof useOptionForm>["addOrUpdateOption"];
+  editOption: ReturnType<typeof useOptionForm>["editOption"];
+  removeOption: ReturnType<typeof useOptionForm>["removeOption"];
+  resetForm: ReturnType<typeof useOptionForm>["resetForm"];
 }
 
-export function OptionFormSection({ onOptionsChange }: OptionFormSectionProps) {
-  const {
-    options,
-    currentOption,
-    setCurrentOption,
-    editingIndex,
-    showVice1,
-    setShowVice1,
-    showVice2,
-    setShowVice2,
-    updateCandidate,
-    addOrUpdateOption,
-    editOption,
-    removeOption,
-    resetForm,
-  } = useOptionForm();
-
+export function OptionFormSection({
+  options,
+  currentOption,
+  setCurrentOption,
+  editingIndex,
+  showVice1,
+  setShowVice1,
+  showVice2,
+  setShowVice2,
+  updateCandidate,
+  addOrUpdateOption,
+  editOption,
+  removeOption,
+  resetForm,
+}: OptionFormSectionProps) {
   const handleAddOrUpdate = () => {
     if (!currentOption.candidate.name) {
       return;
     }
     addOrUpdateOption();
-    if (onOptionsChange) {
-      // Call with updated options after state update
-      setTimeout(() => {
-        onOptionsChange(editingIndex !== null 
-          ? options.map((opt, idx) => idx === editingIndex ? currentOption : opt)
-          : [...options, currentOption]
-        );
-      }, 0);
-    }
   };
 
   const handleRemove = (index: number) => {
     removeOption(index);
-    if (onOptionsChange) {
-      setTimeout(() => {
-        onOptionsChange(options.filter((_, i) => i !== index));
-      }, 0);
-    }
   };
 
   return (
@@ -104,14 +101,14 @@ export function OptionFormSection({ onOptionsChange }: OptionFormSectionProps) {
               setShowVice1(false);
               setCurrentOption({
                 ...currentOption,
-                vice1: { name: "", department: "", college: "", avatar_url: "", experiences: "", opinions: "" },
+                vice1: createEmptyCandidate(),
               });
             }}
             onHideVice2={() => {
               setShowVice2(false);
               setCurrentOption({
                 ...currentOption,
-                vice2: { name: "", department: "", college: "", avatar_url: "", experiences: "", opinions: "" },
+                vice2: createEmptyCandidate(),
               });
             }}
             onVice1Change={(field, value) => updateCandidate("vice1", field, value)}

@@ -29,22 +29,7 @@ import { CandidateFormFields } from "../_components/CandidateFormFields";
 import { ViceCandidateSection } from "../_components/ViceCandidateSection";
 import { OptionFormData } from "../_components/types";
 import { buildOptionPayload } from "../_components/utils";
-
-const createEmptyCandidate = () => ({
-  name: "",
-  department: "",
-  college: "",
-  avatar_url: "",
-  experiences: "",
-  opinions: "",
-});
-
-const createEmptyOption = (): OptionFormData => ({
-  label: "",
-  candidate: createEmptyCandidate(),
-  vice1: createEmptyCandidate(),
-  vice2: createEmptyCandidate(),
-});
+import { createEmptyCandidate, createEmptyOption } from "../_components/formHelpers";
 
 // Extend Activity to include options array
 interface Activity extends BaseActivity {

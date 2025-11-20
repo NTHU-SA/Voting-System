@@ -36,9 +36,8 @@ function NewActivityWizard() {
   });
 
   // Step 2: Options/Candidates - using custom hook
-  const {
-    options,
-  } = useOptionForm();
+  const optionFormHook = useOptionForm();
+  const { options } = optionFormHook;
 
   // Check admin access on mount
   useEffect(() => {
@@ -241,7 +240,21 @@ function NewActivityWizard() {
 
             {currentStep === 2 && (
               <div className="space-y-6">
-                <OptionFormSection />
+                <OptionFormSection
+                  options={optionFormHook.options}
+                  currentOption={optionFormHook.currentOption}
+                  setCurrentOption={optionFormHook.setCurrentOption}
+                  editingIndex={optionFormHook.editingIndex}
+                  showVice1={optionFormHook.showVice1}
+                  setShowVice1={optionFormHook.setShowVice1}
+                  showVice2={optionFormHook.showVice2}
+                  setShowVice2={optionFormHook.setShowVice2}
+                  updateCandidate={optionFormHook.updateCandidate}
+                  addOrUpdateOption={optionFormHook.addOrUpdateOption}
+                  editOption={optionFormHook.editOption}
+                  removeOption={optionFormHook.removeOption}
+                  resetForm={optionFormHook.resetForm}
+                />
 
                 <Separator />
 
