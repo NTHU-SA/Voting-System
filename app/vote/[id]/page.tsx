@@ -17,27 +17,19 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { saveVotingRecord } from "@/lib/votingHistory";
-import {
-  fetchActivity,
-  ActivityWithOptions,
-  Candidate,
-} from "@/lib/activities";
-
-interface UserData {
-  student_id: string;
-  name: string;
-}
+import { Candidate } from "@/types";
+import { useActivity, useUser } from "@/hooks";
 
 export default function VotingPage() {
   const params = useParams();
   const router = useRouter();
   const activityId = params.id as string;
 
-  const [activity, setActivity] = useState<ActivityWithOptions | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { activity, loading, error: activityError } = useActivity(activityId, true);
+  const { user } = useUser();
+
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [userData, setUserData] = useState<UserData | null>(null);
 
   // Vote state
   const [chooseAllVotes, setChooseAllVotes] = useState<Record<string, string>>(
@@ -46,50 +38,15 @@ export default function VotingPage() {
   const [chooseOneVote, setChooseOneVote] = useState<string>("");
 
   useEffect(() => {
-    fetchActivityData();
-    fetchUserData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activityId]);
-
-  const fetchUserData = async () => {
-    try {
-      const response = await fetch("/api/auth/check", {
-        credentials: "include",
+    // Initialize vote state for choose_all when activity loads
+    if (activity && activity.rule === "choose_all") {
+      const initialVotes: Record<string, string> = {};
+      activity.options.forEach((option) => {
+        initialVotes[option._id] = "我沒有意見";
       });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.authenticated && data.user) {
-          setUserData({
-            student_id: data.user.student_id,
-            name: data.user.name,
-          });
-        }
-      }
-    } catch (err) {
-      console.error("Error fetching user data:", err);
+      setChooseAllVotes(initialVotes);
     }
-  };
-
-  const fetchActivityData = async () => {
-    try {
-      const activityData = await fetchActivity(activityId, true);
-      setActivity(activityData);
-
-      // Initialize vote state for choose_all
-      if (activityData.rule === "choose_all") {
-        const initialVotes: Record<string, string> = {};
-        activityData.options.forEach((option) => {
-          initialVotes[option._id] = "我沒有意見";
-        });
-        setChooseAllVotes(initialVotes);
-      }
-    } catch (err) {
-      console.error("Error fetching activity:", err);
-      setError("載入投票活動時發生錯誤");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [activity]);
 
   const handleChooseAllChange = (optionId: string, remark: string) => {
     setChooseAllVotes((prev) => ({
@@ -144,7 +101,7 @@ export default function VotingPage() {
           activityId,
           data.data.token,
           activity.name,
-          userData?.student_id || "",
+          user?.student_id || "",
         );
 
         // Redirect to completion page
@@ -251,7 +208,7 @@ export default function VotingPage() {
     );
   }
 
-  if (!activity) {
+  if (!activity || activityError) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <Card className="w-full max-w-md">

@@ -23,26 +23,22 @@ import {
   Check,
   X,
 } from "lucide-react";
-import { Activity as BaseActivity, Option } from "@/lib/activities";
 import { ActivityFormFields } from "../_components/ActivityFormFields";
 import { CandidateFormFields } from "../_components/CandidateFormFields";
 import { ViceCandidateSection } from "../_components/ViceCandidateSection";
 import { OptionFormData } from "../_components/types";
 import { buildOptionPayload } from "../_components/utils";
 import { createEmptyCandidate, createEmptyOption } from "../_components/formHelpers";
-
-// Extend Activity to include options array
-interface Activity extends BaseActivity {
-  options: Option[];
-}
+import { useAdminAccess, useAdminActivity } from "@/hooks";
+import { Option } from "@/types";
 
 function ActivityDetailPageContent() {
   const params = useParams();
   const router = useRouter();
   const activityId = params.id as string;
 
-  const [activity, setActivity] = useState<Activity | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { activity, loading, refetch } = useAdminActivity(activityId);
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -64,70 +60,34 @@ function ActivityDetailPageContent() {
   const [showVice1, setShowVice1] = useState(false);
   const [showVice2, setShowVice2] = useState(false);
 
+  // Check admin access
+  useAdminAccess();
+
+  // Update form data when activity loads
   useEffect(() => {
-    checkAdminAccess();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activityId]);
+    if (activity) {
+      const openFromDate = new Date(activity.open_from);
+      const openToDate = new Date(activity.open_to);
 
-  const checkAdminAccess = async () => {
-    try {
-      const response = await fetch("/api/auth/check");
-      const data = await response.json();
+      const formatLocalDateTime = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+      };
 
-      if (!data.authenticated || !data.user?.isAdmin) {
-        router.push("/?error=admin_required");
-        return;
-      }
-
-      fetchActivity();
-    } catch (err) {
-      console.error("Error checking admin access:", err);
-      router.push("/?error=auth_failed");
+      setFormData({
+        name: activity.name,
+        type: activity.type,
+        description: activity.description || "",
+        rule: activity.rule,
+        open_from: formatLocalDateTime(openFromDate),
+        open_to: formatLocalDateTime(openToDate),
+      });
     }
-  };
-
-  const fetchActivity = async () => {
-    try {
-      const response = await fetch(
-        `/api/activities/${activityId}?include_options=true`,
-        {
-          credentials: "include",
-        },
-      );
-      const data = await response.json();
-
-      if (data.success) {
-        setActivity(data.data);
-        const openFromDate = new Date(data.data.open_from);
-        const openToDate = new Date(data.data.open_to);
-
-        const formatLocalDateTime = (date: Date) => {
-          const year = date.getFullYear();
-          const month = String(date.getMonth() + 1).padStart(2, "0");
-          const day = String(date.getDate()).padStart(2, "0");
-          const hours = String(date.getHours()).padStart(2, "0");
-          const minutes = String(date.getMinutes()).padStart(2, "0");
-          return `${year}-${month}-${day}T${hours}:${minutes}`;
-        };
-
-        setFormData({
-          name: data.data.name,
-          type: data.data.type,
-          description: data.data.description || "",
-          rule: data.data.rule,
-          open_from: formatLocalDateTime(openFromDate),
-          open_to: formatLocalDateTime(openToDate),
-        });
-      } else {
-        setError(data.error || "無法載入活動資訊");
-      }
-    } catch (err) {
-      console.error("Error fetching activity:", err);
-      setError("載入活動時發生錯誤");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [activity]);
 
   const handleActivityChange = (
     e: React.ChangeEvent<
@@ -158,7 +118,7 @@ function ActivityDetailPageContent() {
 
       if (data.success) {
         setSuccessMessage("活動資訊已更新");
-        setActivity(data.data);
+        await refetch();
       } else {
         setError(data.error || "更新活動失敗");
       }
@@ -260,7 +220,7 @@ function ActivityDetailPageContent() {
         if (data.success) {
           setSuccessMessage("候選人已更新");
           resetOptionForm();
-          fetchActivity();
+          await refetch();
         } else {
           setError(data.error || "更新候選人失敗");
         }
@@ -282,7 +242,7 @@ function ActivityDetailPageContent() {
         if (data.success) {
           setSuccessMessage("候選人已新增");
           resetOptionForm();
-          fetchActivity();
+          await refetch();
         } else {
           setError(data.error || "新增候選人失敗");
         }
@@ -312,7 +272,7 @@ function ActivityDetailPageContent() {
 
       if (data.success) {
         setSuccessMessage("候選人已刪除");
-        fetchActivity();
+        await refetch();
       } else {
         setError(data.error || "刪除候選人失敗");
       }

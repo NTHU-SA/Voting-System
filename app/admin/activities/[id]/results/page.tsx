@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { Loading } from "@/components/ui/loader";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { ArrowLeft, TrendingUp, Users, Award, AlertCircle } from "lucide-react";
+import { useAdminAccess } from "@/hooks";
 
 interface ActivityStats {
   activity: {
@@ -42,29 +43,6 @@ function ResultsPageContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    checkAdminAccess();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activityId]);
-
-  const checkAdminAccess = async () => {
-    try {
-      const response = await fetch("/api/auth/check");
-      const data = await response.json();
-
-      if (!data.authenticated || !data.user?.isAdmin) {
-        // Not authenticated or not an admin, redirect to home
-        window.location.href = "/?error=admin_required";
-        return;
-      }
-
-      fetchStats();
-    } catch (err) {
-      console.error("Error checking admin access:", err);
-      window.location.href = "/?error=auth_failed";
-    }
-  };
-
   const fetchStats = async () => {
     try {
       const response = await fetch(`/api/stats?activity_id=${activityId}`, {
@@ -84,6 +62,11 @@ function ResultsPageContent() {
       setLoading(false);
     }
   };
+
+  // Check admin access and fetch stats on success
+  useAdminAccess(() => {
+    fetchStats();
+  });
 
   if (loading) {
     return (

@@ -7,7 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Download, Home, Copy, Check, User } from "lucide-react";
-import { loadVotingHistory, VotingHistory } from "@/lib/votingHistory";
+import { loadVotingHistory } from "@/lib/votingHistory";
+import { VotingHistory } from "@/types";
+import { useUser } from "@/hooks";
 
 export default function CompletionPage() {
   const router = useRouter();
@@ -15,32 +17,12 @@ export default function CompletionPage() {
     null,
   );
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [userInfo, setUserInfo] = useState<{
-    name: string;
-    student_id: string;
-  } | null>(null);
+  
+  const { user: userInfo } = useUser();
 
   useEffect(() => {
     setVotingHistory(loadVotingHistory());
-    fetchUserData();
   }, []);
-
-  const fetchUserData = async () => {
-    try {
-      const response = await fetch("/api/auth/check", {
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.authenticated && data.user) {
-          setUserInfo(data.user);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch user data:", error);
-    }
-  };
 
   const handleCopyToken = (token: string, index: number) => {
     navigator.clipboard.writeText(token);

@@ -104,3 +104,75 @@ export interface CreateVoteRequest {
   choose_all?: IChoiceAll[];
   choose_one?: string;
 }
+
+// Frontend Types
+export interface UserData {
+  student_id: string;
+  name: string;
+  isAdmin?: boolean;
+}
+
+export interface AdminActivity extends Omit<IActivity, "_id" | "options" | "open_from" | "open_to" | "created_at" | "updated_at"> {
+  _id: string;
+  open_from: string;
+  open_to: string;
+  options: string[]; // Array of option IDs
+}
+
+// Client-side Activity type (serialized from database)
+export interface Activity extends Omit<IActivity, "_id" | "options" | "open_from" | "open_to" | "created_at" | "updated_at"> {
+  _id: string;
+  subtitle?: string; // Additional client field
+  open_from: string;
+  open_to: string;
+  options?: string[]; // Array of option IDs (serialized)
+}
+
+export interface ActivityWithOptions extends Omit<Activity, "options"> {
+  options: Option[];
+}
+
+// Client-side Option type (serialized from database)
+export type Option = Omit<IOption, "_id" | "activity_id" | "created_at" | "updated_at"> & {
+  _id: string;
+};
+
+// Candidate type (re-export for convenience)
+export type Candidate = ICandidate;
+
+// Voting History Types
+export interface VoteRecord {
+  studentId: string;
+  activityId: string;
+  activityName: string;
+  token: string;
+  timestamp: string;
+}
+
+export interface VotingHistory {
+  votedActivityIds: string[];
+  votes: VoteRecord[];
+}
+
+// OAuth Types
+export interface OAuthTokenResponse {
+  access_token: string;
+  expires_in: number;
+  token_type: string;
+  scope: string;
+  refresh_token?: string;
+}
+
+export interface OAuthUserInfo {
+  Userid: string; // Maps to student_id in our system
+  name?: string;
+  inschool?: string;
+  uuid?: string; // Used for anonymous voting
+}
+
+// Middleware Types
+import { NextRequest } from "next/server";
+
+export interface AuthenticatedRequest extends NextRequest {
+  user?: JWTPayload;
+}

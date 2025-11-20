@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -15,27 +14,10 @@ import {
   Vote,
   TrendingUp,
 } from "lucide-react";
-import { fetchActiveActivities, Activity } from "@/lib/activities";
+import { useActivities } from "@/hooks";
 
 export default function HomePage() {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchActivitiesData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const fetchActivitiesData = async () => {
-    try {
-      const activeActivities = await fetchActiveActivities();
-      setActivities(activeActivities);
-    } catch (err) {
-      console.error("Error fetching activities:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { activities, loading } = useActivities();
 
   return (
     <div className="min-h-screen bg-background">

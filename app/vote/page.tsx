@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,68 +14,14 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { hasVoted } from "@/lib/votingHistory";
-import {
-  fetchActiveActivities,
-  Activity,
-  getActivityStatus,
-} from "@/lib/activities";
+import { useActivities, useUser } from "@/hooks";
+import { ActivityStatusBadge } from "@/components/ActivityStatusBadge";
 
 export default function VotePage() {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [currentStudentId, setCurrentStudentId] = useState<string>("");
+  const { activities, loading, error } = useActivities();
+  const { user } = useUser();
 
-  useEffect(() => {
-    fetchActivitiesData();
-    fetchUserData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const fetchUserData = async () => {
-    try {
-      const response = await fetch("/api/auth/check", {
-        credentials: "include",
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.authenticated && data.user) {
-          setCurrentStudentId(data.user.student_id);
-        }
-      }
-    } catch (err) {
-      console.error("Error fetching user data:", err);
-    }
-  };
-
-  const fetchActivitiesData = async () => {
-    try {
-      const activeActivities = await fetchActiveActivities();
-      setActivities(activeActivities);
-    } catch (err) {
-      console.error("Error fetching activities:", err);
-      setError("載入投票活動時發生錯誤");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getStatusBadge = (activity: Activity) => {
-    const status = getActivityStatus(activity);
-
-    switch (status) {
-      case "upcoming":
-        return <Badge variant="warning">即將開始</Badge>;
-      case "ended":
-        return <Badge variant="secondary">已結束</Badge>;
-      case "active":
-        return (        <Badge variant="success" className="gap-1 bg-green-100 text-green-600 hover:bg-green-200 hover:text-green-800">
-
-          <CheckCircle className="h-3 w-3 text-green-600" />
-           進行中
-        </Badge>);
-    }
-  };
+  const currentStudentId = user?.student_id || "";
 
   if (loading) {
     return (
@@ -145,7 +90,7 @@ export default function VotePage() {
                         </p>
                       )}
                     </div>
-                    {getStatusBadge(activity)}
+                    <ActivityStatusBadge activity={activity} />
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">

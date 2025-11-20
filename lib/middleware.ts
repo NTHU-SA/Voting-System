@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
-import { isAdmin } from "@/lib/adminConfig";
+import { isAdmin, verifyToken } from "@/lib/auth";
 import { JWTPayload } from "@/types";
 import { API_CONSTANTS } from "@/lib/constants";
-
-export interface AuthenticatedRequest extends NextRequest {
-  user?: JWTPayload;
-}
 
 /**
  * Extracts JWT token from request (Authorization header or cookie)
@@ -26,7 +21,7 @@ function extractToken(request: NextRequest): string | undefined {
  * Middleware to require authentication
  */
 export async function requireAuth(
-  request: NextRequest,
+  request: NextRequest
 ): Promise<JWTPayload | NextResponse> {
   const token = extractToken(request);
 
@@ -47,7 +42,7 @@ export async function requireAuth(
  * Middleware to require admin authorization
  */
 export async function requireAdmin(
-  user: JWTPayload,
+  user: JWTPayload
 ): Promise<NextResponse | null> {
   try {
     const userIsAdmin = await isAdmin(user.student_id);
@@ -67,7 +62,7 @@ export async function requireAdmin(
  */
 export function createErrorResponse(
   message: string,
-  status: number = 400,
+  status: number = 400
 ): NextResponse {
   return NextResponse.json({ success: false, error: message }, { status });
 }
@@ -77,7 +72,7 @@ export function createErrorResponse(
  */
 export function createSuccessResponse<T>(
   data: T,
-  status: number = 200,
+  status: number = 200
 ): NextResponse {
   return NextResponse.json({ success: true, data }, { status });
 }

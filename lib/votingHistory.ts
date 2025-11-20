@@ -1,17 +1,5 @@
 // Voting history management utilities
-
-export interface VoteRecord {
-  studentId: string;
-  activityId: string;
-  activityName: string;
-  token: string;
-  timestamp: string;
-}
-
-export interface VotingHistory {
-  votedActivityIds: string[];
-  votes: VoteRecord[];
-}
+import { VotingHistory } from "@/types";
 
 /**
  * Load voting history from localStorage
