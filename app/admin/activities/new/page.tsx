@@ -18,22 +18,13 @@ import {
   AlertCircle,
   Check,
   Trash2,
+  Edit,
 } from "lucide-react";
-
-interface CandidateForm {
-  name: string;
-  department: string;
-  college: string;
-  experiences: string;
-  opinions: string;
-}
-
-interface OptionForm {
-  label: string;
-  candidate: CandidateForm;
-  vice1: CandidateForm;
-  vice2: CandidateForm;
-}
+import { useOptionForm } from "../_components/useOptionForm";
+import { CandidateFormFields } from "../_components/CandidateFormFields";
+import { ViceCandidateSection } from "../_components/ViceCandidateSection";
+import { buildCandidatePayload } from "../_components/utils";
+import { emptyCandidateForm } from "../_components/types";
 
 function NewActivityWizard() {
   const router = useRouter();
@@ -51,32 +42,22 @@ function NewActivityWizard() {
     open_to: "",
   });
 
-  // Step 2: Options/Candidates
-  const [options, setOptions] = useState<OptionForm[]>([]);
-  const [currentOption, setCurrentOption] = useState<OptionForm>({
-    label: "",
-    candidate: {
-      name: "",
-      department: "",
-      college: "",
-      experiences: "",
-      opinions: "",
-    },
-    vice1: {
-      name: "",
-      department: "",
-      college: "",
-      experiences: "",
-      opinions: "",
-    },
-    vice2: {
-      name: "",
-      department: "",
-      college: "",
-      experiences: "",
-      opinions: "",
-    },
-  });
+  // Step 2: Options/Candidates - using custom hook
+  const {
+    options,
+    currentOption,
+    setCurrentOption,
+    editingIndex,
+    showVice1,
+    setShowVice1,
+    showVice2,
+    setShowVice2,
+    updateCandidate,
+    addOrUpdateOption,
+    editOption,
+    removeOption,
+    resetForm,
+  } = useOptionForm();
 
   // Check admin access on mount
   useEffect(() => {
@@ -143,36 +124,8 @@ function NewActivityWizard() {
       return;
     }
 
-    setOptions([...options, currentOption]);
-    setCurrentOption({
-      label: "",
-      candidate: {
-        name: "",
-        department: "",
-        college: "",
-        experiences: "",
-        opinions: "",
-      },
-      vice1: {
-        name: "",
-        department: "",
-        college: "",
-        experiences: "",
-        opinions: "",
-      },
-      vice2: {
-        name: "",
-        department: "",
-        college: "",
-        experiences: "",
-        opinions: "",
-      },
-    });
+    addOrUpdateOption();
     setError("");
-  };
-
-  const handleRemoveOption = (index: number) => {
-    setOptions(options.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
@@ -212,66 +165,14 @@ function NewActivityWizard() {
           label: option.label || undefined,
         };
 
-        if (option.candidate.name) {
-          const candidate: Record<string, unknown> = {
-            name: option.candidate.name,
-          };
-          if (option.candidate.department)
-            candidate.department = option.candidate.department;
-          if (option.candidate.college)
-            candidate.college = option.candidate.college;
-          if (option.candidate.experiences) {
-            candidate.personal_experiences = option.candidate.experiences
-              .split("\n")
-              .filter((e) => e.trim());
-          }
-          if (option.candidate.opinions) {
-            candidate.political_opinions = option.candidate.opinions
-              .split("\n")
-              .filter((e) => e.trim());
-          }
-          optionData.candidate = candidate;
-        }
+        const candidatePayload = buildCandidatePayload(option.candidate);
+        if (candidatePayload) optionData.candidate = candidatePayload;
 
-        if (option.vice1.name) {
-          const vice1: Record<string, unknown> = {
-            name: option.vice1.name,
-          };
-          if (option.vice1.department)
-            vice1.department = option.vice1.department;
-          if (option.vice1.college) vice1.college = option.vice1.college;
-          if (option.vice1.experiences) {
-            vice1.personal_experiences = option.vice1.experiences
-              .split("\n")
-              .filter((e) => e.trim());
-          }
-          if (option.vice1.opinions) {
-            vice1.political_opinions = option.vice1.opinions
-              .split("\n")
-              .filter((e) => e.trim());
-          }
-          optionData.vice1 = vice1;
-        }
+        const vice1Payload = buildCandidatePayload(option.vice1);
+        if (vice1Payload) optionData.vice1 = vice1Payload;
 
-        if (option.vice2.name) {
-          const vice2: Record<string, unknown> = {
-            name: option.vice2.name,
-          };
-          if (option.vice2.department)
-            vice2.department = option.vice2.department;
-          if (option.vice2.college) vice2.college = option.vice2.college;
-          if (option.vice2.experiences) {
-            vice2.personal_experiences = option.vice2.experiences
-              .split("\n")
-              .filter((e) => e.trim());
-          }
-          if (option.vice2.opinions) {
-            vice2.political_opinions = option.vice2.opinions
-              .split("\n")
-              .filter((e) => e.trim());
-          }
-          optionData.vice2 = vice2;
-        }
+        const vice2Payload = buildCandidatePayload(option.vice2);
+        if (vice2Payload) optionData.vice2 = vice2Payload;
 
         await fetch("/api/options", {
           method: "POST",
@@ -290,47 +191,6 @@ function NewActivityWizard() {
       setLoading(false);
     }
   };
-
-  const renderCandidateForm = (
-    candidate: CandidateForm,
-    onChange: (field: keyof CandidateForm, value: string) => void,
-    label: string,
-    required: boolean = false,
-  ) => (
-    <div className="space-y-3">
-      <h4 className="font-semibold">{label}</h4>
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        <Input
-          placeholder={`姓名${required ? " *" : ""}`}
-          value={candidate.name}
-          onChange={(e) => onChange("name", e.target.value)}
-          required={required}
-        />
-        <Input
-          placeholder="系所（選填）"
-          value={candidate.department}
-          onChange={(e) => onChange("department", e.target.value)}
-        />
-        <Input
-          placeholder="學院（選填）"
-          value={candidate.college}
-          onChange={(e) => onChange("college", e.target.value)}
-        />
-      </div>
-      <Textarea
-        placeholder="個人經歷（選填，一行一項）"
-        value={candidate.experiences}
-        onChange={(e) => onChange("experiences", e.target.value)}
-        rows={3}
-      />
-      <Textarea
-        placeholder="政見（選填，一行一項）"
-        value={candidate.opinions}
-        onChange={(e) => onChange("opinions", e.target.value)}
-        rows={3}
-      />
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -530,48 +390,67 @@ function NewActivityWizard() {
                       </p>
                     </div>
 
-                    {renderCandidateForm(
-                      currentOption.candidate,
-                      (field, value) =>
+                    <CandidateFormFields
+                      candidate={currentOption.candidate}
+                      onChange={(field, value) => updateCandidate("candidate", field, value)}
+                      label="正選候選人"
+                      required
+                    />
+
+                    <ViceCandidateSection
+                      vice1={currentOption.vice1}
+                      vice2={currentOption.vice2}
+                      showVice1={showVice1}
+                      showVice2={showVice2}
+                      onShowVice1={() => setShowVice1(true)}
+                      onShowVice2={() => setShowVice2(true)}
+                      onHideVice1={() => {
+                        setShowVice1(false);
                         setCurrentOption({
                           ...currentOption,
-                          candidate: {
-                            ...currentOption.candidate,
-                            [field]: value,
-                          },
-                        }),
-                      "正選候選人",
-                      true,
-                    )}
-
-                    {renderCandidateForm(
-                      currentOption.vice1,
-                      (field, value) =>
+                          vice1: emptyCandidateForm(),
+                        });
+                      }}
+                      onHideVice2={() => {
+                        setShowVice2(false);
                         setCurrentOption({
                           ...currentOption,
-                          vice1: { ...currentOption.vice1, [field]: value },
-                        }),
-                      "副選候選人 1（選填）",
-                    )}
+                          vice2: emptyCandidateForm(),
+                        });
+                      }}
+                      onVice1Change={(field, value) => updateCandidate("vice1", field, value)}
+                      onVice2Change={(field, value) => updateCandidate("vice2", field, value)}
+                    />
 
-                    {renderCandidateForm(
-                      currentOption.vice2,
-                      (field, value) =>
-                        setCurrentOption({
-                          ...currentOption,
-                          vice2: { ...currentOption.vice2, [field]: value },
-                        }),
-                      "副選候選人 2（選填）",
-                    )}
-
-                    <Button
-                      type="button"
-                      onClick={handleAddOption}
-                      className="w-full"
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      加入候選人列表
-                    </Button>
+                    <div className="flex gap-2">
+                      {editingIndex !== null && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={resetForm}
+                          className="flex-1"
+                        >
+                          取消編輯
+                        </Button>
+                      )}
+                      <Button
+                        type="button"
+                        onClick={handleAddOption}
+                        className="flex-1"
+                      >
+                        {editingIndex !== null ? (
+                          <>
+                            <Check className="mr-2 h-4 w-4" />
+                            更新候選人
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="mr-2 h-4 w-4" />
+                            加入候選人列表
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -582,7 +461,7 @@ function NewActivityWizard() {
                       已新增的候選人 ({options.length})
                     </h3>
                     {options.map((option, index) => (
-                      <Card key={index}>
+                      <Card key={index} className={editingIndex === index ? "border-primary" : ""}>
                         <CardContent className="flex items-center justify-between py-4">
                           <div>
                             <p className="font-medium">
@@ -594,13 +473,24 @@ function NewActivityWizard() {
                               {option.vice2.name && ` · ${option.vice2.name}`}
                             </p>
                           </div>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleRemoveOption(index)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => editOption(index)}
+                              disabled={editingIndex !== null}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => removeOption(index)}
+                              disabled={editingIndex !== null}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </CardContent>
                       </Card>
                     ))}
