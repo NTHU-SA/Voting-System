@@ -18,12 +18,15 @@ import {
   AlertCircle,
   Check,
   Trash2,
+  Edit,
+  X,
 } from "lucide-react";
 
 interface CandidateForm {
   name: string;
   department: string;
   college: string;
+  avatar_url: string;
   experiences: string;
   opinions: string;
 }
@@ -53,12 +56,16 @@ function NewActivityWizard() {
 
   // Step 2: Options/Candidates
   const [options, setOptions] = useState<OptionForm[]>([]);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [showVice1, setShowVice1] = useState(false);
+  const [showVice2, setShowVice2] = useState(false);
   const [currentOption, setCurrentOption] = useState<OptionForm>({
     label: "",
     candidate: {
       name: "",
       department: "",
       college: "",
+      avatar_url: "",
       experiences: "",
       opinions: "",
     },
@@ -66,6 +73,7 @@ function NewActivityWizard() {
       name: "",
       department: "",
       college: "",
+      avatar_url: "",
       experiences: "",
       opinions: "",
     },
@@ -73,6 +81,7 @@ function NewActivityWizard() {
       name: "",
       department: "",
       college: "",
+      avatar_url: "",
       experiences: "",
       opinions: "",
     },
@@ -143,13 +152,25 @@ function NewActivityWizard() {
       return;
     }
 
-    setOptions([...options, currentOption]);
+    if (editingIndex !== null) {
+      // Update existing option
+      const newOptions = [...options];
+      newOptions[editingIndex] = currentOption;
+      setOptions(newOptions);
+      setEditingIndex(null);
+    } else {
+      // Add new option
+      setOptions([...options, currentOption]);
+    }
+
+    // Reset form
     setCurrentOption({
       label: "",
       candidate: {
         name: "",
         department: "",
         college: "",
+        avatar_url: "",
         experiences: "",
         opinions: "",
       },
@@ -157,6 +178,7 @@ function NewActivityWizard() {
         name: "",
         department: "",
         college: "",
+        avatar_url: "",
         experiences: "",
         opinions: "",
       },
@@ -164,10 +186,56 @@ function NewActivityWizard() {
         name: "",
         department: "",
         college: "",
+        avatar_url: "",
         experiences: "",
         opinions: "",
       },
     });
+    setShowVice1(false);
+    setShowVice2(false);
+    setError("");
+  };
+
+  const handleEditOption = (index: number) => {
+    setCurrentOption(options[index]);
+    setEditingIndex(index);
+    // Show vice forms if they have data
+    setShowVice1(!!options[index].vice1.name);
+    setShowVice2(!!options[index].vice2.name);
+    setError("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingIndex(null);
+    setCurrentOption({
+      label: "",
+      candidate: {
+        name: "",
+        department: "",
+        college: "",
+        avatar_url: "",
+        experiences: "",
+        opinions: "",
+      },
+      vice1: {
+        name: "",
+        department: "",
+        college: "",
+        avatar_url: "",
+        experiences: "",
+        opinions: "",
+      },
+      vice2: {
+        name: "",
+        department: "",
+        college: "",
+        avatar_url: "",
+        experiences: "",
+        opinions: "",
+      },
+    });
+    setShowVice1(false);
+    setShowVice2(false);
     setError("");
   };
 
@@ -220,6 +288,8 @@ function NewActivityWizard() {
             candidate.department = option.candidate.department;
           if (option.candidate.college)
             candidate.college = option.candidate.college;
+          if (option.candidate.avatar_url)
+            candidate.avatar_url = option.candidate.avatar_url;
           if (option.candidate.experiences) {
             candidate.personal_experiences = option.candidate.experiences
               .split("\n")
@@ -240,6 +310,8 @@ function NewActivityWizard() {
           if (option.vice1.department)
             vice1.department = option.vice1.department;
           if (option.vice1.college) vice1.college = option.vice1.college;
+          if (option.vice1.avatar_url)
+            vice1.avatar_url = option.vice1.avatar_url;
           if (option.vice1.experiences) {
             vice1.personal_experiences = option.vice1.experiences
               .split("\n")
@@ -260,6 +332,8 @@ function NewActivityWizard() {
           if (option.vice2.department)
             vice2.department = option.vice2.department;
           if (option.vice2.college) vice2.college = option.vice2.college;
+          if (option.vice2.avatar_url)
+            vice2.avatar_url = option.vice2.avatar_url;
           if (option.vice2.experiences) {
             vice2.personal_experiences = option.vice2.experiences
               .split("\n")
@@ -317,6 +391,11 @@ function NewActivityWizard() {
           onChange={(e) => onChange("college", e.target.value)}
         />
       </div>
+      <Input
+        placeholder="照片網址（選填）- 請輸入外部圖片連結"
+        value={candidate.avatar_url}
+        onChange={(e) => onChange("avatar_url", e.target.value)}
+      />
       <Textarea
         placeholder="個人經歷（選填，一行一項）"
         value={candidate.experiences}
@@ -544,34 +623,136 @@ function NewActivityWizard() {
                       true,
                     )}
 
-                    {renderCandidateForm(
-                      currentOption.vice1,
-                      (field, value) =>
-                        setCurrentOption({
-                          ...currentOption,
-                          vice1: { ...currentOption.vice1, [field]: value },
-                        }),
-                      "副選候選人 1（選填）",
-                    )}
+                    {/* Vice candidate buttons and forms */}
+                    <div className="space-y-3">
+                      {!showVice1 && !showVice2 && (
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowVice1(true)}
+                            className="flex-1"
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            新增副選候選人 1
+                          </Button>
+                        </div>
+                      )}
 
-                    {renderCandidateForm(
-                      currentOption.vice2,
-                      (field, value) =>
-                        setCurrentOption({
-                          ...currentOption,
-                          vice2: { ...currentOption.vice2, [field]: value },
-                        }),
-                      "副選候選人 2（選填）",
-                    )}
+                      {showVice1 && (
+                        <div className="relative rounded-lg border border-border p-4 bg-background">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setShowVice1(false);
+                              setCurrentOption({
+                                ...currentOption,
+                                vice1: {
+                                  name: "",
+                                  department: "",
+                                  college: "",
+                                  avatar_url: "",
+                                  experiences: "",
+                                  opinions: "",
+                                },
+                              });
+                            }}
+                            className="absolute top-2 right-2"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                          {renderCandidateForm(
+                            currentOption.vice1,
+                            (field, value) =>
+                              setCurrentOption({
+                                ...currentOption,
+                                vice1: { ...currentOption.vice1, [field]: value },
+                              }),
+                            "副選候選人 1（選填）",
+                          )}
+                        </div>
+                      )}
 
-                    <Button
-                      type="button"
-                      onClick={handleAddOption}
-                      className="w-full"
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      加入候選人列表
-                    </Button>
+                      {showVice1 && !showVice2 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setShowVice2(true)}
+                          className="w-full"
+                        >
+                          <Plus className="mr-2 h-4 w-4" />
+                          新增副選候選人 2
+                        </Button>
+                      )}
+
+                      {showVice2 && (
+                        <div className="relative rounded-lg border border-border p-4 bg-background">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setShowVice2(false);
+                              setCurrentOption({
+                                ...currentOption,
+                                vice2: {
+                                  name: "",
+                                  department: "",
+                                  college: "",
+                                  avatar_url: "",
+                                  experiences: "",
+                                  opinions: "",
+                                },
+                              });
+                            }}
+                            className="absolute top-2 right-2"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                          {renderCandidateForm(
+                            currentOption.vice2,
+                            (field, value) =>
+                              setCurrentOption({
+                                ...currentOption,
+                                vice2: { ...currentOption.vice2, [field]: value },
+                              }),
+                            "副選候選人 2（選填）",
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      {editingIndex !== null && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleCancelEdit}
+                          className="flex-1"
+                        >
+                          取消編輯
+                        </Button>
+                      )}
+                      <Button
+                        type="button"
+                        onClick={handleAddOption}
+                        className="flex-1"
+                      >
+                        {editingIndex !== null ? (
+                          <>
+                            <Check className="mr-2 h-4 w-4" />
+                            更新候選人
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="mr-2 h-4 w-4" />
+                            加入候選人列表
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -582,7 +763,7 @@ function NewActivityWizard() {
                       已新增的候選人 ({options.length})
                     </h3>
                     {options.map((option, index) => (
-                      <Card key={index}>
+                      <Card key={index} className={editingIndex === index ? "border-primary" : ""}>
                         <CardContent className="flex items-center justify-between py-4">
                           <div>
                             <p className="font-medium">
@@ -594,13 +775,24 @@ function NewActivityWizard() {
                               {option.vice2.name && ` · ${option.vice2.name}`}
                             </p>
                           </div>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleRemoveOption(index)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditOption(index)}
+                              disabled={editingIndex !== null}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleRemoveOption(index)}
+                              disabled={editingIndex !== null}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </CardContent>
                       </Card>
                     ))}
