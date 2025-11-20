@@ -6,13 +6,8 @@ import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, ArrowLeft } from "lucide-react";
-import { fetchActiveActivities, Activity } from "@/lib/activities";
 import { getVotedActivityIds } from "@/lib/votingHistory";
-
-interface UserData {
-  student_id: string;
-  name: string;
-}
+import { useActivities, useUser } from "@/hooks";
 
 export default function CompletionPage() {
   const params = useParams();
@@ -22,9 +17,10 @@ export default function CompletionPage() {
 
   const [activityName, setActivityName] = useState<string>("");
   const [voteToken, setVoteToken] = useState<string>("");
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [allActivities, setAllActivities] = useState<Activity[]>([]);
   const [votedActivityIds, setVotedActivityIds] = useState<string[]>([]);
+
+  const { user } = useUser();
+  const { activities: allActivities } = useActivities();
 
   useEffect(() => {
     // Get data from URL params
@@ -34,39 +30,9 @@ export default function CompletionPage() {
     if (token) setVoteToken(token);
     if (name) setActivityName(decodeURIComponent(name));
 
-    fetchUserData();
-    fetchAllActivities();
     setVotedActivityIds(getVotedActivityIds());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
-
-  const fetchUserData = async () => {
-    try {
-      const response = await fetch("/api/auth/check", {
-        credentials: "include",
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.authenticated && data.user) {
-          setUserData({
-            student_id: data.user.student_id,
-            name: data.user.name,
-          });
-        }
-      }
-    } catch (err) {
-      console.error("Error fetching user data:", err);
-    }
-  };
-
-  const fetchAllActivities = async () => {
-    try {
-      const activeActivities = await fetchActiveActivities();
-      setAllActivities(activeActivities);
-    } catch (err) {
-      console.error("Error fetching activities:", err);
-    }
-  };
 
   // Find next unvoted activity
   const nextActivity = allActivities.find(
@@ -105,7 +71,7 @@ export default function CompletionPage() {
         )}
 
         {/* Voter Information Card */}
-        {userData && (
+        {user && (
           <Card className="mb-6 border-primary/20">
             <CardHeader className="pb-4">
               <CardTitle className="text-center text-lg">投票人資訊</CardTitle>
@@ -116,14 +82,14 @@ export default function CompletionPage() {
                   學號
                 </span>
                 <span className="font-mono text-base font-bold">
-                  {userData.student_id}
+                  {user.student_id}
                 </span>
               </div>
               <div className="flex items-center justify-between rounded-lg bg-muted p-4">
                 <span className="text-sm font-semibold text-muted-foreground">
                   姓名
                 </span>
-                <span className="text-base font-bold">{userData.name}</span>
+                <span className="text-base font-bold">{user.name}</span>
               </div>
             </CardContent>
           </Card>

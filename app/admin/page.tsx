@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Loading } from "@/components/ui/loader";
 import {
@@ -27,90 +25,21 @@ import {
   ClipboardCheck,
   AlertCircle,
 } from "lucide-react";
-import { Activity } from "@/lib/activities";
-
-// Extend Activity for admin dashboard with options as string array
-interface AdminActivity extends Activity {
-  options: string[];
-}
+import { useAdminAccess, useAdminActivities, useActivityStatusBadge, getActivityStatusType } from "@/hooks";
 
 function AdminDashboardContent() {
-  const [activities, setActivities] = useState<AdminActivity[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { activities, loading, error, refetch } = useAdminActivities();
+  const { getStatusBadge } = useActivityStatusBadge();
 
-  useEffect(() => {
-    checkAdminAccess();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Check admin access and fetch activities on success
+  useAdminAccess();
 
-  const checkAdminAccess = async () => {
-    try {
-      const response = await fetch("/api/auth/check");
-      const data = await response.json();
-
-      if (!data.authenticated || !data.user?.isAdmin) {
-        // Not authenticated or not an admin, redirect to home
-        window.location.href = "/?error=admin_required";
-        return;
-      }
-
-      fetchActivities();
-    } catch (err) {
-      console.error("Error checking admin access:", err);
-      window.location.href = "/?error=auth_failed";
-    }
-  };
-
-  const fetchActivities = async () => {
-    try {
-      const response = await fetch("/api/activities");
-      const data = await response.json();
-
-      if (data.success) {
-        setActivities(data.data);
-      } else {
-        setError(data.error || "無法載入投票活動");
-      }
-    } catch (err) {
-      console.error("Error fetching activities:", err);
-      setError("載入投票活動時發生錯誤");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getStatusBadge = (activity: AdminActivity) => {
-    const now = new Date();
-    const openFrom = new Date(activity.open_from);
-    const openTo = new Date(activity.open_to);
-
-    if (now < openFrom) {
-      return (
-        <Badge variant="warning" className="gap-1">
-          <Clock className="h-3 w-3" />
-          即將開始
-        </Badge>
-      );
-    } else if (now > openTo) {
-      return <Badge variant="secondary">已結束</Badge>;
-    } else {
-      return (
-        <Badge variant="success" className="gap-1 bg-green-100 text-green-600 hover:bg-green-200 hover:text-green-800">
-          <CheckCircle className="h-3 w-3 text-green-600" />
-          進行中
-        </Badge>
-      );
-    }
-  };
-
-  const activeCount = activities.filter((a) => {
-    const now = new Date();
-    return now >= new Date(a.open_from) && now <= new Date(a.open_to);
-  }).length;
+  const activeCount = activities.filter((a) => 
+    getActivityStatusType(a) === "active"
+  ).length;
 
   const completedCount = activities.filter(
-    (a) => new Date() > new Date(a.open_to),
+    (a) => getActivityStatusType(a) === "ended"
   ).length;
 
   if (loading) {
@@ -217,7 +146,7 @@ function AdminDashboardContent() {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => window.location.reload()}
+                onClick={() => refetch()}
               >
                 <RefreshCw className="mr-2 h-4 w-4" />
                 重新整理
@@ -262,7 +191,7 @@ function AdminDashboardContent() {
                 </TableHeader>
                 <TableBody>
                   {activities.map((activity) => (
-                    <TableRow key={activity._id}>
+                    <TableRow key={String(activity._id)}>
                       <TableCell>
                         <div>
                           <div className="font-semibold">{activity.name}</div>

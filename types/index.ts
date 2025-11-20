@@ -104,3 +104,14 @@ export interface CreateVoteRequest {
   choose_all?: IChoiceAll[];
   choose_one?: string;
 }
+
+// Frontend Types
+export interface UserData {
+  student_id: string;
+  name: string;
+  isAdmin?: boolean;
+}
+
+export interface AdminActivity extends IActivity {
+  options: string[]; // Array of option IDs
+}
