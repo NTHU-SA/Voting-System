@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { OptionFormData, emptyOptionForm, CandidateForm } from "./types";
+import { OptionFormData, CandidateForm } from "./types";
+import { createEmptyOption } from "./formHelpers";
 
 export function useOptionForm() {
   const [options, setOptions] = useState<OptionFormData[]>([]);
-  const [currentOption, setCurrentOption] = useState<OptionFormData>(emptyOptionForm());
+  const [currentOption, setCurrentOption] = useState<OptionFormData>(createEmptyOption());
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [showVice1, setShowVice1] = useState(false);
   const [showVice2, setShowVice2] = useState(false);
@@ -48,7 +49,7 @@ export function useOptionForm() {
   };
 
   const resetForm = () => {
-    setCurrentOption(emptyOptionForm());
+    setCurrentOption(createEmptyOption());
     setShowVice1(false);
     setShowVice2(false);
     setEditingIndex(null);
