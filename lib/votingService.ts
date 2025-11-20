@@ -33,7 +33,7 @@ interface ActivityDocument extends Document {
  * Validates vote remarks for choose_all rule
  */
 export function validateVoteRemarks(
-  choose_all: IChoiceAll[],
+  choose_all: IChoiceAll[]
 ): VoteValidationResult {
   const allValid = choose_all.every((choice) => isValidRemark(choice.remark));
 
@@ -53,7 +53,7 @@ export function validateVoteRemarks(
  */
 export async function validateOptions(
   activity_id: string,
-  optionIds: string[],
+  optionIds: string[]
 ): Promise<VoteValidationResult> {
   const options = await Option.find({
     _id: { $in: optionIds },
@@ -76,7 +76,7 @@ export async function validateOptions(
  */
 export async function validateVotingEligibility(
   activity: ActivityDocument,
-  student_id: string,
+  student_id: string
 ): Promise<VoteValidationResult> {
   // Check if user already voted
   if (activity.users.includes(student_id)) {
@@ -122,7 +122,7 @@ export async function createVote(params: CreateVoteParams): Promise<{
   try {
     // Get activity
     const activity = (await Activity.findById(
-      activity_id,
+      activity_id
     )) as ActivityDocument | null;
     if (!activity) {
       return {
@@ -144,7 +144,7 @@ export async function createVote(params: CreateVoteParams): Promise<{
     // Validate voting eligibility
     const eligibilityCheck = await validateVotingEligibility(
       activity,
-      student_id,
+      student_id
     );
     if (!eligibilityCheck.valid) {
       return {
@@ -202,10 +202,13 @@ export async function createVote(params: CreateVoteParams): Promise<{
     // Add student_id to activity's voted users list
     await Activity.updateOne(
       { _id: activity_id },
-      { $addToSet: { users: student_id } },
+      { $addToSet: { users: student_id } }
     );
 
-    return { success: true, vote };
+    return {
+      success: true,
+      vote: JSON.parse(JSON.stringify(vote)), // 序列化後自動轉換 ObjectId
+    };
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Failed to create vote";
