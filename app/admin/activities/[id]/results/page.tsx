@@ -179,7 +179,7 @@ function ResultsPageContent() {
                     {stats.statistics.totalVotes}
                   </p>
                 </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20">
                   <TrendingUp className="h-6 w-6 text-primary" />
                 </div>
               </div>
@@ -197,8 +197,8 @@ function ResultsPageContent() {
                     {stats.statistics.totalEligibleVoters}
                   </p>
                 </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
-                  <Users className="h-6 w-6 text-blue-600" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20">
+                  <Users className="h-6 w-6 text-primary" />
                 </div>
               </div>
             </CardContent>
@@ -211,12 +211,12 @@ function ResultsPageContent() {
                   <p className="mb-1 text-sm font-medium text-muted-foreground">
                     投票率
                   </p>
-                  <p className="text-4xl font-bold text-green-600">
+                  <p className="text-4xl font-bold">
                     {stats.statistics.turnoutRate}%
                   </p>
                 </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
-                  <Award className="h-6 w-6 text-green-600" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20">
+                  <Award className="h-6 w-6 text-primary" />
                 </div>
               </div>
             </CardContent>
@@ -241,7 +241,7 @@ function ResultsPageContent() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-3xl font-bold text-primary">
+                  <p className="text-3xl font-bold">
                     {(
                       (winner.support / stats.statistics.totalVotes) *
                       100
