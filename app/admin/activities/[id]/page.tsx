@@ -22,6 +22,7 @@ import {
   ClipboardCheck,
   Eye,
 } from "lucide-react";
+import { buildOptionPayloadFromFlat, emptyFlatForm, FlatOptionForm } from "../_components/utils";
 
 interface Activity {
   _id: string;
@@ -64,28 +65,6 @@ interface Option {
   };
 }
 
-interface NewOptionForm {
-  label: string;
-  candidate_name: string;
-  candidate_department: string;
-  candidate_college: string;
-  candidate_avatar_url: string;
-  candidate_experiences: string;
-  candidate_opinions: string;
-  vice1_name: string;
-  vice1_department: string;
-  vice1_college: string;
-  vice1_avatar_url: string;
-  vice1_experiences: string;
-  vice1_opinions: string;
-  vice2_name: string;
-  vice2_department: string;
-  vice2_college: string;
-  vice2_avatar_url: string;
-  vice2_experiences: string;
-  vice2_opinions: string;
-}
-
 function ActivityDetailPageContent() {
   const params = useParams();
   const router = useRouter();
@@ -109,51 +88,11 @@ function ActivityDetailPageContent() {
 
   // New option form
   const [showNewOption, setShowNewOption] = useState(false);
-  const [newOption, setNewOption] = useState<NewOptionForm>({
-    label: "",
-    candidate_name: "",
-    candidate_department: "",
-    candidate_college: "",
-    candidate_avatar_url: "",
-    candidate_experiences: "",
-    candidate_opinions: "",
-    vice1_name: "",
-    vice1_department: "",
-    vice1_college: "",
-    vice1_avatar_url: "",
-    vice1_experiences: "",
-    vice1_opinions: "",
-    vice2_name: "",
-    vice2_department: "",
-    vice2_college: "",
-    vice2_avatar_url: "",
-    vice2_experiences: "",
-    vice2_opinions: "",
-  });
+  const [newOption, setNewOption] = useState<FlatOptionForm>(emptyFlatForm());
 
   // Edit option form
   const [editingOptionId, setEditingOptionId] = useState<string | null>(null);
-  const [editOption, setEditOption] = useState<NewOptionForm>({
-    label: "",
-    candidate_name: "",
-    candidate_department: "",
-    candidate_college: "",
-    candidate_avatar_url: "",
-    candidate_experiences: "",
-    candidate_opinions: "",
-    vice1_name: "",
-    vice1_department: "",
-    vice1_college: "",
-    vice1_avatar_url: "",
-    vice1_experiences: "",
-    vice1_opinions: "",
-    vice2_name: "",
-    vice2_department: "",
-    vice2_college: "",
-    vice2_avatar_url: "",
-    vice2_experiences: "",
-    vice2_opinions: "",
-  });
+  const [editOption, setEditOption] = useState<FlatOptionForm>(emptyFlatForm());
 
   useEffect(() => {
     checkAdminAccess();
@@ -264,77 +203,8 @@ function ActivityDetailPageContent() {
     setSuccessMessage("");
 
     try {
-      const optionData: Record<string, unknown> = {
-        activity_id: activityId,
-        label: newOption.label || undefined,
-      };
-
-      if (newOption.candidate_name) {
-        const candidate: Record<string, unknown> = {
-          name: newOption.candidate_name,
-        };
-        if (newOption.candidate_department)
-          candidate.department = newOption.candidate_department;
-        if (newOption.candidate_college)
-          candidate.college = newOption.candidate_college;
-        if (newOption.candidate_avatar_url)
-          candidate.avatar_url = newOption.candidate_avatar_url;
-        if (newOption.candidate_experiences) {
-          candidate.personal_experiences = newOption.candidate_experiences
-            .split("\n")
-            .filter((e) => e.trim());
-        }
-        if (newOption.candidate_opinions) {
-          candidate.political_opinions = newOption.candidate_opinions
-            .split("\n")
-            .filter((e) => e.trim());
-        }
-        optionData.candidate = candidate;
-      }
-
-      if (newOption.vice1_name) {
-        const vice1: Record<string, unknown> = {
-          name: newOption.vice1_name,
-        };
-        if (newOption.vice1_department)
-          vice1.department = newOption.vice1_department;
-        if (newOption.vice1_college) vice1.college = newOption.vice1_college;
-        if (newOption.vice1_avatar_url)
-          vice1.avatar_url = newOption.vice1_avatar_url;
-        if (newOption.vice1_experiences) {
-          vice1.personal_experiences = newOption.vice1_experiences
-            .split("\n")
-            .filter((e) => e.trim());
-        }
-        if (newOption.vice1_opinions) {
-          vice1.political_opinions = newOption.vice1_opinions
-            .split("\n")
-            .filter((e) => e.trim());
-        }
-        optionData.vice1 = vice1;
-      }
-
-      if (newOption.vice2_name) {
-        const vice2: Record<string, unknown> = {
-          name: newOption.vice2_name,
-        };
-        if (newOption.vice2_department)
-          vice2.department = newOption.vice2_department;
-        if (newOption.vice2_college) vice2.college = newOption.vice2_college;
-        if (newOption.vice2_avatar_url)
-          vice2.avatar_url = newOption.vice2_avatar_url;
-        if (newOption.vice2_experiences) {
-          vice2.personal_experiences = newOption.vice2_experiences
-            .split("\n")
-            .filter((e) => e.trim());
-        }
-        if (newOption.vice2_opinions) {
-          vice2.political_opinions = newOption.vice2_opinions
-            .split("\n")
-            .filter((e) => e.trim());
-        }
-        optionData.vice2 = vice2;
-      }
+      const optionData = buildOptionPayloadFromFlat(newOption);
+      optionData.activity_id = activityId;
 
       const response = await fetch("/api/options", {
         method: "POST",
@@ -350,27 +220,7 @@ function ActivityDetailPageContent() {
       if (data.success) {
         setSuccessMessage("候選人已新增");
         setShowNewOption(false);
-        setNewOption({
-          label: "",
-          candidate_name: "",
-          candidate_department: "",
-          candidate_college: "",
-          candidate_avatar_url: "",
-          candidate_experiences: "",
-          candidate_opinions: "",
-          vice1_name: "",
-          vice1_department: "",
-          vice1_college: "",
-          vice1_avatar_url: "",
-          vice1_experiences: "",
-          vice1_opinions: "",
-          vice2_name: "",
-          vice2_department: "",
-          vice2_college: "",
-          vice2_avatar_url: "",
-          vice2_experiences: "",
-          vice2_opinions: "",
-        });
+        setNewOption(emptyFlatForm());
         fetchActivity();
       } else {
         setError(data.error || "新增候選人失敗");
@@ -448,76 +298,7 @@ function ActivityDetailPageContent() {
     setSuccessMessage("");
 
     try {
-      const optionData: Record<string, unknown> = {
-        label: editOption.label || undefined,
-      };
-
-      if (editOption.candidate_name) {
-        const candidate: Record<string, unknown> = {
-          name: editOption.candidate_name,
-        };
-        if (editOption.candidate_department)
-          candidate.department = editOption.candidate_department;
-        if (editOption.candidate_college)
-          candidate.college = editOption.candidate_college;
-        if (editOption.candidate_avatar_url)
-          candidate.avatar_url = editOption.candidate_avatar_url;
-        if (editOption.candidate_experiences) {
-          candidate.personal_experiences = editOption.candidate_experiences
-            .split("\n")
-            .filter((e) => e.trim());
-        }
-        if (editOption.candidate_opinions) {
-          candidate.political_opinions = editOption.candidate_opinions
-            .split("\n")
-            .filter((e) => e.trim());
-        }
-        optionData.candidate = candidate;
-      }
-
-      if (editOption.vice1_name) {
-        const vice1: Record<string, unknown> = {
-          name: editOption.vice1_name,
-        };
-        if (editOption.vice1_department)
-          vice1.department = editOption.vice1_department;
-        if (editOption.vice1_college) vice1.college = editOption.vice1_college;
-        if (editOption.vice1_avatar_url)
-          vice1.avatar_url = editOption.vice1_avatar_url;
-        if (editOption.vice1_experiences) {
-          vice1.personal_experiences = editOption.vice1_experiences
-            .split("\n")
-            .filter((e) => e.trim());
-        }
-        if (editOption.vice1_opinions) {
-          vice1.political_opinions = editOption.vice1_opinions
-            .split("\n")
-            .filter((e) => e.trim());
-        }
-        optionData.vice1 = vice1;
-      }
-
-      if (editOption.vice2_name) {
-        const vice2: Record<string, unknown> = {
-          name: editOption.vice2_name,
-        };
-        if (editOption.vice2_department)
-          vice2.department = editOption.vice2_department;
-        if (editOption.vice2_college) vice2.college = editOption.vice2_college;
-        if (editOption.vice2_avatar_url)
-          vice2.avatar_url = editOption.vice2_avatar_url;
-        if (editOption.vice2_experiences) {
-          vice2.personal_experiences = editOption.vice2_experiences
-            .split("\n")
-            .filter((e) => e.trim());
-        }
-        if (editOption.vice2_opinions) {
-          vice2.political_opinions = editOption.vice2_opinions
-            .split("\n")
-            .filter((e) => e.trim());
-        }
-        optionData.vice2 = vice2;
-      }
+      const optionData = buildOptionPayloadFromFlat(editOption);
 
       const response = await fetch(`/api/options/${editingOptionId}`, {
         method: "PUT",
