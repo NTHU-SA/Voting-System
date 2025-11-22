@@ -74,3 +74,40 @@ export function getVotedActivityIds(): string[] {
   const history = loadVotingHistory();
   return history.votedActivityIds;
 }
+
+/**
+ * Clear all voting history from localStorage
+ * This removes all UUID tokens and voting records
+ */
+export function clearVotingHistory(): void {
+  try {
+    localStorage.removeItem("voting_history");
+  } catch (err) {
+    console.error("Error clearing voting history:", err);
+  }
+}
+
+/**
+ * Remove a specific vote record by activity ID
+ */
+export function removeVoteRecord(activityId: string): VotingHistory {
+  try {
+    const history = loadVotingHistory();
+
+    // Remove from votedActivityIds
+    history.votedActivityIds = history.votedActivityIds.filter(
+      (id) => id !== activityId
+    );
+
+    // Remove vote records for this activity
+    history.votes = history.votes.filter(
+      (vote) => vote.activityId !== activityId
+    );
+
+    localStorage.setItem("voting_history", JSON.stringify(history));
+    return history;
+  } catch (err) {
+    console.error("Error removing vote record:", err);
+    return { votedActivityIds: [], votes: [] };
+  }
+}

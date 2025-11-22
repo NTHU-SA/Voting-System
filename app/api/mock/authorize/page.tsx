@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Card,
@@ -21,6 +21,13 @@ function MockAuthContent() {
   const scope = searchParams.get("scope") || "userid name inschool uuid";
   const state = searchParams.get("state");
 
+  const [isProduction, setIsProduction] = useState(false);
+
+  useEffect(() => {
+    // Check if running in production
+    setIsProduction(process.env.NODE_ENV === "production");
+  }, []);
+
   const [formData, setFormData] = useState({
     userid: "110000114",
     name: "測試學生",
@@ -29,6 +36,24 @@ function MockAuthContent() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Show error in production
+  if (isProduction) {
+    return (
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-center text-xl text-destructive">
+            錯誤
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-center text-muted-foreground">
+            Mock OAuth 授權頁面在生產環境中不可用
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

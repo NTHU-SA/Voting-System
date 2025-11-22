@@ -109,7 +109,18 @@ export default function VotingPage() {
           `/vote/${activityId}/completion?token=${data.data.token}&name=${encodeURIComponent(activity.name)}`,
         );
       } else {
-        setError(data.error || "投票失敗");
+        // Check if user has already voted
+        if (data.error === "User has already voted") {
+          setError(
+            "錯誤！你已經投過票了，但本地沒有投票憑證。可能的原因是：\n" +
+            "1. 清除了瀏覽器的 Cookie 或本地儲存\n" +
+            "2. 使用無痕模式或不同的瀏覽器投票\n" +
+            "3. 手動刪除了投票記錄\n\n" +
+            "如需查看投票記錄，請聯繫管理員。"
+          );
+        } else {
+          setError(data.error || "投票失敗");
+        }
       }
     } catch (err) {
       console.error("Error submitting vote:", err);
@@ -268,9 +279,9 @@ export default function VotingPage() {
         {/* Error Message */}
         {error && (
           <Card className="mb-6 border-destructive bg-destructive/10">
-            <CardContent className="flex items-center gap-2 py-4">
-              <AlertCircle className="h-5 w-5 text-destructive" />
-              <p className="text-destructive">{error}</p>
+            <CardContent className="flex items-start gap-2 py-4">
+              <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+              <p className="text-destructive whitespace-pre-line">{error}</p>
             </CardContent>
           </Card>
         )}
