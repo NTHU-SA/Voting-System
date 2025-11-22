@@ -39,6 +39,18 @@ export const API_CONSTANTS = {
     INVALID_DATE_RANGE: "open_from must be before open_to",
     INVALID_OBJECT_ID: "Invalid MongoDB ObjectId format",
   },
+
+  // User-facing messages
+  MESSAGES: {
+    VOTE_ALREADY_VOTED_NO_TOKEN: [
+      "錯誤！你已經投過票了，但本地沒有投票憑證。可能的原因是：",
+      "1. 清除了瀏覽器的 Cookie 或本地儲存",
+      "2. 使用無痕模式或不同的瀏覽器投票",
+      "3. 手動刪除了投票記錄",
+      "",
+      "如需查看投票記錄，請聯繫管理員。",
+    ],
+  },
 } as const;
 
 // Type for voting rules

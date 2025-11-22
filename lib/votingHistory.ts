@@ -77,7 +77,8 @@ export function getVotedActivityIds(): string[] {
 
 /**
  * Clear all voting history from localStorage
- * This removes all UUID tokens and voting records
+ * This removes all UUID tokens and voting records from browser storage
+ * @returns {void}
  */
 export function clearVotingHistory(): void {
   try {
@@ -89,6 +90,9 @@ export function clearVotingHistory(): void {
 
 /**
  * Remove a specific vote record by activity ID
+ * This removes the activity from votedActivityIds and removes all vote records for this activity
+ * @param {string} activityId - The activity ID to remove
+ * @returns {VotingHistory} The updated voting history after removal
  */
 export function removeVoteRecord(activityId: string): VotingHistory {
   try {
