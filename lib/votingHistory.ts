@@ -1,5 +1,5 @@
 // Voting history management utilities
-import { VotingHistory } from "@/types";
+import { VotingHistory, VoteRecord } from "@/types";
 
 /**
  * Load voting history from localStorage
@@ -89,29 +89,60 @@ export function clearVotingHistory(): void {
 }
 
 /**
- * Remove a specific vote record by activity ID
- * This removes the activity from votedActivityIds and removes all vote records for this activity
- * @param {string} activityId - The activity ID to remove
+ * Remove a specific vote record by UUID token
+ * This removes the vote record with the matching token
+ * @param {string} token - The UUID token to remove
  * @returns {VotingHistory} The updated voting history after removal
  */
-export function removeVoteRecord(activityId: string): VotingHistory {
+export function removeVoteRecordByToken(token: string): VotingHistory {
   try {
     const history = loadVotingHistory();
 
-    // Remove from votedActivityIds
-    history.votedActivityIds = history.votedActivityIds.filter(
-      (id) => id !== activityId
-    );
+    // Find the vote to remove
+    const voteToRemove = history.votes.find((vote) => vote.token === token);
+    
+    if (voteToRemove) {
+      // Remove the vote record
+      history.votes = history.votes.filter((vote) => vote.token !== token);
 
-    // Remove vote records for this activity
-    history.votes = history.votes.filter(
-      (vote) => vote.activityId !== activityId
-    );
+      // Check if there are any remaining votes for this activity
+      const hasOtherVotesForActivity = history.votes.some(
+        (vote) => vote.activityId === voteToRemove.activityId
+      );
 
-    localStorage.setItem("voting_history", JSON.stringify(history));
+      // If no other votes exist for this activity, remove it from votedActivityIds
+      if (!hasOtherVotesForActivity) {
+        history.votedActivityIds = history.votedActivityIds.filter(
+          (id) => id !== voteToRemove.activityId
+        );
+      }
+
+      localStorage.setItem("voting_history", JSON.stringify(history));
+    }
+
     return history;
   } catch (err) {
     console.error("Error removing vote record:", err);
     return { votedActivityIds: [], votes: [] };
   }
+}
+
+/**
+ * Get vote records for a specific activity
+ * @param {string} activityId - The activity ID
+ * @returns {VoteRecord[]} Array of vote records for the activity
+ */
+export function getVotesByActivityId(activityId: string): VoteRecord[] {
+  const history = loadVotingHistory();
+  return history.votes.filter((vote) => vote.activityId === activityId);
+}
+
+/**
+ * Get a vote record by token
+ * @param {string} token - The UUID token
+ * @returns {VoteRecord | undefined} The vote record or undefined if not found
+ */
+export function getVoteByToken(token: string): VoteRecord | undefined {
+  const history = loadVotingHistory();
+  return history.votes.find((vote) => vote.token === token);
 }

@@ -19,7 +19,7 @@ import connectDB from "@/lib/db";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
   try {
     // Authenticate user - JWT required to prevent brute force attacks on UUIDs
@@ -30,7 +30,7 @@ export async function GET(
 
     await connectDB();
 
-    const { token } = params;
+    const { token } = await params;
 
     if (!token) {
       return createErrorResponse("Token is required", 400);

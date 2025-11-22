@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Download, Home, Copy, Check, User, Trash2 } from "lucide-react";
-import { loadVotingHistory, clearVotingHistory, removeVoteRecord } from "@/lib/votingHistory";
+import { loadVotingHistory, clearVotingHistory, removeVoteRecordByToken } from "@/lib/votingHistory";
 import { VotingHistory } from "@/types";
 import { useUser } from "@/hooks";
 
@@ -45,13 +45,13 @@ export default function CompletionPage() {
     }
   };
 
-  const handleRemoveVote = (activityId: string, activityName: string) => {
+  const handleRemoveVote = (token: string, activityName: string) => {
     if (
       window.confirm(
-        `確定要清除「${activityName}」的投票記錄嗎？\n\n此操作將移除此活動的 UUID 憑證，無法復原。`
+        `確定要清除「${activityName}」的投票記錄嗎？\n\n此操作將移除此 UUID 憑證，無法復原。`
       )
     ) {
-      const updatedHistory = removeVoteRecord(activityId);
+      const updatedHistory = removeVoteRecordByToken(token);
       setVotingHistory(updatedHistory);
     }
   };
@@ -178,7 +178,7 @@ export default function CompletionPage() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleRemoveVote(vote.activityId, vote.activityName)}
+                        onClick={() => handleRemoveVote(vote.token, vote.activityName)}
                         className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive print:hidden"
                         title="刪除此投票記錄"
                       >

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isProduction } from "@/lib/config";
 
 export async function GET(request: NextRequest) {
   // Disable mock API in production
-  if (process.env.NODE_ENV === "production") {
+  if (isProduction()) {
     return NextResponse.json(
       { error: "Mock API is not available in production" },
       { status: 404 },
