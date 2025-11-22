@@ -111,13 +111,15 @@ export default function VotingPage() {
       } else {
         // Check if user has already voted
         if (data.error === "User has already voted") {
-          setError(
-            "錯誤！你已經投過票了，但本地沒有投票憑證。可能的原因是：\n" +
-            "1. 清除了瀏覽器的 Cookie 或本地儲存\n" +
-            "2. 使用無痕模式或不同的瀏覽器投票\n" +
-            "3. 手動刪除了投票記錄\n\n" +
+          const errorLines = [
+            "錯誤！你已經投過票了，但本地沒有投票憑證。可能的原因是：",
+            "1. 清除了瀏覽器的 Cookie 或本地儲存",
+            "2. 使用無痕模式或不同的瀏覽器投票",
+            "3. 手動刪除了投票記錄",
+            "",
             "如需查看投票記錄，請聯繫管理員。"
-          );
+          ];
+          setError(errorLines.join("\n"));
         } else {
           setError(data.error || "投票失敗");
         }
