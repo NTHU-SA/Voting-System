@@ -6,8 +6,8 @@ import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Download, Home, Copy, Check, User } from "lucide-react";
-import { loadVotingHistory } from "@/lib/votingHistory";
+import { CheckCircle2, Download, Home, Copy, Check, User, Trash2 } from "lucide-react";
+import { loadVotingHistory, clearVotingHistory, removeVoteRecord } from "@/lib/votingHistory";
 import { VotingHistory } from "@/types";
 import { useUser } from "@/hooks";
 
@@ -32,6 +32,28 @@ export default function CompletionPage() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleClearHistory = () => {
+    if (
+      window.confirm(
+        "確定要清除所有投票記錄嗎？\n\n注意：此操作將移除瀏覽器中保存的所有投票 UUID 憑證，無法復原。清除後將無法透過 UUID 查詢投票記錄，但不會影響伺服器上的投票結果。"
+      )
+    ) {
+      clearVotingHistory();
+      setVotingHistory({ votedActivityIds: [], votes: [] });
+    }
+  };
+
+  const handleRemoveVote = (activityId: string, activityName: string) => {
+    if (
+      window.confirm(
+        `確定要清除「${activityName}」的投票記錄嗎？\n\n此操作將移除此活動的 UUID 憑證，無法復原。`
+      )
+    ) {
+      const updatedHistory = removeVoteRecord(activityId);
+      setVotingHistory(updatedHistory);
+    }
   };
 
   if (!votingHistory || votingHistory.votes.length === 0) {
@@ -70,10 +92,17 @@ export default function CompletionPage() {
             感謝您的參與！以下是您的投票證明記錄
           </p>
 
-          <div className="flex justify-center print:hidden">
+          <div className="flex justify-center gap-4 print:hidden">
             <Button onClick={handlePrint}>
               <Download className="mr-2 h-4 w-4" />
               列印 / 儲存 PDF
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleClearHistory}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              清除所有記錄
             </Button>
           </div>
         </div>
@@ -142,9 +171,20 @@ export default function CompletionPage() {
                         })}
                       </p>
                     </div>
-                    <Badge variant="secondary" className="ml-2">
-                      #{index + 1}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="ml-2">
+                        #{index + 1}
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleRemoveVote(vote.activityId, vote.activityName)}
+                        className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive print:hidden"
+                        title="刪除此投票記錄"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
 
                   <div className="rounded-md border bg-muted/30 p-3">
@@ -203,6 +243,12 @@ export default function CompletionPage() {
                 <span className="mr-2 mt-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
                 <span>
                   投票記錄儲存在您的瀏覽器本地，清除瀏覽器資料可能會遺失記錄
+                </span>
+              </li>
+              <li className="flex items-start">
+                <span className="mr-2 mt-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
+                <span>
+                  您可以使用「清除所有記錄」按鈕來移除本地的 UUID 憑證，但這不會影響伺服器上的投票結果
                 </span>
               </li>
             </ul>
