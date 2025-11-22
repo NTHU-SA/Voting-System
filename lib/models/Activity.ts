@@ -155,6 +155,8 @@ export const Activity = {
 
   /**
    * Update an activity (findByIdAndUpdate equivalent)
+   * Note: Uses MongoDB-style operators ($set, $push, $addToSet, $pull) for backward 
+   * compatibility with existing API routes. This is translated to Firestore operations internally.
    */
   findByIdAndUpdate: async (
     id: string,

@@ -1,7 +1,7 @@
 import { Activity } from "@/lib/models/Activity";
 import { Option } from "@/lib/models/Option";
 import { Vote } from "@/lib/models/Vote";
-import { IChoiceAll, IActivity } from "@/types";
+import { IChoiceAll, IActivity, IVote } from "@/types";
 import { isValidRemark } from "@/lib/validation";
 import { API_CONSTANTS } from "@/lib/constants";
 import { v4 as uuidv4 } from "uuid";

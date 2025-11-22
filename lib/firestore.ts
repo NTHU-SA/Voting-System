@@ -36,6 +36,12 @@ function initializeFirebase(): admin.app.App {
     );
   }
 
+  if (!projectId) {
+    throw new Error(
+      "FIREBASE_PROJECT_ID environment variable is required"
+    );
+  }
+
   let credential: admin.credential.Credential;
 
   try {

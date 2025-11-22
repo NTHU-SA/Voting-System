@@ -1,4 +1,4 @@
-import getFirestore from "@/lib/firestore";
+import getFirestore, { admin } from "@/lib/firestore";
 import { IOption } from "@/types";
 
 const COLLECTION_NAME = "options";
@@ -133,7 +133,7 @@ export const Option = {
     }
 
     const snapshot = await query.get();
-    const batch = (await import("@/lib/firestore")).admin.firestore().batch();
+    const batch = admin.firestore().batch();
     
     snapshot.docs.forEach((doc) => {
       batch.delete(doc.ref);

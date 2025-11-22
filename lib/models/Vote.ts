@@ -17,6 +17,8 @@ export const Vote = {
 
   /**
    * Find votes by filter
+   * Note: For large datasets with skip/offset, consider using cursor-based pagination
+   * with startAfter() for better Firestore performance
    */
   find: async (
     filter: Record<string, unknown>,
@@ -40,9 +42,9 @@ export const Vote = {
       }
     }
 
-    // Apply limit
+    // Apply limit and offset
+    // Note: offset() can be inefficient with large skip values in Firestore
     if (options?.limit) {
-      // Firestore doesn't have skip, so we need to use offset
       if (options?.skip) {
         query = query.offset(options.skip);
       }

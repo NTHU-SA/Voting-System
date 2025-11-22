@@ -1,5 +1,8 @@
 import { API_CONSTANTS } from "@/lib/constants";
 
+// Firestore document ID constraints
+const FIRESTORE_MAX_DOCUMENT_ID_LENGTH = 1500;
+
 /**
  * Validates if a string is a valid Firestore document ID
  */
@@ -12,7 +15,7 @@ export function isValidObjectId(id: string): boolean {
   
   // Check if it's a reasonable length (Firestore allows up to 1,500 bytes)
   // and doesn't contain invalid characters
-  return id.length > 0 && id.length <= 1500 && !id.includes("/");
+  return id.length > 0 && id.length <= FIRESTORE_MAX_DOCUMENT_ID_LENGTH && !id.includes("/");
 }
 
 /**
