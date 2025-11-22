@@ -12,11 +12,10 @@ This guide provides step-by-step instructions for deploying the NTHU Voting Syst
    - 2GB+ RAM, 10GB+ disk space
    - Open ports: 80 (HTTP), 443 (HTTPS)
 
-2. **MongoDB Instance**
-   - MongoDB 6.0+
-   - Accessible from application server
-   - Authentication enabled
-   - Regular backup configured
+2. **Firebase Project**
+   - Firebase project with Firestore enabled
+   - Service account credentials with Firestore permissions
+   - Firestore database in production mode
 
 3. **Domain and SSL**
    - Domain name (e.g., voting.nthusa.tw)
@@ -28,26 +27,19 @@ This guide provides step-by-step instructions for deploying the NTHU Voting Syst
 
 ## Deployment Steps
 
-### 1. Prepare MongoDB
+### 1. Prepare Firebase Firestore
 
-If you don't have a MongoDB instance, set one up:
+If you don't have a Firebase project, set one up:
 
-```bash
-# Example: MongoDB on separate server
-# Install MongoDB 6.0
-wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
-echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
-sudo apt-get update
-sudo apt-get install -y mongodb-org
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Create a new project or select an existing one
+3. Enable Firestore Database in production mode
+4. Generate service account credentials:
+   - Go to Project Settings > Service Accounts
+   - Click "Generate New Private Key"
+   - Save the JSON file securely
 
-# Enable authentication
-sudo mongosh
-> use admin
-> db.createUser({
-    user: "admin",
-    pwd: "STRONG_PASSWORD_HERE",
-    roles: [ { role: "userAdminAnyDatabase", db: "admin" } ]
-  })
+**Note:** If migrating from MongoDB, export your data and import it to Firestore. The data structure is compatible.
 > exit
 
 # Create application database and user
@@ -88,8 +80,8 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 # Clone repository
 cd /opt
-sudo git clone https://github.com/l7wei/Voting-New.git
-cd Voting-New
+sudo git clone https://github.com/NTHU-SA/Voting-System.git
+cd Voting-System
 ```
 
 ### 3. Configure Environment
@@ -102,8 +94,13 @@ sudo nano .env.production
 ```
 
 ```env
-# MongoDB Connection
-MONGODB_URI=mongodb://voting_user:YOUR_PASSWORD@mongodb-host:27017/voting_sa?authSource=voting_sa
+# Firebase Configuration
+FIREBASE_PROJECT_ID=your-firebase-project-id
+
+# Firebase Service Account (single-line JSON string)
+# Convert your service account JSON to a single line:
+# cat service-account.json | jq -c .
+FIREBASE_SERVICE_ACCOUNT={"type":"service_account","project_id":"your-project-id",...}
 
 # Security
 TOKEN_SECRET=GENERATE_WITH_openssl_rand_base64_32

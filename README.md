@@ -6,7 +6,7 @@ Anonymous voting system for National Tsing Hua University Student Association.
 
 - **Framework**: Next.js 15 (App Router)
 - **Language**: TypeScript
-- **Database**: MongoDB 6 with Mongoose 8
+- **Database**: Firebase Firestore
 - **Authentication**: OAuth (CCXP) + JWT
 - **Styling**: Tailwind CSS
 
@@ -28,22 +28,22 @@ Anonymous voting system for National Tsing Hua University Student Association.
 ### Prerequisites
 
 - Node.js 18+
-- MongoDB 6+
+- Firebase project with Firestore enabled
 - npm 9+
 
 ### Development Setup
 
 ```bash
 # Clone repository
-git clone https://github.com/l7wei/Voting-New.git
-cd Voting-New
+git clone https://github.com/NTHU-SA/Voting-System.git
+cd Voting-System
 
 # Install dependencies
 npm install
 
 # Configure environment
-cp .env.example .env.development
-# Edit .env.development with your MongoDB connection details
+cp .env.development.example .env.development
+# Edit .env.development with your Firebase configuration
 
 # Run development server
 npm run dev
@@ -55,9 +55,13 @@ Access at http://localhost:3000
 
 ### Production Deployment
 
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed production deployment instructions.
+
+See [MIGRATION.md](MIGRATION.md) for instructions on migrating from MongoDB to Firestore.
+
 #### Prerequisites
 
-- MongoDB instance (external, not managed by this application)
+- Firebase project with Firestore enabled
 - OAuth credentials from CCXP
 - SSL certificates for HTTPS
 
@@ -65,7 +69,7 @@ Access at http://localhost:3000
 
 ```bash
 # 1. Configure environment variables
-cp .env.example .env.production
+cp .env.production.example .env.production
 # Edit .env.production with production values
 
 # 2. Build and run
@@ -83,16 +87,9 @@ docker-compose down
 **Required for Production:**
 
 ```env
-# MongoDB Connection (use one of these methods)
-# Method 1: Full URI (recommended)
-MONGODB_URI=mongodb://username:password@host:27017/database?authSource=admin
-
-# Method 2: Individual parameters
-MONGO_HOST=your-mongodb-host
-MONGO_PORT=27017
-MONGO_USERNAME=your-username
-MONGO_PASSWORD=your-password
-MONGO_NAME=voting_sa
+# Firebase Configuration
+FIREBASE_PROJECT_ID=your-firebase-project-id
+FIREBASE_SERVICE_ACCOUNT={"type":"service_account","project_id":"...",...}
 
 # Security
 TOKEN_SECRET=your-strong-random-secret-here
