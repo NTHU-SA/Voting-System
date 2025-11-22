@@ -14,9 +14,10 @@ import {
   FileText,
   ArrowLeft,
   AlertCircle,
+  Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { saveVotingRecord } from "@/lib/votingHistory";
+import { saveVotingRecord, getVotesByActivityId } from "@/lib/votingHistory";
 import { Candidate } from "@/types";
 import { useActivity, useUser } from "@/hooks";
 import { API_CONSTANTS } from "@/lib/constants";
@@ -31,6 +32,8 @@ export default function VotingPage() {
 
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [hasExistingVote, setHasExistingVote] = useState(false);
+  const [loadingVote, setLoadingVote] = useState(true);
 
   // Vote state
   const [chooseAllVotes, setChooseAllVotes] = useState<Record<string, string>>(
@@ -38,16 +41,81 @@ export default function VotingPage() {
   );
   const [chooseOneVote, setChooseOneVote] = useState<string>("");
 
+  // Load existing vote from localStorage
   useEffect(() => {
-    // Initialize vote state for choose_all when activity loads
-    if (activity && activity.rule === "choose_all") {
+    const loadExistingVote = async () => {
+      if (!activity || !activityId) {
+        setLoadingVote(false);
+        return;
+      }
+
+      try {
+        const localVotes = getVotesByActivityId(activityId);
+        
+        if (localVotes.length === 0) {
+          // No local votes found
+          setLoadingVote(false);
+          return;
+        }
+
+        if (localVotes.length > 1) {
+          // Multiple UUIDs for same event
+          setError(
+            "本地有多個投票憑證對應此活動，無法獲取投票記錄。\n" +
+            "可能的原因：使用不同瀏覽器或設備多次投票。\n" +
+            "請聯繫管理員查詢投票記錄。"
+          );
+          setHasExistingVote(true);
+          setLoadingVote(false);
+          return;
+        }
+
+        // Fetch the vote from API
+        const token = localVotes[0].token;
+        const response = await fetch(`/api/votes/${token}`, {
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            const voteData = data.data;
+            
+            // Set existing vote data
+            if (voteData.rule === "choose_all" && voteData.choose_all) {
+              const votes: Record<string, string> = {};
+              voteData.choose_all.forEach((choice: { option_id: string; remark: string }) => {
+                votes[choice.option_id] = choice.remark;
+              });
+              setChooseAllVotes(votes);
+            } else if (voteData.rule === "choose_one" && voteData.choose_one) {
+              setChooseOneVote(voteData.choose_one);
+            }
+            
+            setHasExistingVote(true);
+            setError("您已經完成投票，投票已送出無法修改。以下顯示您之前的選擇。");
+          }
+        }
+      } catch (err) {
+        console.error("Error loading existing vote:", err);
+      } finally {
+        setLoadingVote(false);
+      }
+    };
+
+    loadExistingVote();
+  }, [activity, activityId]);
+
+  useEffect(() => {
+    // Initialize vote state for choose_all when activity loads (only if no existing vote)
+    if (activity && activity.rule === "choose_all" && !hasExistingVote && !loadingVote) {
       const initialVotes: Record<string, string> = {};
       activity.options.forEach((option) => {
-        initialVotes[option._id] = "我沒有意見";
+        initialVotes[option._id] = chooseAllVotes[option._id] || "我沒有意見";
       });
       setChooseAllVotes(initialVotes);
     }
-  }, [activity]);
+  }, [activity, hasExistingVote, loadingVote]);
 
   const handleChooseAllChange = (optionId: string, remark: string) => {
     setChooseAllVotes((prev) => ({
@@ -271,12 +339,24 @@ export default function VotingPage() {
           )}
         </Card>
 
-        {/* Error Message */}
+        {/* Status Message */}
         {error && (
-          <Card className="mb-6 border-destructive bg-destructive/10">
+          <Card className={cn(
+            "mb-6",
+            hasExistingVote 
+              ? "border-blue-200 bg-blue-50/50" 
+              : "border-destructive bg-destructive/10"
+          )}>
             <CardContent className="flex items-start gap-2 py-4">
-              <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
-              <p className="text-destructive whitespace-pre-line">{error}</p>
+              {hasExistingVote ? (
+                <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              ) : (
+                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+              )}
+              <p className={cn(
+                "whitespace-pre-line",
+                hasExistingVote ? "text-blue-900" : "text-destructive"
+              )}>{error}</p>
             </CardContent>
           </Card>
         )}
@@ -309,6 +389,7 @@ export default function VotingPage() {
                         onClick={() =>
                           handleChooseAllChange(option._id, "我要投給他")
                         }
+                        disabled={hasExistingVote}
                         variant={
                           chooseAllVotes[option._id] === "我要投給他"
                             ? "default"
@@ -326,6 +407,7 @@ export default function VotingPage() {
                         onClick={() =>
                           handleChooseAllChange(option._id, "我不投給他")
                         }
+                        disabled={hasExistingVote}
                         variant={
                           chooseAllVotes[option._id] === "我不投給他"
                             ? "destructive"
@@ -339,6 +421,7 @@ export default function VotingPage() {
                         onClick={() =>
                           handleChooseAllChange(option._id, "我沒有意見")
                         }
+                        disabled={hasExistingVote}
                         variant={
                           chooseAllVotes[option._id] === "我沒有意見"
                             ? "default"
@@ -356,6 +439,7 @@ export default function VotingPage() {
                   ) : (
                     <Button
                       onClick={() => setChooseOneVote(option._id)}
+                      disabled={hasExistingVote}
                       variant={
                         chooseOneVote === option._id ? "default" : "outline"
                       }
@@ -384,14 +468,16 @@ export default function VotingPage() {
             <ArrowLeft className="mr-2 h-4 w-4" />
             返回
           </Button>
-          <Button
-            onClick={handleSubmitVote}
-            size="lg"
-            disabled={submitting}
-            className="flex-1"
-          >
-            {submitting ? "提交中..." : "確認投票"}
-          </Button>
+          {!hasExistingVote && (
+            <Button
+              onClick={handleSubmitVote}
+              size="lg"
+              disabled={submitting}
+              className="flex-1"
+            >
+              {submitting ? "提交中..." : "確認投票"}
+            </Button>
+          )}
         </div>
       </div>
     </div>
