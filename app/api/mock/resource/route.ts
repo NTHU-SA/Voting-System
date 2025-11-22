@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mockAuthStore } from "@/lib/mockAuthStore";
+import { isProduction } from "@/lib/config";
 
 export async function POST(request: NextRequest) {
+  // Disable mock API in production
+  if (isProduction()) {
+    return NextResponse.json(
+      { error: "Mock API is not available in production" },
+      { status: 404 },
+    );
+  }
+
   // Get access token from Authorization header
   const authHeader = request.headers.get("Authorization");
 

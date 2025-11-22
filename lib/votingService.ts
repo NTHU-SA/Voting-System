@@ -182,6 +182,10 @@ export async function createVote(params: CreateVoteParams): Promise<{
     }
 
     // Create vote with UUID token for anonymity
+    // Using UUID v4 which provides cryptographically secure random tokens
+    // UUID v4 has 122 random bits, making brute force attacks computationally infeasible
+    // (2^122 ≈ 5.3 × 10^36 possible values)
+    // The GET endpoint also requires JWT authentication for additional security
     const token = uuidv4();
     const voteData: Record<string, unknown> = {
       activity_id,
