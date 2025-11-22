@@ -50,6 +50,14 @@ export const API_CONSTANTS = {
       "",
       "如需查看投票記錄，請聯繫管理員。",
     ],
+    VOTE_LOCAL_MULTIPLE_TOKENS: [
+      "本地有多個投票憑證對應此活動，無法獲取投票記錄。",
+      "可能的原因：使用不同瀏覽器或設備多次投票。",
+      "請聯繫管理員查詢投票記錄。",
+    ],
+    VOTE_ALREADY_SUBMITTED: "您已經完成投票，投票已送出無法修改。以下顯示您之前的選擇。",
+    CONFIRM_CLEAR_ALL_HISTORY: "確定要清除所有投票記錄嗎？\n\n注意：此操作將移除瀏覽器中保存的所有投票 UUID 憑證，無法復原。清除後將無法透過 UUID 查詢投票記錄，但不會影響伺服器上的投票結果。",
+    CONFIRM_REMOVE_VOTE: (activityName: string) => `確定要清除「${activityName}」的投票記錄嗎？\n\n此操作將移除此 UUID 憑證，無法復原。`,
   },
 } as const;
 

@@ -10,6 +10,7 @@ import { CheckCircle2, Download, Home, Copy, Check, User, Trash2 } from "lucide-
 import { loadVotingHistory, clearVotingHistory, removeVoteRecordByToken } from "@/lib/votingHistory";
 import { VotingHistory } from "@/types";
 import { useUser } from "@/hooks";
+import { API_CONSTANTS } from "@/lib/constants";
 
 export default function CompletionPage() {
   const router = useRouter();
@@ -36,9 +37,7 @@ export default function CompletionPage() {
 
   const handleClearHistory = () => {
     if (
-      window.confirm(
-        "確定要清除所有投票記錄嗎？\n\n注意：此操作將移除瀏覽器中保存的所有投票 UUID 憑證，無法復原。清除後將無法透過 UUID 查詢投票記錄，但不會影響伺服器上的投票結果。"
-      )
+      window.confirm(API_CONSTANTS.MESSAGES.CONFIRM_CLEAR_ALL_HISTORY)
     ) {
       clearVotingHistory();
       setVotingHistory({ votedActivityIds: [], votes: [] });
@@ -47,9 +46,7 @@ export default function CompletionPage() {
 
   const handleRemoveVote = (token: string, activityName: string) => {
     if (
-      window.confirm(
-        `確定要清除「${activityName}」的投票記錄嗎？\n\n此操作將移除此 UUID 憑證，無法復原。`
-      )
+      window.confirm(API_CONSTANTS.MESSAGES.CONFIRM_REMOVE_VOTE(activityName))
     ) {
       const updatedHistory = removeVoteRecordByToken(token);
       setVotingHistory(updatedHistory);
@@ -100,6 +97,7 @@ export default function CompletionPage() {
             <Button
               variant="destructive"
               onClick={handleClearHistory}
+              aria-label="清除所有投票記錄"
             >
               <Trash2 className="mr-2 h-4 w-4" />
               清除所有記錄
@@ -181,6 +179,7 @@ export default function CompletionPage() {
                         onClick={() => handleRemoveVote(vote.token, vote.activityName)}
                         className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive print:hidden"
                         title="刪除此投票記錄"
+                        aria-label="刪除此投票記錄"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

@@ -91,8 +91,9 @@ export function clearVotingHistory(): void {
 /**
  * Remove a specific vote record by UUID token
  * This removes the vote record with the matching token
+ * Modifies localStorage directly
  * @param {string} token - The UUID token to remove
- * @returns {VotingHistory} The updated voting history after removal
+ * @returns {VotingHistory} The updated voting history after removal, or current state if error occurs
  */
 export function removeVoteRecordByToken(token: string): VotingHistory {
   try {
@@ -123,7 +124,8 @@ export function removeVoteRecordByToken(token: string): VotingHistory {
     return history;
   } catch (err) {
     console.error("Error removing vote record:", err);
-    return { votedActivityIds: [], votes: [] };
+    // Return current state from localStorage if error occurs
+    return loadVotingHistory();
   }
 }
 

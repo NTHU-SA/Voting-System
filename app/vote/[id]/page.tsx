@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { saveVotingRecord, getVotesByActivityId } from "@/lib/votingHistory";
-import { Candidate } from "@/types";
+import { Candidate, IChoiceAll } from "@/types";
 import { useActivity, useUser } from "@/hooks";
 import { API_CONSTANTS } from "@/lib/constants";
 
@@ -60,11 +60,7 @@ export default function VotingPage() {
 
         if (localVotes.length > 1) {
           // Multiple UUIDs for same event
-          setError(
-            "本地有多個投票憑證對應此活動，無法獲取投票記錄。\n" +
-            "可能的原因：使用不同瀏覽器或設備多次投票。\n" +
-            "請聯繫管理員查詢投票記錄。"
-          );
+          setError(API_CONSTANTS.MESSAGES.VOTE_LOCAL_MULTIPLE_TOKENS.join("\n"));
           setHasExistingVote(true);
           setLoadingVote(false);
           return;
@@ -84,8 +80,8 @@ export default function VotingPage() {
             // Set existing vote data
             if (voteData.rule === "choose_all" && voteData.choose_all) {
               const votes: Record<string, string> = {};
-              voteData.choose_all.forEach((choice: { option_id: string; remark: string }) => {
-                votes[choice.option_id] = choice.remark;
+              voteData.choose_all.forEach((choice: IChoiceAll) => {
+                votes[choice.option_id.toString()] = choice.remark;
               });
               setChooseAllVotes(votes);
             } else if (voteData.rule === "choose_one" && voteData.choose_one) {
@@ -93,7 +89,7 @@ export default function VotingPage() {
             }
             
             setHasExistingVote(true);
-            setError("您已經完成投票，投票已送出無法修改。以下顯示您之前的選擇。");
+            setError(API_CONSTANTS.MESSAGES.VOTE_ALREADY_SUBMITTED);
           }
         }
       } catch (err) {
@@ -111,9 +107,15 @@ export default function VotingPage() {
     if (activity && activity.rule === "choose_all" && !hasExistingVote && !loadingVote) {
       const initialVotes: Record<string, string> = {};
       activity.options.forEach((option) => {
-        initialVotes[option._id] = chooseAllVotes[option._id] || "我沒有意見";
+        // Only set default if not already set
+        if (!chooseAllVotes[option._id]) {
+          initialVotes[option._id] = "我沒有意見";
+        }
       });
-      setChooseAllVotes(initialVotes);
+      // Only update if we have new initialVotes to set
+      if (Object.keys(initialVotes).length > 0) {
+        setChooseAllVotes((prev) => ({ ...prev, ...initialVotes }));
+      }
     }
   }, [activity, hasExistingVote, loadingVote]);
 
