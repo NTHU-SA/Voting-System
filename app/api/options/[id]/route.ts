@@ -7,7 +7,7 @@ import {
 } from "@/lib/middleware";
 import { Activity } from "@/lib/models/Activity";
 import { Option } from "@/lib/models/Option";
-import connectDB from "@/lib/db";
+
 import { isValidObjectId } from "@/lib/validation";
 import { API_CONSTANTS } from "@/lib/constants";
 
@@ -26,7 +26,6 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await connectDB();
 
     const { id } = await params;
 
@@ -67,7 +66,6 @@ export async function PUT(
       return adminCheck;
     }
 
-    await connectDB();
 
     const { id } = await params;
 
@@ -85,10 +83,11 @@ export async function PUT(
     if (body.candidate !== undefined) updateData.candidate = body.candidate;
     if (body.vice !== undefined) updateData.vice = body.vice;
 
-    const option = await Option.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    const option = await Option.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true }
+    );
 
     if (!option) {
       return createErrorResponse(API_CONSTANTS.ERRORS.OPTION_NOT_FOUND, 404);
@@ -121,7 +120,6 @@ export async function DELETE(
       return adminCheck;
     }
 
-    await connectDB();
 
     const { id } = await params;
 
@@ -135,10 +133,10 @@ export async function DELETE(
       return createErrorResponse(API_CONSTANTS.ERRORS.OPTION_NOT_FOUND, 404);
     }
 
-    // Remove option from activity's options array
-    await Activity.updateOne(
-      { _id: option.activity_id },
-      { $pull: { options: option._id } },
+    // Remove option from activity's options array using findByIdAndUpdate
+    await Activity.findByIdAndUpdate(
+      option.activity_id.toString(),
+      { $pull: { options: option._id.toString() } },
     );
 
     await Option.findByIdAndDelete(id);

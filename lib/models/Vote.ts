@@ -1,62 +1,133 @@
-import mongoose, { Schema, Model } from "mongoose";
-import { IVote, IChoiceAll } from "@/types";
+import getFirestore from "@/lib/firestore";
+import { IVote } from "@/types";
 
-const ChoiceAllSchema = new Schema<IChoiceAll>(
-  {
-    option_id: {
-      type: String,
-      required: true,
-    },
-    remark: {
-      type: String,
-      enum: ["我要投給他", "我不投給他", "我沒有意見"],
-      required: true,
-    },
-  },
-  {
-    _id: false,
-  },
-);
+const COLLECTION_NAME = "votes";
 
-const VoteSchema = new Schema<IVote>({
-  activity_id: {
-    type: Schema.Types.ObjectId,
-    required: true,
-    ref: "Activity",
+/**
+ * Vote model for Firestore
+ */
+export const Vote = {
+  /**
+   * Get the votes collection reference
+   */
+  getCollection: async () => {
+    const db = await getFirestore();
+    return db.collection(COLLECTION_NAME);
   },
-  rule: {
-    type: String,
-    enum: ["choose_all", "choose_one"],
-    required: true,
-  },
-  choose_all: {
-    type: [ChoiceAllSchema],
-    required: false,
-  },
-  choose_one: {
-    type: String,
-    required: false,
-  },
-  token: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  created_at: {
-    type: Date,
-    required: true,
-    default: Date.now,
-  },
-  updated_at: {
-    type: Date,
-    required: true,
-    default: Date.now,
-  },
-} as const);
 
-// Add indexes (without duplicate)
-VoteSchema.index({ activity_id: 1 });
-VoteSchema.index({ token: 1 });
+  /**
+   * Find votes by filter
+   */
+  find: async (
+    filter: Record<string, unknown>,
+    options?: {
+      limit?: number;
+      skip?: number;
+      sort?: Record<string, 1 | -1>;
+    }
+  ): Promise<IVote[]> => {
+    const collection = await Vote.getCollection();
+    let query: FirebaseFirestore.Query = collection;
 
-export const Vote: Model<IVote> =
-  mongoose.models.Vote || mongoose.model<IVote>("Vote", VoteSchema);
+    for (const [key, value] of Object.entries(filter)) {
+      query = query.where(key, "==", value);
+    }
+
+    // Apply sorting
+    if (options?.sort) {
+      for (const [key, order] of Object.entries(options.sort)) {
+        query = query.orderBy(key, order === -1 ? "desc" : "asc");
+      }
+    }
+
+    // Apply limit
+    if (options?.limit) {
+      // Firestore doesn't have skip, so we need to use offset
+      if (options?.skip) {
+        query = query.offset(options.skip);
+      }
+      query = query.limit(options.limit);
+    }
+
+    const snapshot = await query.get();
+    return snapshot.docs.map((doc) => ({
+      _id: doc.id,
+      ...doc.data(),
+    })) as IVote[];
+  },
+
+  /**
+   * Count documents matching filter
+   */
+  countDocuments: async (filter: Record<string, unknown>): Promise<number> => {
+    const collection = await Vote.getCollection();
+    let query: FirebaseFirestore.Query = collection;
+
+    for (const [key, value] of Object.entries(filter)) {
+      query = query.where(key, "==", value);
+    }
+
+    const snapshot = await query.get();
+    return snapshot.size;
+  },
+
+  /**
+   * Create a new vote
+   */
+  create: async (voteData: Omit<IVote, "_id">): Promise<IVote> => {
+    const collection = await Vote.getCollection();
+    const docRef = await collection.add({
+      ...voteData,
+      created_at: voteData.created_at || new Date(),
+      updated_at: voteData.updated_at || new Date(),
+    });
+
+    const doc = await docRef.get();
+    return {
+      _id: doc.id,
+      ...doc.data(),
+    } as IVote;
+  },
+
+  /**
+   * Find vote by ID
+   */
+  findById: async (id: string): Promise<IVote | null> => {
+    const collection = await Vote.getCollection();
+    const doc = await collection.doc(id).get();
+
+    if (!doc.exists) {
+      return null;
+    }
+
+    return {
+      _id: doc.id,
+      ...doc.data(),
+    } as IVote;
+  },
+
+  /**
+   * Find one vote by filter
+   */
+  findOne: async (filter: Record<string, unknown>): Promise<IVote | null> => {
+    const collection = await Vote.getCollection();
+    let query: FirebaseFirestore.Query = collection;
+
+    for (const [key, value] of Object.entries(filter)) {
+      query = query.where(key, "==", value);
+    }
+
+    const snapshot = await query.limit(1).get();
+
+    if (snapshot.empty) {
+      return null;
+    }
+
+    const doc = snapshot.docs[0];
+    return {
+      _id: doc.id,
+      ...doc.data(),
+    } as IVote;
+  },
+};
+

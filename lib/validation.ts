@@ -1,11 +1,18 @@
-import { Types } from "mongoose";
 import { API_CONSTANTS } from "@/lib/constants";
 
 /**
- * Validates if a string is a valid MongoDB ObjectId
+ * Validates if a string is a valid Firestore document ID
  */
 export function isValidObjectId(id: string): boolean {
-  return Types.ObjectId.isValid(id);
+  // Firestore document IDs can be any non-empty string
+  // but typically should not contain certain characters
+  if (!id || typeof id !== "string") {
+    return false;
+  }
+  
+  // Check if it's a reasonable length (Firestore allows up to 1,500 bytes)
+  // and doesn't contain invalid characters
+  return id.length > 0 && id.length <= 1500 && !id.includes("/");
 }
 
 /**

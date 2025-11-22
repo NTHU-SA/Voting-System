@@ -6,7 +6,7 @@ import {
   createSuccessResponse,
 } from "@/lib/middleware";
 import { Vote } from "@/lib/models/Vote";
-import connectDB from "@/lib/db";
+
 import { isValidObjectId } from "@/lib/validation";
 import { API_CONSTANTS } from "@/lib/constants";
 
@@ -28,7 +28,6 @@ export async function GET(
       return adminCheck;
     }
 
-    await connectDB();
 
     const { id } = await params;
 
@@ -37,10 +36,10 @@ export async function GET(
     }
 
     // Get all votes for this activity with only the token field
-    const votes = await Vote.find({ activity_id: id })
-      .select("token created_at")
-      .sort({ created_at: -1 })
-      .lean();
+    const votes = await Vote.find(
+      { activity_id: id },
+      { sort: { created_at: -1 } }
+    );
 
     // Return the list of UUIDs and count
     return createSuccessResponse({

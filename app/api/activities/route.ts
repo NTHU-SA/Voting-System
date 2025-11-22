@@ -6,7 +6,7 @@ import {
   createSuccessResponse,
 } from "@/lib/middleware";
 import { Activity } from "@/lib/models/Activity";
-import connectDB from "@/lib/db";
+import { IActivity } from "@/types";
 import {
   validateDateRange,
   isValidRule,
@@ -26,18 +26,16 @@ export const config = {
 // GET /api/activities - List all activities
 export async function GET(request: NextRequest) {
   try {
-    await connectDB();
-
     const searchParams = request.nextUrl.searchParams;
     const includeOptions = searchParams.get("include_options") === "true";
 
-    let query = Activity.find().sort({ created_at: -1 });
-
+    let activities: IActivity[];
+    
     if (includeOptions) {
-      query = query.populate("options");
+      activities = await Activity.find().sort({ created_at: -1 }).populate("options").exec();
+    } else {
+      activities = await Activity.find().sort({ created_at: -1 }).exec();
     }
-
-    const activities = await query.exec();
 
     return createSuccessResponse(activities);
   } catch (error: unknown) {
@@ -63,10 +61,8 @@ export async function POST(request: NextRequest) {
       return adminCheck;
     }
 
-    await connectDB();
-
     const body = await request.json();
-    const { name, type, subtitle, description, rule, open_from, open_to } =
+    const { name, type, description, rule, open_from, open_to } =
       body;
 
     // Validate required fields using helper
@@ -100,7 +96,6 @@ export async function POST(request: NextRequest) {
     const activity = await Activity.create({
       name,
       type,
-      subtitle,
       description,
       rule,
       open_from: openFrom,

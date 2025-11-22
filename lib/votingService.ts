@@ -1,11 +1,10 @@
 import { Activity } from "@/lib/models/Activity";
 import { Option } from "@/lib/models/Option";
 import { Vote } from "@/lib/models/Vote";
-import { IChoiceAll } from "@/types";
+import { IChoiceAll, IActivity } from "@/types";
 import { isValidRemark } from "@/lib/validation";
 import { API_CONSTANTS } from "@/lib/constants";
 import { v4 as uuidv4 } from "uuid";
-import { Document, Types } from "mongoose";
 
 interface VoteValidationResult {
   valid: boolean;
@@ -19,14 +18,6 @@ interface CreateVoteParams {
   choose_all?: IChoiceAll[];
   choose_one?: string;
   student_id: string;
-}
-
-interface ActivityDocument extends Document {
-  _id: Types.ObjectId;
-  rule: string;
-  users: string[];
-  open_from: Date;
-  open_to: Date;
 }
 
 /**
@@ -75,7 +66,7 @@ export async function validateOptions(
  * Validates user's eligibility to vote
  */
 export async function validateVotingEligibility(
-  activity: ActivityDocument,
+  activity: IActivity,
   student_id: string
 ): Promise<VoteValidationResult> {
   // Check if user already voted
@@ -113,7 +104,7 @@ export async function validateVotingEligibility(
  */
 export async function createVote(params: CreateVoteParams): Promise<{
   success: boolean;
-  vote?: Document;
+  vote?: Record<string, unknown>;
   error?: string;
   statusCode?: number;
 }> {
@@ -121,9 +112,7 @@ export async function createVote(params: CreateVoteParams): Promise<{
 
   try {
     // Get activity
-    const activity = (await Activity.findById(
-      activity_id
-    )) as ActivityDocument | null;
+    const activity = await Activity.findById(activity_id);
     if (!activity) {
       return {
         success: false,
@@ -197,7 +186,7 @@ export async function createVote(params: CreateVoteParams): Promise<{
       voteData.choose_one = choose_one;
     }
 
-    const vote = await Vote.create(voteData);
+    const vote = await Vote.create(voteData as Omit<IVote, "_id">);
 
     // Add student_id to activity's voted users list
     await Activity.updateOne(

@@ -7,7 +7,7 @@ import {
 } from "@/lib/middleware";
 import { loadVoterList, isStudentEligible } from "@/lib/voterList";
 import { Vote } from "@/lib/models/Vote";
-import connectDB from "@/lib/db";
+
 import { createVote } from "@/lib/votingService";
 import { isValidRule } from "@/lib/validation";
 import { validatePagination } from "@/lib/validation";
@@ -31,7 +31,6 @@ export async function POST(request: NextRequest) {
     }
     const user = authResult;
 
-    await connectDB();
 
     const body = await request.json();
     const { activity_id, rule, choose_all, choose_one } = body;
@@ -92,7 +91,6 @@ export async function GET(request: NextRequest) {
       return adminCheck;
     }
 
-    await connectDB();
 
     const searchParams = request.nextUrl.searchParams;
     const activity_id = searchParams.get("activity_id");
@@ -107,10 +105,11 @@ export async function GET(request: NextRequest) {
     }
 
     const total = await Vote.countDocuments(filter);
-    const data = await Vote.find(filter)
-      .limit(limit)
-      .skip(skip)
-      .sort({ created_at: -1 });
+    const data = await Vote.find(filter, {
+      limit,
+      skip,
+      sort: { created_at: -1 },
+    });
 
     return createSuccessResponse({ total, data });
   } catch (error: unknown) {

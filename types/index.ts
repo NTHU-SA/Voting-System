@@ -1,8 +1,6 @@
-import { Types } from "mongoose";
-
 // Database Models
 export interface IUser {
-  _id: Types.ObjectId | string;
+  _id: string;
   student_id: string;
   remark?: string;
   created_at: Date;
@@ -10,13 +8,13 @@ export interface IUser {
 }
 
 export interface IActivity {
-  _id: Types.ObjectId | string;
+  _id: string;
   name: string;
   type: string; // Kept for backward compatibility
   description?: string; // New field for activity description
   rule: "choose_all" | "choose_one";
   users: string[]; // Student IDs who have voted
-  options: (Types.ObjectId | string)[]; // Option IDs
+  options: string[]; // Option IDs
   open_from: Date;
   open_to: Date;
   created_at: Date;
@@ -24,8 +22,8 @@ export interface IActivity {
 }
 
 export interface IOption {
-  _id: Types.ObjectId | string;
-  activity_id: Types.ObjectId | string;
+  _id: string;
+  activity_id: string;
   label?: string; // Optional label for the candidate
   candidate?: ICandidate;
   vice?: ICandidate[];
@@ -43,18 +41,18 @@ export interface ICandidate {
 }
 
 export interface IVote {
-  _id: Types.ObjectId | string;
-  activity_id: Types.ObjectId | string;
+  _id: string;
+  activity_id: string;
   rule: "choose_all" | "choose_one";
   choose_all?: IChoiceAll[];
-  choose_one?: Types.ObjectId | string;
+  choose_one?: string;
   token: string; // UUID for anonymity
   created_at: Date;
   updated_at: Date;
 }
 
 export interface IChoiceAll {
-  option_id: Types.ObjectId | string;
+  option_id: string;
   remark: "我要投給他" | "我不投給他" | "我沒有意見";
 }
 

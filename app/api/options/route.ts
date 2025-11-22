@@ -7,7 +7,7 @@ import {
 } from "@/lib/middleware";
 import { Activity } from "@/lib/models/Activity";
 import { Option } from "@/lib/models/Option";
-import connectDB from "@/lib/db";
+
 import { isValidObjectId } from "@/lib/validation";
 import { API_CONSTANTS } from "@/lib/constants";
 
@@ -23,7 +23,6 @@ export const config = {
 // GET /api/options - List options for an activity
 export async function GET(request: NextRequest) {
   try {
-    await connectDB();
 
     const searchParams = request.nextUrl.searchParams;
     const activity_id = searchParams.get("activity_id");
@@ -38,7 +37,7 @@ export async function GET(request: NextRequest) {
       return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
     }
 
-    const options = await Option.find({ activity_id }).sort({ created_at: 1 });
+    const options = await Option.find({ activity_id }, { sort: { created_at: 1 } });
 
     return createSuccessResponse(options);
   } catch (error: unknown) {
@@ -64,7 +63,6 @@ export async function POST(request: NextRequest) {
       return adminCheck;
     }
 
-    await connectDB();
 
     const body = await request.json();
     const { activity_id, label, candidate, vice } = body;
@@ -96,9 +94,9 @@ export async function POST(request: NextRequest) {
     });
 
     // Add option to activity's options array
-    await Activity.updateOne(
-      { _id: activity_id },
-      { $addToSet: { options: option._id } },
+    await Activity.findByIdAndUpdate(
+      activity_id,
+      { $push: { options: option._id.toString() } },
     );
 
     return createSuccessResponse(option, 201);

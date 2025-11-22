@@ -1,7 +1,7 @@
 import { Activity } from "@/lib/models/Activity";
 import { Option } from "@/lib/models/Option";
 import { Vote } from "@/lib/models/Vote";
-import { Document, Types } from "mongoose";
+import { IOption, IVote } from "@/types";
 
 interface OptionStat {
   option_id: string;
@@ -20,35 +20,10 @@ interface Statistics {
 }
 
 interface ActivityData {
-  id: Types.ObjectId;
+  id: string;
   name: string;
   type: string;
   rule: string;
-  open_from: Date;
-  open_to: Date;
-}
-
-interface OptionDocument extends Document {
-  _id: Types.ObjectId;
-  candidate?: {
-    name?: string;
-  };
-}
-
-interface VoteDocument extends Document {
-  choose_all?: Array<{
-    option_id: Types.ObjectId | string;
-    remark: string;
-  }>;
-  choose_one?: Types.ObjectId | string;
-}
-
-interface ActivityDocument extends Document {
-  _id: Types.ObjectId;
-  name: string;
-  type: string;
-  rule: string;
-  users: string[];
   open_from: Date;
   open_to: Date;
 }
@@ -69,9 +44,7 @@ export async function calculateActivityStatistics(
 }> {
   try {
     // Get activity with populated options
-    const activity = (await Activity.findById(activity_id).populate(
-      "options",
-    )) as ActivityDocument | null;
+    const activity = await Activity.findById(activity_id);
     if (!activity) {
       return {
         success: false,
@@ -81,7 +54,7 @@ export async function calculateActivityStatistics(
     }
 
     // Get all votes for this activity
-    const votes = (await Vote.find({ activity_id })) as VoteDocument[];
+    const votes = await Vote.find({ activity_id });
 
     // Calculate basic statistics
     const totalVotes = votes.length;
@@ -92,7 +65,7 @@ export async function calculateActivityStatistics(
         : "0";
 
     // Initialize stats for all options
-    const options = (await Option.find({ activity_id })) as OptionDocument[];
+    const options = await Option.find({ activity_id });
     const optionStatsMap = initializeOptionStats(options);
 
     // Count votes based on activity rule
@@ -132,7 +105,7 @@ export async function calculateActivityStatistics(
  * Initialize option statistics map
  */
 function initializeOptionStats(
-  options: OptionDocument[],
+  options: IOption[],
 ): Record<string, OptionStat> {
   const statsMap: Record<string, OptionStat> = {};
 
@@ -157,7 +130,7 @@ function initializeOptionStats(
  * Count votes for choose_all rule
  */
 function countChooseAllVotes(
-  votes: VoteDocument[],
+  votes: IVote[],
   optionStatsMap: Record<string, OptionStat>,
 ): void {
   votes.forEach((vote) => {
@@ -188,7 +161,7 @@ function countChooseAllVotes(
  * Count votes for choose_one rule
  */
 function countChooseOneVotes(
-  votes: VoteDocument[],
+  votes: IVote[],
   optionStatsMap: Record<string, OptionStat>,
 ): void {
   votes.forEach((vote) => {

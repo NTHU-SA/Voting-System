@@ -7,7 +7,7 @@ import {
 } from "@/lib/middleware";
 import { Activity } from "@/lib/models/Activity";
 import { Option } from "@/lib/models/Option";
-import connectDB from "@/lib/db";
+
 import {
   isValidObjectId,
   validateDateRange,
@@ -30,7 +30,6 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await connectDB();
 
     const { id } = await params;
 
@@ -41,13 +40,9 @@ export async function GET(
     const searchParams = request.nextUrl.searchParams;
     const includeOptions = searchParams.get("include_options") === "true";
 
-    let query = Activity.findById(id);
-
-    if (includeOptions) {
-      query = query.populate("options");
-    }
-
-    const activity = await query.exec();
+    const activity = await Activity.findById(id, {
+      populate: includeOptions ? "options" : undefined,
+    });
 
     if (!activity) {
       return createErrorResponse(API_CONSTANTS.ERRORS.ACTIVITY_NOT_FOUND, 404);
@@ -80,7 +75,6 @@ export async function PUT(
       return adminCheck;
     }
 
-    await connectDB();
 
     const { id } = await params;
 
@@ -120,7 +114,6 @@ export async function PUT(
 
     const activity = await Activity.findByIdAndUpdate(id, updateData, {
       new: true,
-      runValidators: true,
     });
 
     if (!activity) {
@@ -154,7 +147,6 @@ export async function DELETE(
       return adminCheck;
     }
 
-    await connectDB();
 
     const { id } = await params;
 

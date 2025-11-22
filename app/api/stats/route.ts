@@ -5,7 +5,7 @@ import {
   createErrorResponse,
   createSuccessResponse,
 } from "@/lib/middleware";
-import connectDB from "@/lib/db";
+
 import { calculateActivityStatistics } from "@/lib/statisticsService";
 import { isValidObjectId } from "@/lib/validation";
 import { API_CONSTANTS } from "@/lib/constants";
@@ -25,7 +25,6 @@ export async function GET(request: NextRequest) {
       return adminCheck;
     }
 
-    await connectDB();
 
     const searchParams = request.nextUrl.searchParams;
     const activity_id = searchParams.get("activity_id");
