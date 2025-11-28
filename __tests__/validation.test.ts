@@ -2,12 +2,12 @@
  * Tests for validation utilities
  */
 
-// Mock mongoose to avoid ESM issues
+// Mock mongoose to avoid ESM import issues in Jest environment
+// The mock replicates MongoDB ObjectId validation: valid IDs are 24-character hex strings
 jest.mock('mongoose', () => ({
   Types: {
     ObjectId: {
       isValid: (id: string) => {
-        // Simple validation: 24 character hex string
         return typeof id === 'string' && /^[0-9a-fA-F]{24}$/.test(id);
       },
     },
