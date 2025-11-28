@@ -69,9 +69,10 @@ export default function Header() {
             alt="banner"
             width={150}
             height={20}
+            priority
             className="h-8 w-auto object-contain"
           />
-          <span className="text-xl font-bold">投票系統</span>
+          <span className="text-xl font-bold whitespace-nowrap">投票系統</span>
         </Link>
 
         <div className="flex items-center gap-4">

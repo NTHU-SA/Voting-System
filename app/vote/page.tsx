@@ -38,10 +38,10 @@ export default function VotePage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto max-w-7xl px-6 py-8 sm:py-12">
+      <main className="container mx-auto max-w-7xl px-6 py-8">
         {/* Header */}
-        <div className="mb-10 text-center">
-          <h1 className="mb-3 text-3xl font-bold sm:text-4xl">投票活動選擇</h1>
+        <div className="mb-8 text-center">
+          <h1 className="mb-3 text-3xl font-bold">投票活動選擇</h1>
           <p className="text-base text-muted-foreground sm:text-lg">
             選擇您要參與的投票活動
           </p>

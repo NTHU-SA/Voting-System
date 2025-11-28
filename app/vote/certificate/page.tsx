@@ -57,7 +57,7 @@ export default function CompletionPage() {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="container mx-auto max-w-4xl px-6 py-12">
+        <main className="container mx-auto max-w-4xl px-6 py-8">
           <Card>
             <CardContent className="py-16 text-center">
               <h2 className="mb-4 text-2xl font-bold">尚無投票記錄</h2>
@@ -76,7 +76,7 @@ export default function CompletionPage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto max-w-4xl px-6 py-8 sm:py-12">
+      <main className="container mx-auto max-w-4xl px-6 py-8">
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
@@ -108,18 +108,18 @@ export default function CompletionPage() {
         {/* User Info Section */}
         {userInfo && (
           <Card className="mb-8 shadow-sm">
-            <CardContent className="flex flex-col items-center justify-center gap-4 py-6 sm:flex-row sm:gap-12">
+            <CardContent className="flex items-center justify-center gap-4 py-6 flex-row sm:gap-12">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
                   <User className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <div className="text-center sm:text-left">
+                <div className="text-left">
                   <p className="text-xs text-muted-foreground">姓名</p>
-                  <p className="text-lg font-bold">{userInfo.name}</p>
+                  <p className="text-md font-bold">{userInfo.name}</p>
                 </div>
               </div>
-              <div className="hidden h-10 w-px bg-border sm:block" />
-              <div className="text-center sm:text-left">
+              <div className="h-10 w-px bg-border sm:block" />
+              <div className="text-left">
                 <p className="text-xs text-muted-foreground">學號</p>
                 <p className="text-lg font-bold font-mono">
                   {userInfo.student_id}
@@ -257,18 +257,16 @@ export default function CompletionPage() {
         {/* Action Buttons */}
         <div className="flex flex-col gap-4 sm:flex-row print:hidden">
           <Button
-            size="lg"
             variant="outline"
-            className="flex-1"
+            className="w-full"
             onClick={() => router.push("/")}
           >
             <Home className="mr-2 h-4 w-4" />
             返回首頁
           </Button>
           <Button
-            size="lg"
             variant="outline"
-            className="flex-1"
+            className="w-full"
             onClick={() => router.push("/vote")}
           >
             前往投票

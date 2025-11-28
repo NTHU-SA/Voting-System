@@ -46,7 +46,7 @@ export default function CompletionPage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto max-w-4xl px-6 py-8 sm:py-12">
+      <main className="container mx-auto max-w-4xl px-6 py-8">
         {/* Success Icon and Title */}
         <div className="mb-8 text-center">
           <div className="mx-auto mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">

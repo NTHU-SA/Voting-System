@@ -306,7 +306,7 @@ export default function VotingPage() {
             <div className="flex flex-col gap-2">
               <CardTitle className="text-3xl">{activity.name}</CardTitle>
               {activity.description && (
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
                   {activity.description}
                 </p>
               )}

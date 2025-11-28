@@ -348,31 +348,31 @@ function ActivityDetailPageContent() {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto max-w-7xl px-6 py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <Button variant="outline" asChild>
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <Button variant="outline" asChild className="shrink-0">
             <Link href="/admin">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              返回後台
+              <ArrowLeft className="sm:mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">返回後台</span>
             </Link>
           </Button>
 
           <div className="flex gap-2">
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild className="shrink-0">
               <Link href={`/vote/${activityId}`}>
-                <Eye className="mr-2 h-4 w-4" />
-                預覽活動
+                <Eye className="sm:mr-2 h-4 w-4" />
+                <span className="sm:inline">預覽活動</span>
               </Link>
             </Button>
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild className="shrink-0">
               <Link href={`/admin/activities/${activityId}/results`}>
-                <BarChart3 className="mr-2 h-4 w-4" />
-                查看統計
+                <BarChart3 className="sm:mr-2 h-4 w-4" />
+                <span className="sm:inline">查看統計</span>
               </Link>
             </Button>
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild className="shrink-0">
               <Link href={`/admin/activities/${activityId}/verification`}>
-                <ClipboardCheck className="mr-2 h-4 w-4" />
-                驗票
+                <ClipboardCheck className="sm:mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">驗票</span>
               </Link>
             </Button>
           </div>

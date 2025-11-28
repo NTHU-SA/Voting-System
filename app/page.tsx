@@ -23,7 +23,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto max-w-7xl px-6 py-12">
+      <main className="container mx-auto max-w-7xl px-6 py-8">
         {/* Hero Section */}
         <div className="mb-16 space-y-6 text-center">
           <div className="mb-6 flex justify-center">
