@@ -35,8 +35,8 @@ Anonymous voting system for National Tsing Hua University Student Association.
 
 ```bash
 # Clone repository
-git clone https://github.com/l7wei/Voting-New.git
-cd Voting-New
+git clone https://github.com/NTHU-SA/Voting-System.git
+cd Voting-System
 
 # Install dependencies
 npm install
