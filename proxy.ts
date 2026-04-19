@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { verifyToken } from "@/lib/jwt";
 import { isProduction } from "@/lib/config";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public paths that don't require authentication
