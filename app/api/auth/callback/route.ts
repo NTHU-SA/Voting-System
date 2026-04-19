@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { exchangeCodeForToken, getUserInfo } from "@/lib/oauth";
+import {
+  exchangeCodeForToken,
+  getUserInfo,
+  requireOAuthRedirectPath,
+} from "@/lib/oauth";
 import { generateToken } from "@/lib/auth";
 import { API_CONSTANTS } from "@/lib/constants";
 import { getBaseURL, isProduction } from "@/lib/config";
@@ -7,32 +11,17 @@ import { getBaseURL, isProduction } from "@/lib/config";
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const code = searchParams.get("code");
-    const error = searchParams.get("error");
+    const code = searchParams.get("code") ?? "";
+    const oauthError = searchParams.get("error") ?? "";
     const state = searchParams.get("state");
 
     // Get the base URL from config
     const baseUrl = getBaseURL();
 
-    if (error === "access_denied" || !code) {
-      return NextResponse.redirect(new URL("/?error=auth_failed", baseUrl));
-    }
-
-    // Parse state to get redirect URL
-    let redirectPath = "/vote"; // Default redirect
-    if (state) {
-      try {
-        const stateData = JSON.parse(Buffer.from(state, "base64").toString());
-        if (stateData.redirect) {
-          redirectPath = stateData.redirect;
-        }
-      } catch {
-        // Invalid state, use default redirect
-      }
-    }
+    const redirectPath = requireOAuthRedirectPath(state);
 
     // Exchange code for access token
-    const tokenInfo = await exchangeCodeForToken(code);
+    const tokenInfo = await exchangeCodeForToken(code, oauthError);
 
     // Get user info from OAuth (Userid field maps to student_id)
     const userInfo = await getUserInfo(tokenInfo.access_token);

@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { verifyToken } from "@/lib/jwt";
 import { isProduction } from "@/lib/config";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public paths that don't require authentication
@@ -71,17 +71,37 @@ export async function middleware(request: NextRequest) {
 }
 
 function addSecurityHeaders(response: NextResponse): NextResponse {
+  const isProd = isProduction();
+
+  // Next.js needs inline scripts for hydration; dev mode also needs eval and ws/wss for HMR.
+  const scriptSrc = isProd
+    ? "script-src 'self' 'unsafe-inline'"
+    : "script-src 'self' 'unsafe-inline' 'unsafe-eval'";
+  const connectSrc = isProd
+    ? "connect-src 'self'"
+    : "connect-src 'self' ws: wss: http: https:";
+
   // Add security headers
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-XSS-Protection", "1; mode=block");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set(
+    "Content-Security-Policy",
+    `default-src 'self'; ${scriptSrc}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; ${connectSrc}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'`,
+  );
+  response.headers.set(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=()",
+  );
+  response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
+  response.headers.set("Cross-Origin-Resource-Policy", "same-origin");
 
   // HSTS header for production
-  if (isProduction()) {
+  if (isProd) {
     response.headers.set(
       "Strict-Transport-Security",
-      "max-age=31536000; includeSubDomains"
+      "max-age=31536000; includeSubDomains",
     );
   }
 

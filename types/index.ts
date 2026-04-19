@@ -13,6 +13,7 @@ export interface IActivity {
   _id: Types.ObjectId | string;
   name: string;
   type: string; // Kept for backward compatibility
+  subtitle?: string;
   description?: string; // New field for activity description
   rule: "choose_all" | "choose_one";
   users: string[]; // Student IDs who have voted
@@ -59,7 +60,7 @@ export interface IChoiceAll {
 }
 
 // API Types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -83,6 +84,7 @@ export interface JWTPayload extends AuthUser {
 export interface CreateActivityRequest {
   name: string;
   type: string;
+  subtitle?: string;
   description?: string;
   rule: "choose_all" | "choose_one";
   open_from: string;

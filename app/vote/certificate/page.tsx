@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,15 +15,11 @@ import { API_CONSTANTS } from "@/lib/constants";
 export default function CompletionPage() {
   const router = useRouter();
   const [votingHistory, setVotingHistory] = useState<VotingHistory | null>(
-    null,
+    () => loadVotingHistory(),
   );
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   
   const { user: userInfo } = useUser();
-
-  useEffect(() => {
-    setVotingHistory(loadVotingHistory());
-  }, []);
 
   const handleCopyToken = (token: string, index: number) => {
     navigator.clipboard.writeText(token);

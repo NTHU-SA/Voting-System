@@ -11,15 +11,6 @@ import connectDB from "@/lib/db";
 import { isValidObjectId } from "@/lib/validation";
 import { API_CONSTANTS } from "@/lib/constants";
 
-// Configure API route
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "1mb",
-    },
-  },
-};
-
 // GET /api/options/[id] - Get single option
 export async function GET(
   request: NextRequest,

@@ -22,11 +22,11 @@ export async function POST(request: NextRequest) {
     mockData = mockAuthStore.get(accessToken);
 
     if (mockData) {
-      console.log("[Mock Resource] Found data for access token");
+      console.warn("[Mock Resource] Found data for access token");
       return NextResponse.json(mockData);
     }
   }
 
-  console.log("[Mock Resource] Using fallback data");
+  console.warn("[Mock Resource] Using fallback data");
   return NextResponse.json(mockData);
 }

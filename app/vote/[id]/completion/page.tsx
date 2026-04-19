@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,25 +14,12 @@ export default function CompletionPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activityId = params.id as string;
-
-  const [activityName, setActivityName] = useState<string>("");
-  const [voteToken, setVoteToken] = useState<string>("");
-  const [votedActivityIds, setVotedActivityIds] = useState<string[]>([]);
+  const voteToken = searchParams.get("token") || "";
+  const activityName = searchParams.get("name") || "";
+  const votedActivityIds = useMemo(() => getVotedActivityIds(), []);
 
   const { user } = useUser();
   const { activities: allActivities } = useActivities();
-
-  useEffect(() => {
-    // Get data from URL params
-    const token = searchParams.get("token");
-    const name = searchParams.get("name");
-
-    if (token) setVoteToken(token);
-    if (name) setActivityName(decodeURIComponent(name));
-
-    setVotedActivityIds(getVotedActivityIds());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
 
   // Find next unvoted activity
   const nextActivity = allActivities.find(
