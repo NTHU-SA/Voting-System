@@ -46,7 +46,3 @@ export function isStudentEligible(
 ): boolean {
   return voterList.includes(studentId);
 }
-
-export function reloadVoterList(): void {
-  cachedVoterList = null;
-}

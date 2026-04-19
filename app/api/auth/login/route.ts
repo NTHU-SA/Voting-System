@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthorizationURL } from "@/lib/oauth";
-import { validateLoginEnv } from "@/lib/validateEnv";
 
 export async function GET(request: NextRequest) {
   try {
-    validateLoginEnv();
-
     const searchParams = request.nextUrl.searchParams;
     const redirect = searchParams.get("redirect");
 

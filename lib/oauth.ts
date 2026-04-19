@@ -167,8 +167,6 @@ export async function exchangeCodeForToken(
 
 export async function getUserInfo(accessToken: string): Promise<OAuthUserInfo> {
   try {
-    validateOAuthCallbackEnv();
-
     const OAUTH_RESOURCE_URL = getRequiredEnvVar("OAUTH_RESOURCE_URL");
 
     const response = await axios.post(

@@ -58,11 +58,3 @@ export async function isAdmin(studentId: string): Promise<boolean> {
   const admins = await loadAdmins();
   return admins.includes(studentId);
 }
-
-/**
- * 強制清除管理員快取 (用於熱更新或測試)
- */
-export function clearAdminCache(): void {
-  adminCache = [];
-  lastLoadTime = 0;
-}

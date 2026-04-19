@@ -1,14 +1,6 @@
 import { Types } from "mongoose";
 
 // Database Models
-export interface IUser {
-  _id: Types.ObjectId | string;
-  student_id: string;
-  remark?: string;
-  created_at: Date;
-  updated_at: Date;
-}
-
 export interface IActivity {
   _id: Types.ObjectId | string;
   name: string;
