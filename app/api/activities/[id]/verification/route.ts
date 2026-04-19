@@ -3,11 +3,11 @@ import {
   requireAdminAuth,
   createErrorResponse,
   createSuccessResponse,
+  validateObjectIdOrError,
+  createInternalErrorResponse,
 } from "@/lib/middleware";
 import { Vote } from "@/lib/models/Vote";
 import connectDB from "@/lib/db";
-import { isValidObjectId } from "@/lib/validation";
-import { API_CONSTANTS } from "@/lib/constants";
 
 // GET /api/activities/[id]/verification - Get voted UUIDs for verification (Admin only)
 export async function GET(
@@ -24,8 +24,9 @@ export async function GET(
 
     const { id } = await params;
 
-    if (!isValidObjectId(id)) {
-      return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+    const invalidIdResponse = validateObjectIdOrError(id);
+    if (invalidIdResponse) {
+      return invalidIdResponse;
     }
 
     // Get all votes for this activity with only the token field
@@ -44,11 +45,10 @@ export async function GET(
       })),
     });
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : "Failed to get verification data";
-    console.error("Get verification error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to get verification data",
+      "Get verification error",
+    );
   }
 }

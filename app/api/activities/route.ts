@@ -3,6 +3,7 @@ import {
   requireAdminAuth,
   createErrorResponse,
   createSuccessResponse,
+  createInternalErrorResponse,
 } from "@/lib/middleware";
 import { Activity } from "@/lib/models/Activity";
 import connectDB from "@/lib/db";
@@ -31,10 +32,11 @@ export async function GET(request: NextRequest) {
 
     return createSuccessResponse(activities);
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to get activities";
-    console.error("Get activities error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to get activities",
+      "Get activities error",
+    );
   }
 }
 
@@ -96,9 +98,10 @@ export async function POST(request: NextRequest) {
 
     return createSuccessResponse(activity, 201);
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to create activity";
-    console.error("Create activity error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to create activity",
+      "Create activity error",
+    );
   }
 }

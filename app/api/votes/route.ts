@@ -4,12 +4,14 @@ import {
   requireAdminAuth,
   createErrorResponse,
   createSuccessResponse,
+  validateObjectIdOrError,
+  createInternalErrorResponse,
 } from "@/lib/middleware";
 import { loadVoterList, isStudentEligible } from "@/lib/voterList";
 import { Vote } from "@/lib/models/Vote";
 import connectDB from "@/lib/db";
 import { createVote } from "@/lib/votingService";
-import { isValidObjectId, isValidRule } from "@/lib/validation";
+import { isValidRule } from "@/lib/validation";
 import { validatePagination } from "@/lib/validation";
 import { API_CONSTANTS } from "@/lib/constants";
 
@@ -32,8 +34,13 @@ export async function POST(request: NextRequest) {
       return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_RULE);
     }
 
-    if (!activity_id || !isValidObjectId(activity_id)) {
+    if (!activity_id) {
       return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+    }
+
+    const invalidActivityIdResponse = validateObjectIdOrError(activity_id);
+    if (invalidActivityIdResponse) {
+      return invalidActivityIdResponse;
     }
 
     if (!body[rule]) {
@@ -84,10 +91,11 @@ export async function POST(request: NextRequest) {
 
     return createSuccessResponse(result.vote, 201);
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to create vote";
-    console.error("Create vote error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to create vote",
+      "Create vote error",
+    );
   }
 }
 
@@ -109,8 +117,9 @@ export async function GET(request: NextRequest) {
 
     const filter: Record<string, unknown> = {};
     if (activity_id) {
-      if (!isValidObjectId(activity_id)) {
-        return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+      const invalidActivityIdResponse = validateObjectIdOrError(activity_id);
+      if (invalidActivityIdResponse) {
+        return invalidActivityIdResponse;
       }
       filter.activity_id = activity_id;
     }
@@ -123,9 +132,10 @@ export async function GET(request: NextRequest) {
 
     return createSuccessResponse({ total, data });
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to get votes";
-    console.error("Get votes error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to get votes",
+      "Get votes error",
+    );
   }
 }

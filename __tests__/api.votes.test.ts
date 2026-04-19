@@ -8,6 +8,27 @@ jest.mock("@/lib/middleware", () => ({
   requireAuth: jest.fn(),
   requireAdmin: jest.fn(),
   requireAdminAuth: jest.fn(),
+  validateObjectIdOrError: (id: string) => {
+    if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+      return NextResponse.json(
+        { success: false, error: API_CONSTANTS.ERRORS.INVALID_OBJECT_ID },
+        { status: 400 },
+      );
+    }
+
+    return null;
+  },
+  createInternalErrorResponse: (
+    error: unknown,
+    fallbackMessage: string,
+  ) =>
+    NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : fallbackMessage,
+      },
+      { status: 500 },
+    ),
   createErrorResponse: (message: string, status = 400) =>
     NextResponse.json({ success: false, error: message }, { status }),
   createSuccessResponse: (data: unknown, status = 200) =>

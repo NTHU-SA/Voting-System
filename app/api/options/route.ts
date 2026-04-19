@@ -3,11 +3,12 @@ import {
   requireAdminAuth,
   createErrorResponse,
   createSuccessResponse,
+  validateObjectIdOrError,
+  createInternalErrorResponse,
 } from "@/lib/middleware";
 import { Activity } from "@/lib/models/Activity";
 import { Option } from "@/lib/models/Option";
 import connectDB from "@/lib/db";
-import { isValidObjectId } from "@/lib/validation";
 import { API_CONSTANTS } from "@/lib/constants";
 
 // GET /api/options - List options for an activity
@@ -24,18 +25,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (!isValidObjectId(activity_id)) {
-      return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+    const invalidIdResponse = validateObjectIdOrError(activity_id);
+    if (invalidIdResponse) {
+      return invalidIdResponse;
     }
 
     const options = await Option.find({ activity_id }).sort({ created_at: 1 });
 
     return createSuccessResponse(options);
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to get options";
-    console.error("Get options error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to get options",
+      "Get options error",
+    );
   }
 }
 
@@ -59,8 +62,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!isValidObjectId(activity_id)) {
-      return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+    const invalidIdResponse = validateObjectIdOrError(activity_id);
+    if (invalidIdResponse) {
+      return invalidIdResponse;
     }
 
     // Check if activity exists
@@ -86,9 +90,10 @@ export async function POST(request: NextRequest) {
 
     return createSuccessResponse(option, 201);
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to create option";
-    console.error("Create option error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to create option",
+      "Create option error",
+    );
   }
 }

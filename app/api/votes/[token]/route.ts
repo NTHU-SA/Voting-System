@@ -3,6 +3,7 @@ import {
   requireAuth,
   createErrorResponse,
   createSuccessResponse,
+  createInternalErrorResponse,
 } from "@/lib/middleware";
 import { Vote } from "@/lib/models/Vote";
 import connectDB from "@/lib/db";
@@ -46,9 +47,10 @@ export async function GET(
     // Return vote data
     return createSuccessResponse(vote);
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to get vote";
-    console.error("Get vote by token error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to get vote",
+      "Get vote by token error",
+    );
   }
 }

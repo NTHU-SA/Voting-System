@@ -3,12 +3,13 @@ import {
   requireAdminAuth,
   createErrorResponse,
   createSuccessResponse,
+  validateObjectIdOrError,
+  createInternalErrorResponse,
 } from "@/lib/middleware";
 import { Activity } from "@/lib/models/Activity";
 import { Option } from "@/lib/models/Option";
 import connectDB from "@/lib/db";
 import {
-  isValidObjectId,
   validateDateRange,
   isValidRule,
 } from "@/lib/validation";
@@ -24,8 +25,9 @@ export async function GET(
 
     const { id } = await params;
 
-    if (!isValidObjectId(id)) {
-      return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+    const invalidIdResponse = validateObjectIdOrError(id);
+    if (invalidIdResponse) {
+      return invalidIdResponse;
     }
 
     const searchParams = request.nextUrl.searchParams;
@@ -45,10 +47,11 @@ export async function GET(
 
     return createSuccessResponse(activity);
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to get activity";
-    console.error("Get activity error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to get activity",
+      "Get activity error",
+    );
   }
 }
 
@@ -67,8 +70,9 @@ export async function PUT(
 
     const { id } = await params;
 
-    if (!isValidObjectId(id)) {
-      return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+    const invalidIdResponse = validateObjectIdOrError(id);
+    if (invalidIdResponse) {
+      return invalidIdResponse;
     }
 
     const body = await request.json();
@@ -112,10 +116,11 @@ export async function PUT(
 
     return createSuccessResponse(activity);
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to update activity";
-    console.error("Update activity error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to update activity",
+      "Update activity error",
+    );
   }
 }
 
@@ -134,8 +139,9 @@ export async function DELETE(
 
     const { id } = await params;
 
-    if (!isValidObjectId(id)) {
-      return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+    const invalidIdResponse = validateObjectIdOrError(id);
+    if (invalidIdResponse) {
+      return invalidIdResponse;
     }
 
     // Delete all related options first
@@ -149,9 +155,10 @@ export async function DELETE(
 
     return createSuccessResponse({ message: "Activity deleted successfully" });
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to delete activity";
-    console.error("Delete activity error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to delete activity",
+      "Delete activity error",
+    );
   }
 }

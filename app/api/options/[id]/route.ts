@@ -3,11 +3,12 @@ import {
   requireAdminAuth,
   createErrorResponse,
   createSuccessResponse,
+  validateObjectIdOrError,
+  createInternalErrorResponse,
 } from "@/lib/middleware";
 import { Activity } from "@/lib/models/Activity";
 import { Option } from "@/lib/models/Option";
 import connectDB from "@/lib/db";
-import { isValidObjectId } from "@/lib/validation";
 import { API_CONSTANTS } from "@/lib/constants";
 
 // GET /api/options/[id] - Get single option
@@ -20,8 +21,9 @@ export async function GET(
 
     const { id } = await params;
 
-    if (!isValidObjectId(id)) {
-      return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+    const invalidIdResponse = validateObjectIdOrError(id);
+    if (invalidIdResponse) {
+      return invalidIdResponse;
     }
 
     const option = await Option.findById(id);
@@ -32,10 +34,11 @@ export async function GET(
 
     return createSuccessResponse(option);
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to get option";
-    console.error("Get option error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to get option",
+      "Get option error",
+    );
   }
 }
 
@@ -54,8 +57,9 @@ export async function PUT(
 
     const { id } = await params;
 
-    if (!isValidObjectId(id)) {
-      return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+    const invalidIdResponse = validateObjectIdOrError(id);
+    if (invalidIdResponse) {
+      return invalidIdResponse;
     }
 
     const body = await request.json();
@@ -79,10 +83,11 @@ export async function PUT(
 
     return createSuccessResponse(option);
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to update option";
-    console.error("Update option error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to update option",
+      "Update option error",
+    );
   }
 }
 
@@ -101,8 +106,9 @@ export async function DELETE(
 
     const { id } = await params;
 
-    if (!isValidObjectId(id)) {
-      return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+    const invalidIdResponse = validateObjectIdOrError(id);
+    if (invalidIdResponse) {
+      return invalidIdResponse;
     }
 
     const option = await Option.findById(id);
@@ -121,9 +127,10 @@ export async function DELETE(
 
     return createSuccessResponse({ message: "Option deleted successfully" });
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to delete option";
-    console.error("Delete option error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to delete option",
+      "Delete option error",
+    );
   }
 }
