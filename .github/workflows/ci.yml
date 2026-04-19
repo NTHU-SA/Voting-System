@@ -49,10 +49,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Prepare production env file for compose
-        run: cp .env.production.example .env.production
+        run: cp .env.example .env
 
       - name: Build and start containers
-        run: docker compose --env-file .env.production up -d --build
+        run: docker compose --env-file .env up -d --build
 
       - name: Wait for app readiness and smoke test
         run: |
@@ -65,13 +65,13 @@ jobs:
             sleep 2
           done
           echo "App did not become ready in time"
-          docker compose --env-file .env.production logs --tail=200
+          docker compose --env-file .env logs --tail=200
           exit 1
 
       - name: Show container logs
         if: always()
-        run: docker compose --env-file .env.production logs --tail=200
+        run: docker compose --env-file .env logs --tail=200
 
       - name: Stop containers
         if: always()
-        run: docker compose --env-file .env.production down -v
+        run: docker compose --env-file .env down -v
