@@ -22,6 +22,8 @@ import {
   Eye,
   Check,
   X,
+  Upload,
+  Users,
 } from "lucide-react";
 import { ActivityFormFields } from "../_components/ActivityFormFields";
 import { CandidateFormFields } from "../_components/CandidateFormFields";
@@ -43,6 +45,8 @@ function ActivityDetailPageContent() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [voterCsvFile, setVoterCsvFile] = useState<File | null>(null);
+  const [voterCount, setVoterCount] = useState<number>(0);
 
   // Edit form state
   const [formData, setFormData] = useState({
@@ -73,8 +77,28 @@ function ActivityDetailPageContent() {
         open_from: toDateTimeLocalString(activity.open_from),
         open_to: toDateTimeLocalString(activity.open_to),
       });
+      setVoterCount(activity.eligibleVotersCount || 0);
     }
   }, [activity]);
+
+  useEffect(() => {
+    fetchVoterStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activityId]);
+
+  const fetchVoterStats = async () => {
+    try {
+      const response = await fetch(`/api/activities/${activityId}/voters`, {
+        credentials: "include",
+      });
+      const data = await response.json();
+      if (data.success) {
+        setVoterCount(data.data.eligible_voters_count || 0);
+      }
+    } catch (err) {
+      console.error("Error fetching voter stats:", err);
+    }
+  };
 
   const handleActivityChange = (
     e: React.ChangeEvent<
@@ -179,23 +203,25 @@ function ActivityDetailPageContent() {
     setEditingOptionId(option._id);
     setCurrentOption({
       label: option.label || "",
-      candidate: {
-        name: option.candidate?.name || "",
-        department: option.candidate?.department || "",
-        college: option.candidate?.college || "",
-        avatar_url: option.candidate?.avatar_url || "",
-        experiences: option.candidate?.personal_experiences?.join("\n") || "",
-        opinions: option.candidate?.political_opinions?.join("\n") || "",
-      },
-      vice: (option.vice || []).map((v) => ({
-        name: v.name || "",
-        department: v.department || "",
-        college: v.college || "",
-        avatar_url: v.avatar_url || "",
-        experiences: v.personal_experiences?.join("\n") || "",
-        opinions: v.political_opinions?.join("\n") || "",
-      })),
-    });
+        candidate: {
+          name: option.candidate?.name || "",
+          department: option.candidate?.department || "",
+          college: option.candidate?.college || "",
+          avatar_url: option.candidate?.avatar_url || "",
+          description: option.candidate?.description || "",
+          experiences: option.candidate?.personal_experiences?.join("\n") || "",
+          opinions: option.candidate?.political_opinions?.join("\n") || "",
+        },
+        vice: (option.vice || []).map((v) => ({
+          name: v.name || "",
+          department: v.department || "",
+          college: v.college || "",
+          avatar_url: v.avatar_url || "",
+          description: v.description || "",
+          experiences: v.personal_experiences?.join("\n") || "",
+          opinions: v.political_opinions?.join("\n") || "",
+        })),
+      });
   };
 
   const handleSaveOption = async (e: React.FormEvent) => {
@@ -317,6 +343,42 @@ function ActivityDetailPageContent() {
     }
   };
 
+  const handleUploadVoterList = async () => {
+    if (!voterCsvFile) {
+      setError("請先選擇 CSV 檔案");
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+    setSuccessMessage("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", voterCsvFile);
+
+      const response = await fetch(`/api/activities/${activityId}/voters`, {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      const data = await response.json();
+      if (!data.success) {
+        setError(data.error || "上傳選民名冊失敗");
+      } else {
+        setSuccessMessage(`選民名冊上傳成功，共 ${data.data.eligible_voters_count} 人`);
+        setVoterCsvFile(null);
+        await fetchVoterStats();
+        await refetch();
+      }
+    } catch (err) {
+      console.error("Error uploading voter list:", err);
+      setError("上傳選民名冊時發生錯誤");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -429,6 +491,36 @@ function ActivityDetailPageContent() {
                 </Button>
               </div>
             </form>
+          </CardContent>
+        </Card>
+
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              上傳選民名冊（CSV）
+            </CardTitle>
+          </CardHeader>
+          <Separator />
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                合格選民數：{voterCount}
+              </p>
+              <Input
+                type="file"
+                accept=".csv,text/csv"
+                onChange={(e) => setVoterCsvFile(e.target.files?.[0] || null)}
+                disabled={saving}
+              />
+              <p className="text-xs text-muted-foreground">
+                CSV 第一欄需為學號，可包含標題列 student_id。
+              </p>
+              <Button onClick={handleUploadVoterList} disabled={saving || !voterCsvFile}>
+                <Upload className="mr-2 h-4 w-4" />
+                上傳選民名冊
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

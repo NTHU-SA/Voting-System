@@ -22,15 +22,18 @@ import {
   XCircle,
   AlertCircle,
   Download,
+  ListChecks,
 } from "lucide-react";
 import { formatDateTime } from "@/utils/formatDate";
 
 interface VerificationData {
   activity_id: string;
+  activity_name: string;
   total_votes: number;
   voted_tokens: {
     uuid: string;
     voted_at: string;
+    selections: string[];
   }[];
 }
 
@@ -109,10 +112,11 @@ function VerificationPageContent() {
     if (!data) return;
 
     const csvContent = [
-      ["投票憑證 UUID", "投票時間"],
+      ["投票憑證 UUID", "投票時間", "投票內容"],
       ...data.voted_tokens.map((token) => [
         token.uuid,
         formatDateTime(token.voted_at),
+        token.selections.join(" / "),
       ]),
     ]
       .map((row) => row.join(","))
@@ -254,24 +258,37 @@ function VerificationPageContent() {
           <CardContent className="pt-6">
             {data.voted_tokens.length > 0 ? (
               <div className="max-h-[600px] space-y-2 overflow-y-auto">
-                {data.voted_tokens.map((token, index) => (
-                  <div
-                    key={token.uuid}
-                    className="flex items-center justify-between rounded-md border bg-muted/50 p-3 text-sm"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                        {index + 1}
-                      </span>
-                      <code className="rounded bg-background px-2 py-1 font-mono text-xs">
-                        {token.uuid}
-                      </code>
-                    </div>
-                    <span className="text-muted-foreground">
-                      {formatDateTime(token.voted_at)}
-                    </span>
-                  </div>
-                ))}
+                 {data.voted_tokens.map((token, index) => (
+                   <div
+                     key={token.uuid}
+                     className="rounded-md border bg-muted/50 p-3 text-sm"
+                   >
+                     <div className="flex items-center justify-between gap-3">
+                       <div className="flex items-center gap-3">
+                         <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                           {index + 1}
+                         </span>
+                         <code className="rounded bg-background px-2 py-1 font-mono text-xs">
+                           {token.uuid}
+                         </code>
+                       </div>
+                       <span className="text-muted-foreground">
+                         {formatDateTime(token.voted_at)}
+                       </span>
+                     </div>
+                     <div className="mt-2 rounded bg-background/80 p-2">
+                       <p className="mb-1 flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                         <ListChecks className="h-3 w-3" />
+                         投票內容
+                       </p>
+                       <ul className="space-y-1 text-xs">
+                         {token.selections.map((selection, selectionIndex) => (
+                           <li key={`${token.uuid}-${selectionIndex}`}>{selection}</li>
+                         ))}
+                       </ul>
+                     </div>
+                   </div>
+                 ))}
               </div>
             ) : (
               <p className="py-8 text-center text-muted-foreground">
@@ -289,13 +306,13 @@ function VerificationPageContent() {
               <div className="text-sm text-blue-900">
                 <p className="mb-2 font-semibold">關於投票驗證</p>
                 <ul className="list-inside list-disc space-y-1 text-blue-800">
-                  <li>每個投票者在完成投票後會獲得唯一的 UUID 憑證</li>
-                  <li>投票者可使用此憑證驗證其投票是否被正確記錄</li>
-                  <li>UUID 與投票者身份完全分離，確保匿名性</li>
-                  <li>管理員無法透過 UUID 追蹤投票者的投票內容</li>
-                </ul>
-              </div>
-            </div>
+                   <li>每個投票者在完成投票後會獲得唯一的 UUID 憑證</li>
+                   <li>投票者可使用此憑證驗證其投票是否被正確記錄</li>
+                   <li>UUID 與投票者身份完全分離，確保匿名性</li>
+                   <li>管理員可檢視匿名投票內容，但無法對應回個人身份</li>
+                 </ul>
+               </div>
+             </div>
           </CardContent>
         </Card>
       </main>

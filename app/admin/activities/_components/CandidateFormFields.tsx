@@ -44,6 +44,12 @@ export function CandidateFormFields({
         onChange={(e) => onChange("avatar_url", e.target.value)}
       />
       <Textarea
+        placeholder="候選人介紹（支援 Markdown/HTML）"
+        value={candidate.description}
+        onChange={(e) => onChange("description", e.target.value)}
+        rows={3}
+      />
+      <Textarea
         placeholder="個人經歷（選填，一行一項）"
         value={candidate.experiences}
         onChange={(e) => onChange("experiences", e.target.value)}

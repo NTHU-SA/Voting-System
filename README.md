@@ -94,6 +94,7 @@ MONGO_INITDB_DATABASE=voting_sa
 
 # Security
 TOKEN_SECRET=your-strong-random-secret-here
+ROOT_ADMIN=your-root-admin-student-id
 # Use openssl rand -base64 32 to generate
 
 # OAuth (CCXP Production)
@@ -122,34 +123,15 @@ openssl rand -base64 32
 
 ### Eligible Voters
 
-Copy Example file to create voter list:
-
-```bash
-cp data/voterList.csv.example data/voterList.csv
-```
-
-Edit `data/voterList.csv`:
-
-```csv
-student_id
-110000001
-110000002
-```
+Each activity now has its own voter list in MongoDB.
+Upload CSV from admin activity page (`/admin/activities/:id`) to overwrite that activity's eligible voter roster and update `eligibleVotersCount`.
 
 ### Administrators
 
-Copy Example file to create admin list:
+Administrators are stored in MongoDB (`admins` collection).
 
-```bash
-cp data/adminList.csv.example data/adminList.csv
-```
-
-Edit `data/adminList.csv`:
-
-```csv
-student_id
-110000114
-```
+- `ROOT_ADMIN` is configured via environment variable.
+- Only `ROOT_ADMIN` can access `/admin/settings` to manage other admins.
 
 ## Architecture
 
@@ -209,6 +191,7 @@ student_id
 
 - `POST /api/votes` - Submit vote (authenticated, eligible)
 - `GET /api/votes` - List votes (admin, anonymized)
+- `GET /api/verify/:uuid` - Public UUID verification
 
 ### Statistics
 
@@ -231,9 +214,6 @@ student_id
 │   └── db.ts             # Database connection
 │   ...
 ├── components/           # React components
-├── data/                 # CSV configuration files
-│   ├── voterList.csv     # Eligible voters
-│   └── adminList.csv     # Admin list
 └── middleware.ts         # Auth middleware
 ```
 
@@ -277,7 +257,7 @@ For local development, the system uses Mock OAuth:
 
 - ✅ JWT authentication with HttpOnly cookies
 - ✅ UUID-based vote anonymization
-- ✅ Admin role verification via CSV
+- ✅ Admin role verification via MongoDB + ROOT_ADMIN
 - ✅ Voter eligibility validation
 - ✅ Time-window enforcement
 - ✅ Duplicate vote prevention
@@ -300,8 +280,8 @@ Before deploying to production:
 - [ ] Configure production OAuth credentials (CCXP)
 - [ ] Set up HTTPS/SSL certificates
 - [ ] Configure MongoDB with authentication
-- [ ] Update `data/voterList.csv` with current student roster
-- [ ] Update `data/adminList.csv` with admin student IDs
+- [ ] Set `ROOT_ADMIN` in environment
+- [ ] Prepare activity voter roster CSV for each election and upload in admin UI
 - [ ] Set `NODE_ENV=production` in environment
 - [ ] Enable MongoDB backup automation
 - [ ] Configure firewall rules
@@ -326,7 +306,7 @@ Before deploying to production:
 
 **Vote submission fails**
 
-- Verify student is in `data/voterList.csv`
+- Verify student is in the activity's uploaded voter roster
 - Check activity time window is valid
 - Confirm student hasn't already voted
 

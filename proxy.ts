@@ -14,7 +14,9 @@ export async function proxy(request: NextRequest) {
     "/api/auth/callback",
     "/api/mock",
     "/api/activities",
+    "/api/verify",
     "/callback",
+    "/verify",
   ];
 
   // Check if the current path is public
@@ -88,7 +90,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set(
     "Content-Security-Policy",
-    `default-src 'self'; ${scriptSrc}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; ${connectSrc}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'`,
+      `default-src 'self'; ${scriptSrc}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; ${connectSrc}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'`,
   );
   response.headers.set(
     "Permissions-Policy",

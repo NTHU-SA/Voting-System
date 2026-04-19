@@ -19,6 +19,10 @@ const CandidateSchema = new Schema<ICandidate>(
       type: String,
       required: false,
     },
+    description: {
+      type: String,
+      required: false,
+    },
     personal_experiences: [
       {
         type: String,

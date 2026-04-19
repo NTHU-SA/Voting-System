@@ -7,8 +7,9 @@ import {
   validateObjectIdOrError,
   createInternalErrorResponse,
 } from "@/lib/middleware";
-import { loadVoterList, isStudentEligible } from "@/lib/voterList";
 import { Vote } from "@/lib/models/Vote";
+import { ActivityVoter } from "@/lib/models/ActivityVoter";
+import { Option } from "@/lib/models/Option";
 import connectDB from "@/lib/db";
 import { createVote } from "@/lib/votingService";
 import { isValidRule } from "@/lib/validation";
@@ -70,9 +71,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check if student is eligible to vote
-    const voterList = await loadVoterList();
-    if (!isStudentEligible(user.student_id, voterList)) {
+    // Check if student is eligible to vote for this activity
+    const eligibleVoter = await ActivityVoter.findOne({
+      activity_id,
+      student_id: user.student_id,
+    }).select("_id");
+    if (!eligibleVoter) {
       return createErrorResponse(API_CONSTANTS.ERRORS.VOTE_NOT_ELIGIBLE, 403);
     }
 
@@ -133,7 +137,40 @@ export async function GET(request: NextRequest) {
       .skip(skip)
       .sort({ created_at: -1 });
 
-    return createSuccessResponse({ total, data });
+    const activityIds = [...new Set(data.map((vote) => vote.activity_id.toString()))];
+    const options = await Option.find({ activity_id: { $in: activityIds } })
+      .select("_id label candidate.name")
+      .lean();
+    const optionMap = new Map<string, string>();
+    options.forEach((option) => {
+      optionMap.set(
+        option._id.toString(),
+        option.label || option.candidate?.name || option._id.toString(),
+      );
+    });
+
+    const enrichedData = data.map((vote) => {
+      if (vote.rule === "choose_one") {
+        const selected = vote.choose_one
+          ? optionMap.get(vote.choose_one.toString()) || vote.choose_one.toString()
+          : "";
+        return {
+          ...vote.toObject(),
+          selections: selected ? [selected] : [],
+        };
+      }
+
+      return {
+        ...vote.toObject(),
+        selections: (vote.choose_all || []).map((choice) => {
+          const optionName =
+            optionMap.get(choice.option_id.toString()) || choice.option_id.toString();
+          return `${optionName}（${choice.remark}）`;
+        }),
+      };
+    });
+
+    return createSuccessResponse({ total, data: enrichedData });
   } catch (error: unknown) {
     return createInternalErrorResponse(
       error,

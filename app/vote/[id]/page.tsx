@@ -21,6 +21,7 @@ import { saveVotingRecord, getVotesByActivityId } from "@/lib/votingHistory";
 import { Candidate, IChoiceAll } from "@/types";
 import { useActivity, useUser } from "@/hooks";
 import { API_CONSTANTS } from "@/lib/constants";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 
 export default function VotingPage() {
   const params = useParams();
@@ -234,6 +235,16 @@ export default function VotingPage() {
             </div>
           </div>
 
+          {candidate.description && (
+            <div className="mb-3 rounded-lg bg-white/80 p-3">
+              <p className="mb-2 text-sm font-bold">候選人介紹</p>
+              <MarkdownRenderer
+                content={candidate.description}
+                className="space-y-2 text-sm break-words"
+              />
+            </div>
+          )}
+
           {candidate.personal_experiences &&
             candidate.personal_experiences.length > 0 && (
               <div className="mb-3 rounded-lg bg-white/80 p-3">
@@ -244,9 +255,11 @@ export default function VotingPage() {
                 <ul className="space-y-1">
                   {candidate.personal_experiences.map(
                     (exp: string, idx: number) => (
-                      <li key={idx} className="flex items-start text-sm">
-                        <span className="mr-2 text-primary">•</span>
-                        <span>{exp}</span>
+                      <li key={idx} className="text-sm">
+                        <MarkdownRenderer
+                          content={exp}
+                          className="break-words"
+                        />
                       </li>
                     ),
                   )}
@@ -264,9 +277,11 @@ export default function VotingPage() {
                 <ul className="space-y-1">
                   {candidate.political_opinions.map(
                     (opinion: string, idx: number) => (
-                      <li key={idx} className="flex items-start text-sm">
-                        <span className="mr-2 text-primary">•</span>
-                        <span>{opinion}</span>
+                      <li key={idx} className="text-sm">
+                        <MarkdownRenderer
+                          content={opinion}
+                          className="break-words"
+                        />
                       </li>
                     ),
                   )}
