@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  requireAuth,
-  requireAdmin,
+  requireAdminAuth,
   createErrorResponse,
   createSuccessResponse,
 } from "@/lib/middleware";
@@ -59,16 +58,9 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    // Authenticate user and require admin
-    const authResult = await requireAuth(request);
-    if (authResult instanceof NextResponse) {
-      return authResult;
-    }
-    const user = authResult;
-
-    const adminCheck = await requireAdmin(user);
-    if (adminCheck) {
-      return adminCheck;
+    const adminUser = await requireAdminAuth(request);
+    if (adminUser instanceof NextResponse) {
+      return adminUser;
     }
 
     await connectDB();
@@ -133,16 +125,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    // Authenticate user and require admin
-    const authResult = await requireAuth(request);
-    if (authResult instanceof NextResponse) {
-      return authResult;
-    }
-    const user = authResult;
-
-    const adminCheck = await requireAdmin(user);
-    if (adminCheck) {
-      return adminCheck;
+    const adminUser = await requireAdminAuth(request);
+    if (adminUser instanceof NextResponse) {
+      return adminUser;
     }
 
     await connectDB();

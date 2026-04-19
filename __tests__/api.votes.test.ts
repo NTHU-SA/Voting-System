@@ -7,6 +7,7 @@ import { API_CONSTANTS } from "@/lib/constants";
 jest.mock("@/lib/middleware", () => ({
   requireAuth: jest.fn(),
   requireAdmin: jest.fn(),
+  requireAdminAuth: jest.fn(),
   createErrorResponse: (message: string, status = 400) =>
     NextResponse.json({ success: false, error: message }, { status }),
   createSuccessResponse: (data: unknown, status = 200) =>
@@ -30,6 +31,7 @@ jest.mock("@/lib/models/Vote", () => ({
 const middlewareMock = jest.requireMock("@/lib/middleware") as {
   requireAuth: jest.Mock;
   requireAdmin: jest.Mock;
+  requireAdminAuth: jest.Mock;
 };
 const voterListMock = jest.requireMock("@/lib/voterList") as {
   loadVoterList: jest.Mock;
@@ -51,6 +53,9 @@ describe("/api/votes route", () => {
 
     middlewareMock.requireAuth.mockResolvedValue({ student_id: "111000111" });
     middlewareMock.requireAdmin.mockResolvedValue(null);
+    middlewareMock.requireAdminAuth.mockResolvedValue({
+      student_id: "111000111",
+    });
     voterListMock.loadVoterList.mockResolvedValue(["111000111"]);
     voterListMock.isStudentEligible.mockReturnValue(true);
   });

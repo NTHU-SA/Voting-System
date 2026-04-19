@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdmin, verifyToken } from "@/lib/auth";
 import { JWTPayload } from "@/types";
 import { API_CONSTANTS } from "@/lib/constants";
+import { isValidObjectId } from "@/lib/validation";
 
 /**
  * Extracts JWT token from request (Authorization header or cookie)
@@ -55,6 +56,50 @@ export async function requireAdmin(
   } catch {
     return createErrorResponse(API_CONSTANTS.ERRORS.ADMIN_REQUIRED, 403);
   }
+}
+
+/**
+ * Middleware helper to require both authentication and admin authorization
+ */
+export async function requireAdminAuth(
+  request: NextRequest
+): Promise<JWTPayload | NextResponse> {
+  const authResult = await requireAuth(request);
+  if (authResult instanceof NextResponse) {
+    return authResult;
+  }
+
+  const adminCheck = await requireAdmin(authResult);
+  if (adminCheck) {
+    return adminCheck;
+  }
+
+  return authResult;
+}
+
+/**
+ * Validates MongoDB ObjectId and returns a standardized error response when invalid.
+ */
+export function validateObjectIdOrError(id: string): NextResponse | null {
+  if (!isValidObjectId(id)) {
+    return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+  }
+
+  return null;
+}
+
+/**
+ * Creates a standardized internal server error response with consistent logging.
+ */
+export function createInternalErrorResponse(
+  error: unknown,
+  fallbackMessage: string,
+  context: string,
+): NextResponse {
+  const errorMessage =
+    error instanceof Error ? error.message : fallbackMessage;
+  console.error(`${context}:`, error);
+  return createErrorResponse(errorMessage, 500);
 }
 
 /**
