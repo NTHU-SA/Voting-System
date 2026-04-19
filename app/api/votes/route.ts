@@ -35,7 +35,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (!activity_id) {
-      return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+      return createErrorResponse(
+        `${API_CONSTANTS.ERRORS.MISSING_FIELD}: activity_id`,
+        400,
+      );
     }
 
     const invalidActivityIdResponse = validateObjectIdOrError(activity_id);
