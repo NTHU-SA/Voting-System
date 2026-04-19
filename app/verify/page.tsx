@@ -39,7 +39,13 @@ export default function VerifyPage() {
       const data = await response.json();
 
       if (!data.success) {
-        setError(data.error || "查詢失敗");
+        if (response.status === 404) {
+          setError("查無此 UUID 投票記錄");
+        } else if (response.status === 400) {
+          setError("UUID 格式或參數錯誤");
+        } else {
+          setError(data.error || "查詢失敗");
+        }
       } else {
         setResult(data.data);
       }

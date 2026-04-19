@@ -83,7 +83,7 @@ export async function POST(
       return adminUser;
     }
 
-    await connectDB();
+    const db = await connectDB();
     const { id } = await params;
 
     const invalidIdResponse = validateObjectIdOrError(id);
@@ -108,21 +108,34 @@ export async function POST(
       return createErrorResponse("CSV does not contain valid student IDs", 400);
     }
 
-    await ActivityVoter.deleteMany({ activity_id: id });
-    await ActivityVoter.insertMany(
-      studentIds.map((studentId) => ({
-        activity_id: id,
-        student_id: studentId,
-        created_at: new Date(),
-        updated_at: new Date(),
-      })),
-      { ordered: false },
-    );
+    const session = await db.startSession();
+    try {
+      await session.withTransaction(async () => {
+        await ActivityVoter.deleteMany({ activity_id: id }, { session });
+        await ActivityVoter.insertMany(
+          studentIds.map((studentId) => ({
+            activity_id: id,
+            student_id: studentId,
+            created_at: new Date(),
+            updated_at: new Date(),
+          })),
+          { ordered: false, session },
+        );
 
-    await Activity.updateOne(
-      { _id: id },
-      { $set: { eligibleVotersCount: studentIds.length, updated_at: new Date() } },
-    );
+        await Activity.updateOne(
+          { _id: id },
+          {
+            $set: {
+              eligibleVotersCount: studentIds.length,
+              updated_at: new Date(),
+            },
+          },
+          { session },
+        );
+      });
+    } finally {
+      await session.endSession();
+    }
 
     return createSuccessResponse({
       activity_id: id,

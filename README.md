@@ -132,6 +132,7 @@ Administrators are stored in MongoDB (`admins` collection).
 
 - `ROOT_ADMIN` is configured via environment variable.
 - Only `ROOT_ADMIN` can access `/admin/settings` to manage other admins.
+- If `ROOT_ADMIN` is missing, root-only admin management is unavailable.
 
 ## Architecture
 

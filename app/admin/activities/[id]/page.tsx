@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -81,12 +81,7 @@ function ActivityDetailPageContent() {
     }
   }, [activity]);
 
-  useEffect(() => {
-    fetchVoterStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activityId]);
-
-  const fetchVoterStats = async () => {
+  const fetchVoterStats = useCallback(async () => {
     try {
       const response = await fetch(`/api/activities/${activityId}/voters`, {
         credentials: "include",
@@ -94,11 +89,18 @@ function ActivityDetailPageContent() {
       const data = await response.json();
       if (data.success) {
         setVoterCount(data.data.eligible_voters_count || 0);
+      } else {
+        setError(data.error || "無法載入選民名冊統計");
       }
     } catch (err) {
       console.error("Error fetching voter stats:", err);
+      setError("無法載入選民名冊統計");
     }
-  };
+  }, [activityId]);
+
+  useEffect(() => {
+    fetchVoterStats();
+  }, [fetchVoterStats]);
 
   const handleActivityChange = (
     e: React.ChangeEvent<
@@ -510,7 +512,21 @@ function ActivityDetailPageContent() {
               <Input
                 type="file"
                 accept=".csv,text/csv"
-                onChange={(e) => setVoterCsvFile(e.target.files?.[0] || null)}
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  if (!file) {
+                    setVoterCsvFile(null);
+                    return;
+                  }
+                  const isCsv =
+                    file.type === "text/csv" || file.name.toLowerCase().endsWith(".csv");
+                  if (!isCsv) {
+                    setError("請上傳 CSV 檔案");
+                    setVoterCsvFile(null);
+                    return;
+                  }
+                  setVoterCsvFile(file);
+                }}
                 disabled={saving}
               />
               <p className="text-xs text-muted-foreground">

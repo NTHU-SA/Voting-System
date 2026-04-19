@@ -39,7 +39,16 @@ export default function MarkdownRenderer({
 }: MarkdownRendererProps) {
   return (
     <div className={className}>
-      <ReactMarkdown rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema]]}>
+      <ReactMarkdown
+        rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema]]}
+        components={{
+          a: (props) => {
+            const target = props.target || "_blank";
+            const rel = target === "_blank" ? "noopener noreferrer" : props.rel;
+            return <a {...props} target={target} rel={rel} />;
+          },
+        }}
+      >
         {content}
       </ReactMarkdown>
     </div>

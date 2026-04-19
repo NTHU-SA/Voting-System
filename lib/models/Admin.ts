@@ -24,7 +24,5 @@ const AdminSchema = new Schema<IAdmin>({
   },
 } as const);
 
-AdminSchema.index({ student_id: 1 }, { unique: true });
-
 export const Admin: Model<IAdmin> =
   mongoose.models.Admin || mongoose.model<IAdmin>("Admin", AdminSchema);

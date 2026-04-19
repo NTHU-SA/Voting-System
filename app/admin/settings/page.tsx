@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +18,7 @@ interface AdminItem {
 }
 
 export default function AdminSettingsPage() {
+  const router = useRouter();
   const { user, loading: userLoading } = useUser();
   const [loading, setLoading] = useState(true);
   const [rootAdmin, setRootAdmin] = useState<string>("");
@@ -46,11 +48,11 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     if (userLoading) return;
     if (!user?.isRootAdmin) {
-      window.location.href = "/?error=admin_required";
+      router.push("/?error=admin_required");
       return;
     }
     fetchAdmins();
-  }, [user, userLoading]);
+  }, [router, user, userLoading]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
