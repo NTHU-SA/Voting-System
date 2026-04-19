@@ -2,7 +2,7 @@ import { Activity } from "@/lib/models/Activity";
 import { Option } from "@/lib/models/Option";
 import { Vote } from "@/lib/models/Vote";
 import { IChoiceAll } from "@/types";
-import { isValidRemark } from "@/lib/validation";
+import { isValidObjectId, isValidRemark } from "@/lib/validation";
 import { API_CONSTANTS } from "@/lib/constants";
 import { v4 as uuidv4 } from "uuid";
 import { Document, Types } from "mongoose";
@@ -55,6 +55,22 @@ export async function validateOptions(
   activity_id: string,
   optionIds: string[]
 ): Promise<VoteValidationResult> {
+  if (optionIds.length === 0) {
+    return {
+      valid: false,
+      error: API_CONSTANTS.ERRORS.INVALID_OPTIONS,
+      statusCode: 400,
+    };
+  }
+
+  if (!optionIds.every((id) => isValidObjectId(id))) {
+    return {
+      valid: false,
+      error: API_CONSTANTS.ERRORS.INVALID_OBJECT_ID,
+      statusCode: 400,
+    };
+  }
+
   const options = await Option.find({
     _id: { $in: optionIds },
     activity_id,
@@ -154,11 +170,31 @@ export async function createVote(params: CreateVoteParams): Promise<{
       };
     }
 
+    if (rule === "choose_one") {
+      if (!choose_one || !choose_one.trim()) {
+        return {
+          success: false,
+          error: `${API_CONSTANTS.ERRORS.MISSING_FIELD}: choose_one`,
+          statusCode: 400,
+        };
+      }
+    }
+
+    if (rule === "choose_all") {
+      if (!choose_all || choose_all.length === 0) {
+        return {
+          success: false,
+          error: `${API_CONSTANTS.ERRORS.MISSING_FIELD}: choose_all`,
+          statusCode: 400,
+        };
+      }
+    }
+
     // Get option IDs and validate
     const optionIds =
       rule === "choose_all"
         ? (choose_all || []).map((c) => c.option_id.toString())
-        : [choose_one || ""];
+        : [choose_one as string];
 
     const optionValidation = await validateOptions(activity_id, optionIds);
     if (!optionValidation.valid) {
@@ -198,7 +234,7 @@ export async function createVote(params: CreateVoteParams): Promise<{
     if (rule === "choose_all") {
       voteData.choose_all = choose_all;
     } else {
-      voteData.choose_one = choose_one;
+      voteData.choose_one = choose_one as string;
     }
 
     const vote = await Vote.create(voteData);

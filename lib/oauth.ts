@@ -2,6 +2,7 @@ import axios from "axios";
 import crypto from "crypto";
 import { getRequiredEnvVar } from "./config";
 import { OAuthTokenResponse, OAuthUserInfo } from "@/types";
+import { validateOAuthCallbackEnv, validateLoginEnv } from "@/lib/validateEnv";
 
 const OAUTH_STATE_MAX_AGE_SECONDS = 10 * 60;
 
@@ -105,6 +106,8 @@ export function requireOAuthRedirectPath(state: string | null): string {
 }
 
 export function getAuthorizationURL(redirect?: string): string {
+  validateLoginEnv();
+
   const OAUTH_CLIENT_ID = getRequiredEnvVar("OAUTH_CLIENT_ID");
   const OAUTH_CALLBACK_URL = getRequiredEnvVar("OAUTH_CALLBACK_URL");
   const OAUTH_SCOPE = getRequiredEnvVar("OAUTH_SCOPE");
@@ -129,6 +132,8 @@ export async function exchangeCodeForToken(
   oauthError?: string,
 ): Promise<OAuthTokenResponse> {
   try {
+    validateOAuthCallbackEnv();
+
     if (oauthError) {
       throw new Error(`OAuth provider error: ${oauthError}`);
     }
@@ -162,6 +167,8 @@ export async function exchangeCodeForToken(
 
 export async function getUserInfo(accessToken: string): Promise<OAuthUserInfo> {
   try {
+    validateOAuthCallbackEnv();
+
     const OAUTH_RESOURCE_URL = getRequiredEnvVar("OAUTH_RESOURCE_URL");
 
     const response = await axios.post(

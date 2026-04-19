@@ -9,7 +9,7 @@ import { loadVoterList, isStudentEligible } from "@/lib/voterList";
 import { Vote } from "@/lib/models/Vote";
 import connectDB from "@/lib/db";
 import { createVote } from "@/lib/votingService";
-import { isValidRule } from "@/lib/validation";
+import { isValidObjectId, isValidRule } from "@/lib/validation";
 import { validatePagination } from "@/lib/validation";
 import { API_CONSTANTS } from "@/lib/constants";
 
@@ -32,10 +32,32 @@ export async function POST(request: NextRequest) {
       return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_RULE);
     }
 
+    if (!activity_id || !isValidObjectId(activity_id)) {
+      return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+    }
+
     if (!body[rule]) {
       return createErrorResponse(
         `${API_CONSTANTS.ERRORS.MISSING_FIELD}: ${rule}`,
       );
+    }
+
+    if (rule === "choose_all") {
+      if (!Array.isArray(choose_all) || choose_all.length === 0) {
+        return createErrorResponse(
+          `${API_CONSTANTS.ERRORS.MISSING_FIELD}: choose_all`,
+          400,
+        );
+      }
+    }
+
+    if (rule === "choose_one") {
+      if (typeof choose_one !== "string" || !choose_one.trim()) {
+        return createErrorResponse(
+          `${API_CONSTANTS.ERRORS.MISSING_FIELD}: choose_one`,
+          400,
+        );
+      }
     }
 
     // Check if student is eligible to vote
@@ -94,6 +116,9 @@ export async function GET(request: NextRequest) {
 
     const filter: Record<string, unknown> = {};
     if (activity_id) {
+      if (!isValidObjectId(activity_id)) {
+        return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+      }
       filter.activity_id = activity_id;
     }
 
