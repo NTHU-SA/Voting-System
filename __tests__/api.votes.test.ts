@@ -18,10 +18,7 @@ jest.mock("@/lib/middleware", () => ({
 
     return null;
   },
-  createInternalErrorResponse: (
-    error: unknown,
-    fallbackMessage: string,
-  ) =>
+  createInternalErrorResponse: (error: unknown, fallbackMessage: string) =>
     NextResponse.json(
       {
         success: false,
@@ -58,15 +55,19 @@ const voterListMock = jest.requireMock("@/lib/voterList") as {
   loadVoterList: jest.Mock;
   isStudentEligible: jest.Mock;
 };
-const createVoteMock = (jest.requireMock("@/lib/votingService") as {
-  createVote: jest.Mock;
-}).createVote;
-const voteModelMock = (jest.requireMock("@/lib/models/Vote") as {
-  Vote: {
-    countDocuments: jest.Mock;
-    find: jest.Mock;
-  };
-}).Vote;
+const createVoteMock = (
+  jest.requireMock("@/lib/votingService") as {
+    createVote: jest.Mock;
+  }
+).createVote;
+const voteModelMock = (
+  jest.requireMock("@/lib/models/Vote") as {
+    Vote: {
+      countDocuments: jest.Mock;
+      find: jest.Mock;
+    };
+  }
+).Vote;
 
 describe("/api/votes route", () => {
   beforeEach(() => {

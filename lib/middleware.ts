@@ -22,7 +22,7 @@ function extractToken(request: NextRequest): string | undefined {
  * Middleware to require authentication
  */
 export async function requireAuth(
-  request: NextRequest
+  request: NextRequest,
 ): Promise<JWTPayload | NextResponse> {
   const token = extractToken(request);
 
@@ -43,7 +43,7 @@ export async function requireAuth(
  * Middleware to require admin authorization
  */
 export async function requireAdmin(
-  user: JWTPayload
+  user: JWTPayload,
 ): Promise<NextResponse | null> {
   try {
     const userIsAdmin = await isAdmin(user.student_id);
@@ -62,7 +62,7 @@ export async function requireAdmin(
  * Middleware helper to require both authentication and admin authorization
  */
 export async function requireAdminAuth(
-  request: NextRequest
+  request: NextRequest,
 ): Promise<JWTPayload | NextResponse> {
   const authResult = await requireAuth(request);
   if (authResult instanceof NextResponse) {
@@ -96,8 +96,7 @@ export function createInternalErrorResponse(
   fallbackMessage: string,
   context: string,
 ): NextResponse {
-  const errorMessage =
-    error instanceof Error ? error.message : fallbackMessage;
+  const errorMessage = error instanceof Error ? error.message : fallbackMessage;
   console.error(`${context}:`, error);
   return createErrorResponse(errorMessage, 500);
 }
@@ -107,7 +106,7 @@ export function createInternalErrorResponse(
  */
 export function createErrorResponse(
   message: string,
-  status: number = 400
+  status: number = 400,
 ): NextResponse {
   return NextResponse.json({ success: false, error: message }, { status });
 }
@@ -117,7 +116,7 @@ export function createErrorResponse(
  */
 export function createSuccessResponse<T>(
   data: T,
-  status: number = 200
+  status: number = 200,
 ): NextResponse {
   return NextResponse.json({ success: true, data }, { status });
 }

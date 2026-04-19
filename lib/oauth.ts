@@ -26,7 +26,10 @@ function signStatePayload(payloadBase64Url: string, secret: string): string {
     .digest("base64url");
 }
 
-function isSignatureValid(signature: string, expectedSignature: string): boolean {
+function isSignatureValid(
+  signature: string,
+  expectedSignature: string,
+): boolean {
   const actualBuffer = Buffer.from(signature);
   const expectedBuffer = Buffer.from(expectedSignature);
 
@@ -46,7 +49,7 @@ export function createOAuthState(redirect: string): string {
   };
 
   const payloadBase64Url = Buffer.from(JSON.stringify(payload)).toString(
-    "base64url"
+    "base64url",
   );
   const signature = signStatePayload(payloadBase64Url, TOKEN_SECRET);
 
@@ -69,7 +72,7 @@ export function parseOAuthState(state: string): string | null {
   let payload: OAuthStatePayload;
   try {
     payload = JSON.parse(
-      Buffer.from(payloadBase64Url, "base64url").toString("utf-8")
+      Buffer.from(payloadBase64Url, "base64url").toString("utf-8"),
     ) as OAuthStatePayload;
   } catch {
     return null;
@@ -85,7 +88,10 @@ export function parseOAuthState(state: string): string | null {
   }
 
   const now = Math.floor(Date.now() / 1000);
-  if (payload.iat > now + 60 || now - payload.iat > OAUTH_STATE_MAX_AGE_SECONDS) {
+  if (
+    payload.iat > now + 60 ||
+    now - payload.iat > OAUTH_STATE_MAX_AGE_SECONDS
+  ) {
     return null;
   }
 

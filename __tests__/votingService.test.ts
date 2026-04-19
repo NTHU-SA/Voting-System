@@ -58,7 +58,9 @@ describe("voting service", () => {
   });
 
   it("rejects invalid option object id", async () => {
-    const result = await validateOptions("507f1f77bcf86cd799439011", ["not-an-id"]);
+    const result = await validateOptions("507f1f77bcf86cd799439011", [
+      "not-an-id",
+    ]);
 
     expect(result.valid).toBe(false);
     expect(result.error).toBe(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID);
@@ -81,7 +83,9 @@ describe("voting service", () => {
     });
 
     expect(result.success).toBe(false);
-    expect(result.error).toBe(`${API_CONSTANTS.ERRORS.MISSING_FIELD}: choose_one`);
+    expect(result.error).toBe(
+      `${API_CONSTANTS.ERRORS.MISSING_FIELD}: choose_one`,
+    );
     expect(result.statusCode).toBe(400);
   });
 
@@ -102,7 +106,9 @@ describe("voting service", () => {
     });
 
     expect(result.success).toBe(false);
-    expect(result.error).toBe(`${API_CONSTANTS.ERRORS.MISSING_FIELD}: choose_all`);
+    expect(result.error).toBe(
+      `${API_CONSTANTS.ERRORS.MISSING_FIELD}: choose_all`,
+    );
     expect(result.statusCode).toBe(400);
   });
 
@@ -124,7 +130,10 @@ describe("voting service", () => {
 
   it("validates option ownership by activity", async () => {
     Option.find.mockResolvedValueOnce([
-      { _id: "507f1f77bcf86cd799439012", activity_id: "507f1f77bcf86cd799439011" },
+      {
+        _id: "507f1f77bcf86cd799439012",
+        activity_id: "507f1f77bcf86cd799439011",
+      },
     ]);
 
     const result = await validateOptions("507f1f77bcf86cd799439011", [

@@ -39,7 +39,7 @@ async function loadAdmins(): Promise<string[]> {
     });
 
     adminCache = records.map(
-      (record: { student_id: string }) => record.student_id
+      (record: { student_id: string }) => record.student_id,
     );
     lastLoadTime = now;
 

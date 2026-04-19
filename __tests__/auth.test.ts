@@ -48,7 +48,9 @@ describe("auth and env utilities", () => {
 
     expect(url).toContain("https://oauth.example.com/authorize?");
     expect(url).toContain("client_id=cid");
-    expect(url).toContain("redirect_uri=https%3A%2F%2Fexample.com%2Fapi%2Fauth%2Fcallback");
+    expect(url).toContain(
+      "redirect_uri=https%3A%2F%2Fexample.com%2Fapi%2Fauth%2Fcallback",
+    );
     expect(url).toContain("scope=userid+name");
     expect(url).toContain("state=");
   });

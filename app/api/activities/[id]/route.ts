@@ -9,10 +9,7 @@ import {
 import { Activity } from "@/lib/models/Activity";
 import { Option } from "@/lib/models/Option";
 import connectDB from "@/lib/db";
-import {
-  validateDateRange,
-  isValidRule,
-} from "@/lib/validation";
+import { validateDateRange, isValidRule } from "@/lib/validation";
 import { API_CONSTANTS } from "@/lib/constants";
 
 // GET /api/activities/[id] - Get single activity

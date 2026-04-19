@@ -11,7 +11,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(authUrl);
   } catch (error: unknown) {
     const errorMessage =
-      error instanceof Error ? error.message : "Failed to initialize OAuth login";
+      error instanceof Error
+        ? error.message
+        : "Failed to initialize OAuth login";
 
     console.error("Auth login initialization error:", errorMessage);
 
