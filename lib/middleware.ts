@@ -99,6 +99,7 @@ export function createInternalErrorResponse(
   const errorMessage = fallbackMessage;
   console.error(`${context}:`, error);
   return createErrorResponse(errorMessage, 500);
+}
 
 /**
  * Creates a standardized error response
