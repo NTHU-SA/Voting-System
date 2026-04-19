@@ -4,9 +4,9 @@ Anonymous voting system for National Tsing Hua University Student Association.
 
 ## Stack
 
-- **Framework**: Next.js 15 (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
-- **Database**: MongoDB 6 with Mongoose 8
+- **Database**: MongoDB 7 with Mongoose 9
 - **Authentication**: OAuth (CCXP) + JWT
 - **Styling**: Tailwind CSS
 
@@ -28,7 +28,7 @@ Anonymous voting system for National Tsing Hua University Student Association.
 ### Prerequisites
 
 - Node.js 18+
-- MongoDB 6+
+- MongoDB 7+
 - npm 9+
 
 ### Development Setup
@@ -42,7 +42,7 @@ cd Voting-System
 npm install
 
 # Configure environment
-cp .env.example .env.development
+cp .env.development.example .env.development
 # Edit .env.development with your MongoDB connection details
 
 # Run development server
@@ -57,7 +57,7 @@ Access at http://localhost:3000
 
 #### Prerequisites
 
-- MongoDB instance (external, not managed by this application)
+- Docker and Docker Compose
 - OAuth credentials from CCXP
 - SSL certificates for HTTPS
 
@@ -65,7 +65,7 @@ Access at http://localhost:3000
 
 ```bash
 # 1. Configure environment variables
-cp .env.example .env.production
+cp .env.production.example .env.production
 # Edit .env.production with production values
 
 # 2. Build and run

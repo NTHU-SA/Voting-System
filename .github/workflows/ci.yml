@@ -39,3 +39,39 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+  docker-smoke-test:
+    name: Docker Compose Smoke Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare production env file for compose
+        run: cp .env.production.example .env.production
+
+      - name: Build and start containers
+        run: docker compose up -d --build
+
+      - name: Wait for app readiness and smoke test
+        run: |
+          for i in {1..60}; do
+            if curl -fsS http://localhost:3000/api/activities > /tmp/activities.json; then
+              echo "Smoke test response:"
+              cat /tmp/activities.json
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "App did not become ready in time"
+          docker compose logs --tail=200
+          exit 1
+
+      - name: Show container logs
+        if: always()
+        run: docker compose logs --tail=200
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down -v
