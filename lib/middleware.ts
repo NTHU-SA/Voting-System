@@ -96,10 +96,9 @@ export function createInternalErrorResponse(
   fallbackMessage: string,
   context: string,
 ): NextResponse {
-  const errorMessage = error instanceof Error ? error.message : fallbackMessage;
+  const errorMessage = fallbackMessage;
   console.error(`${context}:`, error);
   return createErrorResponse(errorMessage, 500);
-}
 
 /**
  * Creates a standardized error response
