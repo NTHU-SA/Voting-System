@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   requireAuth,
-  requireAdmin,
+  requireAdminAuth,
   createErrorResponse,
   createSuccessResponse,
+  validateObjectIdOrError,
+  createInternalErrorResponse,
 } from "@/lib/middleware";
 import { loadVoterList, isStudentEligible } from "@/lib/voterList";
 import { Vote } from "@/lib/models/Vote";
@@ -32,10 +34,40 @@ export async function POST(request: NextRequest) {
       return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_RULE);
     }
 
+    if (!activity_id) {
+      return createErrorResponse(
+        `${API_CONSTANTS.ERRORS.MISSING_FIELD}: activity_id`,
+        400,
+      );
+    }
+
+    const invalidActivityIdResponse = validateObjectIdOrError(activity_id);
+    if (invalidActivityIdResponse) {
+      return invalidActivityIdResponse;
+    }
+
     if (!body[rule]) {
       return createErrorResponse(
         `${API_CONSTANTS.ERRORS.MISSING_FIELD}: ${rule}`,
       );
+    }
+
+    if (rule === "choose_all") {
+      if (!Array.isArray(choose_all) || choose_all.length === 0) {
+        return createErrorResponse(
+          `${API_CONSTANTS.ERRORS.MISSING_FIELD}: choose_all`,
+          400,
+        );
+      }
+    }
+
+    if (rule === "choose_one") {
+      if (typeof choose_one !== "string" || !choose_one.trim()) {
+        return createErrorResponse(
+          `${API_CONSTANTS.ERRORS.MISSING_FIELD}: choose_one`,
+          400,
+        );
+      }
     }
 
     // Check if student is eligible to vote
@@ -62,25 +94,19 @@ export async function POST(request: NextRequest) {
 
     return createSuccessResponse(result.vote, 201);
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to create vote";
-    console.error("Create vote error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to create vote",
+      "Create vote error",
+    );
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
-    // Authenticate user and require admin
-    const authResult = await requireAuth(request);
-    if (authResult instanceof NextResponse) {
-      return authResult;
-    }
-    const user = authResult;
-
-    const adminCheck = await requireAdmin(user);
-    if (adminCheck) {
-      return adminCheck;
+    const adminUser = await requireAdminAuth(request);
+    if (adminUser instanceof NextResponse) {
+      return adminUser;
     }
 
     await connectDB();
@@ -94,6 +120,10 @@ export async function GET(request: NextRequest) {
 
     const filter: Record<string, unknown> = {};
     if (activity_id) {
+      const invalidActivityIdResponse = validateObjectIdOrError(activity_id);
+      if (invalidActivityIdResponse) {
+        return invalidActivityIdResponse;
+      }
       filter.activity_id = activity_id;
     }
 
@@ -105,9 +135,10 @@ export async function GET(request: NextRequest) {
 
     return createSuccessResponse({ total, data });
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to get votes";
-    console.error("Get votes error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to get votes",
+      "Get votes error",
+    );
   }
 }

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  requireAuth,
-  requireAdmin,
+  requireAdminAuth,
   createErrorResponse,
   createSuccessResponse,
+  createInternalErrorResponse,
 } from "@/lib/middleware";
 import { Activity } from "@/lib/models/Activity";
 import connectDB from "@/lib/db";
@@ -32,26 +32,20 @@ export async function GET(request: NextRequest) {
 
     return createSuccessResponse(activities);
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to get activities";
-    console.error("Get activities error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to get activities",
+      "Get activities error",
+    );
   }
 }
 
 // POST /api/activities - Create new activity (Admin only)
 export async function POST(request: NextRequest) {
   try {
-    // Authenticate user and require admin
-    const authResult = await requireAuth(request);
-    if (authResult instanceof NextResponse) {
-      return authResult;
-    }
-    const user = authResult;
-
-    const adminCheck = await requireAdmin(user);
-    if (adminCheck) {
-      return adminCheck;
+    const adminUser = await requireAdminAuth(request);
+    if (adminUser instanceof NextResponse) {
+      return adminUser;
     }
 
     await connectDB();
@@ -104,9 +98,10 @@ export async function POST(request: NextRequest) {
 
     return createSuccessResponse(activity, 201);
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to create activity";
-    console.error("Create activity error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to create activity",
+      "Create activity error",
+    );
   }
 }

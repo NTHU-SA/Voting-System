@@ -2,7 +2,7 @@ import { Activity } from "@/lib/models/Activity";
 import { Option } from "@/lib/models/Option";
 import { Vote } from "@/lib/models/Vote";
 import { IChoiceAll } from "@/types";
-import { isValidRemark } from "@/lib/validation";
+import { isValidObjectId, isValidRemark } from "@/lib/validation";
 import { API_CONSTANTS } from "@/lib/constants";
 import { v4 as uuidv4 } from "uuid";
 import { Document, Types } from "mongoose";
@@ -33,7 +33,7 @@ interface ActivityDocument extends Document {
  * Validates vote remarks for choose_all rule
  */
 export function validateVoteRemarks(
-  choose_all: IChoiceAll[]
+  choose_all: IChoiceAll[],
 ): VoteValidationResult {
   const allValid = choose_all.every((choice) => isValidRemark(choice.remark));
 
@@ -53,8 +53,24 @@ export function validateVoteRemarks(
  */
 export async function validateOptions(
   activity_id: string,
-  optionIds: string[]
+  optionIds: string[],
 ): Promise<VoteValidationResult> {
+  if (optionIds.length === 0) {
+    return {
+      valid: false,
+      error: API_CONSTANTS.ERRORS.INVALID_OPTIONS,
+      statusCode: 400,
+    };
+  }
+
+  if (!optionIds.every((id) => isValidObjectId(id))) {
+    return {
+      valid: false,
+      error: API_CONSTANTS.ERRORS.INVALID_OBJECT_ID,
+      statusCode: 400,
+    };
+  }
+
   const options = await Option.find({
     _id: { $in: optionIds },
     activity_id,
@@ -76,7 +92,7 @@ export async function validateOptions(
  */
 export async function validateVotingEligibility(
   activity: ActivityDocument,
-  student_id: string
+  student_id: string,
 ): Promise<VoteValidationResult> {
   // Check if user already voted
   if (activity.users.includes(student_id)) {
@@ -122,7 +138,7 @@ export async function createVote(params: CreateVoteParams): Promise<{
   try {
     // Get activity
     const activity = (await Activity.findById(
-      activity_id
+      activity_id,
     )) as ActivityDocument | null;
     if (!activity) {
       return {
@@ -144,7 +160,7 @@ export async function createVote(params: CreateVoteParams): Promise<{
     // Validate voting eligibility
     const eligibilityCheck = await validateVotingEligibility(
       activity,
-      student_id
+      student_id,
     );
     if (!eligibilityCheck.valid) {
       return {
@@ -154,11 +170,31 @@ export async function createVote(params: CreateVoteParams): Promise<{
       };
     }
 
+    if (rule === "choose_one") {
+      if (!choose_one || !choose_one.trim()) {
+        return {
+          success: false,
+          error: `${API_CONSTANTS.ERRORS.MISSING_FIELD}: choose_one`,
+          statusCode: 400,
+        };
+      }
+    }
+
+    if (rule === "choose_all") {
+      if (!choose_all || choose_all.length === 0) {
+        return {
+          success: false,
+          error: `${API_CONSTANTS.ERRORS.MISSING_FIELD}: choose_all`,
+          statusCode: 400,
+        };
+      }
+    }
+
     // Get option IDs and validate
     const optionIds =
       rule === "choose_all"
         ? (choose_all || []).map((c) => c.option_id.toString())
-        : [choose_one || ""];
+        : [choose_one as string];
 
     const optionValidation = await validateOptions(activity_id, optionIds);
     if (!optionValidation.valid) {
@@ -198,7 +234,7 @@ export async function createVote(params: CreateVoteParams): Promise<{
     if (rule === "choose_all") {
       voteData.choose_all = choose_all;
     } else {
-      voteData.choose_one = choose_one;
+      voteData.choose_one = choose_one as string;
     }
 
     const vote = await Vote.create(voteData);
@@ -206,7 +242,7 @@ export async function createVote(params: CreateVoteParams): Promise<{
     // Add student_id to activity's voted users list
     await Activity.updateOne(
       { _id: activity_id },
-      { $addToSet: { users: student_id } }
+      { $addToSet: { users: student_id } },
     );
 
     return {

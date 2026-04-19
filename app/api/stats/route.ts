@@ -1,28 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  requireAuth,
-  requireAdmin,
+  requireAdminAuth,
   createErrorResponse,
   createSuccessResponse,
+  validateObjectIdOrError,
+  createInternalErrorResponse,
 } from "@/lib/middleware";
 import connectDB from "@/lib/db";
 import { calculateActivityStatistics } from "@/lib/statisticsService";
-import { isValidObjectId } from "@/lib/validation";
 import { API_CONSTANTS } from "@/lib/constants";
 
 // GET /api/stats?activity_id=xxx - Get statistics for an activity (Admin only)
 export async function GET(request: NextRequest) {
   try {
-    // Authenticate user and require admin
-    const authResult = await requireAuth(request);
-    if (authResult instanceof NextResponse) {
-      return authResult;
-    }
-    const user = authResult;
-
-    const adminCheck = await requireAdmin(user);
-    if (adminCheck) {
-      return adminCheck;
+    const adminUser = await requireAdminAuth(request);
+    if (adminUser instanceof NextResponse) {
+      return adminUser;
     }
 
     await connectDB();
@@ -36,8 +29,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (!isValidObjectId(activity_id)) {
-      return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+    const invalidIdResponse = validateObjectIdOrError(activity_id);
+    if (invalidIdResponse) {
+      return invalidIdResponse;
     }
 
     // Calculate statistics using service
@@ -52,9 +46,10 @@ export async function GET(request: NextRequest) {
 
     return createSuccessResponse(result.data);
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to get statistics";
-    console.error("Get statistics error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to get statistics",
+      "Get statistics error",
+    );
   }
 }

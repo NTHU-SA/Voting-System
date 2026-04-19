@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdmin, verifyToken } from "@/lib/auth";
 import { JWTPayload } from "@/types";
 import { API_CONSTANTS } from "@/lib/constants";
+import { isValidObjectId } from "@/lib/validation";
 
 /**
  * Extracts JWT token from request (Authorization header or cookie)
@@ -21,7 +22,7 @@ function extractToken(request: NextRequest): string | undefined {
  * Middleware to require authentication
  */
 export async function requireAuth(
-  request: NextRequest
+  request: NextRequest,
 ): Promise<JWTPayload | NextResponse> {
   const token = extractToken(request);
 
@@ -42,7 +43,7 @@ export async function requireAuth(
  * Middleware to require admin authorization
  */
 export async function requireAdmin(
-  user: JWTPayload
+  user: JWTPayload,
 ): Promise<NextResponse | null> {
   try {
     const userIsAdmin = await isAdmin(user.student_id);
@@ -58,11 +59,54 @@ export async function requireAdmin(
 }
 
 /**
+ * Middleware helper to require both authentication and admin authorization
+ */
+export async function requireAdminAuth(
+  request: NextRequest,
+): Promise<JWTPayload | NextResponse> {
+  const authResult = await requireAuth(request);
+  if (authResult instanceof NextResponse) {
+    return authResult;
+  }
+
+  const adminCheck = await requireAdmin(authResult);
+  if (adminCheck) {
+    return adminCheck;
+  }
+
+  return authResult;
+}
+
+/**
+ * Validates MongoDB ObjectId and returns a standardized error response when invalid.
+ */
+export function validateObjectIdOrError(id: string): NextResponse | null {
+  if (!isValidObjectId(id)) {
+    return createErrorResponse(API_CONSTANTS.ERRORS.INVALID_OBJECT_ID, 400);
+  }
+
+  return null;
+}
+
+/**
+ * Creates a standardized internal server error response with consistent logging.
+ */
+export function createInternalErrorResponse(
+  error: unknown,
+  fallbackMessage: string,
+  context: string,
+): NextResponse {
+  const errorMessage = fallbackMessage;
+  console.error(`${context}:`, error);
+  return createErrorResponse(errorMessage, 500);
+}
+
+/**
  * Creates a standardized error response
  */
 export function createErrorResponse(
   message: string,
-  status: number = 400
+  status: number = 400,
 ): NextResponse {
   return NextResponse.json({ success: false, error: message }, { status });
 }
@@ -72,7 +116,7 @@ export function createErrorResponse(
  */
 export function createSuccessResponse<T>(
   data: T,
-  status: number = 200
+  status: number = 200,
 ): NextResponse {
   return NextResponse.json({ success: true, data }, { status });
 }

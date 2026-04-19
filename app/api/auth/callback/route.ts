@@ -51,11 +51,19 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     const errorMessage =
       error instanceof Error ? error.message : "Authentication failed";
-    console.error("OAuth callback error:", errorMessage);
+    console.error("OAuth callback error:", {
+      message: errorMessage,
+      path: request.nextUrl.pathname,
+      hasCode: Boolean(request.nextUrl.searchParams.get("code")),
+      hasError: Boolean(request.nextUrl.searchParams.get("error")),
+      hasState: Boolean(request.nextUrl.searchParams.get("state")),
+    });
 
     // Get the base URL from config
     const baseUrl = getBaseURL();
 
-    return NextResponse.redirect(new URL("/?error=auth_failed", baseUrl));
+    return NextResponse.redirect(
+      new URL("/?error=auth_failed&error_code=oauth_callback_failed", baseUrl),
+    );
   }
 }

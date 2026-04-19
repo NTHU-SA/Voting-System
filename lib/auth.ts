@@ -39,15 +39,14 @@ async function loadAdmins(): Promise<string[]> {
     });
 
     adminCache = records.map(
-      (record: { student_id: string }) => record.student_id
+      (record: { student_id: string }) => record.student_id,
     );
     lastLoadTime = now;
 
     return adminCache;
   } catch (error) {
     console.error("Error loading adminList.csv:", error);
-    // 讀取失敗時回傳空陣列，避免系統崩潰，但會導致無法登入 Admin
-    return [];
+    throw new Error("Failed to load adminList.csv", { cause: error });
   }
 }
 
@@ -58,12 +57,4 @@ export async function isAdmin(studentId: string): Promise<boolean> {
   if (!studentId) return false;
   const admins = await loadAdmins();
   return admins.includes(studentId);
-}
-
-/**
- * 強制清除管理員快取 (用於熱更新或測試)
- */
-export function clearAdminCache(): void {
-  adminCache = [];
-  lastLoadTime = 0;
 }

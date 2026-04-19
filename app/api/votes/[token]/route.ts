@@ -3,6 +3,7 @@ import {
   requireAuth,
   createErrorResponse,
   createSuccessResponse,
+  createInternalErrorResponse,
 } from "@/lib/middleware";
 import { Vote } from "@/lib/models/Vote";
 import connectDB from "@/lib/db";
@@ -11,7 +12,7 @@ import connectDB from "@/lib/db";
  * GET /api/votes/[token]
  * Retrieve a vote record by its UUID token
  * Requires JWT authentication to prevent unauthorized access
- * 
+ *
  * Security considerations:
  * - JWT authentication prevents anonymous token enumeration attempts
  * - Different response codes for not found vs unauthorized provide minimal information
@@ -19,7 +20,7 @@ import connectDB from "@/lib/db";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ token: string }> }
+  { params }: { params: Promise<{ token: string }> },
 ) {
   try {
     // Authenticate user - JWT required to prevent brute force attacks on UUIDs
@@ -46,9 +47,10 @@ export async function GET(
     // Return vote data
     return createSuccessResponse(vote);
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to get vote";
-    console.error("Get vote by token error:", error);
-    return createErrorResponse(errorMessage, 500);
+    return createInternalErrorResponse(
+      error,
+      "Failed to get vote",
+      "Get vote by token error",
+    );
   }
 }

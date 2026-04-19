@@ -1,14 +1,6 @@
 import { Types } from "mongoose";
 
 // Database Models
-export interface IUser {
-  _id: Types.ObjectId | string;
-  student_id: string;
-  remark?: string;
-  created_at: Date;
-  updated_at: Date;
-}
-
 export interface IActivity {
   _id: Types.ObjectId | string;
   name: string;
@@ -112,7 +104,10 @@ export interface UserData {
   isAdmin?: boolean;
 }
 
-export interface AdminActivity extends Omit<IActivity, "_id" | "options" | "open_from" | "open_to" | "created_at" | "updated_at"> {
+export interface AdminActivity extends Omit<
+  IActivity,
+  "_id" | "options" | "open_from" | "open_to" | "created_at" | "updated_at"
+> {
   _id: string;
   open_from: string;
   open_to: string;
@@ -120,7 +115,10 @@ export interface AdminActivity extends Omit<IActivity, "_id" | "options" | "open
 }
 
 // Client-side Activity type (serialized from database)
-export interface Activity extends Omit<IActivity, "_id" | "options" | "open_from" | "open_to" | "created_at" | "updated_at"> {
+export interface Activity extends Omit<
+  IActivity,
+  "_id" | "options" | "open_from" | "open_to" | "created_at" | "updated_at"
+> {
   _id: string;
   subtitle?: string; // Additional client field
   open_from: string;
@@ -133,7 +131,10 @@ export interface ActivityWithOptions extends Omit<Activity, "options"> {
 }
 
 // Client-side Option type (serialized from database)
-export type Option = Omit<IOption, "_id" | "activity_id" | "created_at" | "updated_at"> & {
+export type Option = Omit<
+  IOption,
+  "_id" | "activity_id" | "created_at" | "updated_at"
+> & {
   _id: string;
 };
 
