@@ -46,7 +46,7 @@ async function loadAdmins(): Promise<string[]> {
     return adminCache;
   } catch (error) {
     console.error("Error loading adminList.csv:", error);
-    throw new Error("Failed to load adminList.csv");
+    throw new Error("Failed to load adminList.csv", { cause: error });
   }
 }
 
