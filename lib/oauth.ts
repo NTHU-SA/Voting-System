@@ -126,8 +126,16 @@ export function getAuthorizationURL(redirect?: string): string {
 
 export async function exchangeCodeForToken(
   code: string,
+  oauthError?: string,
 ): Promise<OAuthTokenResponse> {
   try {
+    if (oauthError) {
+      throw new Error(`OAuth provider error: ${oauthError}`);
+    }
+    if (!code.trim()) {
+      throw new Error("Missing OAuth authorization code");
+    }
+
     const OAUTH_CLIENT_ID = getRequiredEnvVar("OAUTH_CLIENT_ID");
     const OAUTH_CLIENT_SECRET = getRequiredEnvVar("OAUTH_CLIENT_SECRET");
     const OAUTH_CALLBACK_URL = getRequiredEnvVar("OAUTH_CALLBACK_URL");

@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const code = searchParams.get("code") ?? "";
+    const oauthError = searchParams.get("error") ?? "";
     const state = searchParams.get("state");
 
     // Get the base URL from config
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
     const redirectPath = requireOAuthRedirectPath(state);
 
     // Exchange code for access token
-    const tokenInfo = await exchangeCodeForToken(code);
+    const tokenInfo = await exchangeCodeForToken(code, oauthError);
 
     // Get user info from OAuth (Userid field maps to student_id)
     const userInfo = await getUserInfo(tokenInfo.access_token);
