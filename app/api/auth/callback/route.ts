@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { exchangeCodeForToken, getUserInfo } from "@/lib/oauth";
+import { exchangeCodeForToken, getUserInfo, parseOAuthState } from "@/lib/oauth";
 import { generateToken } from "@/lib/auth";
 import { API_CONSTANTS } from "@/lib/constants";
 import { getBaseURL, isProduction } from "@/lib/config";
@@ -21,13 +21,9 @@ export async function GET(request: NextRequest) {
     // Parse state to get redirect URL
     let redirectPath = "/vote"; // Default redirect
     if (state) {
-      try {
-        const stateData = JSON.parse(Buffer.from(state, "base64").toString());
-        if (stateData.redirect) {
-          redirectPath = stateData.redirect;
-        }
-      } catch {
-        // Invalid state, use default redirect
+      const parsedState = parseOAuthState(state);
+      if (parsedState) {
+        redirectPath = parsedState;
       }
     }
 
