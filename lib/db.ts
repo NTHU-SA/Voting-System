@@ -7,14 +7,7 @@ function getMongoDBURI(): string {
     return process.env.MONGODB_URI;
   }
 
-  // Otherwise, build URI from individual parameters
-  const host = process.env.MONGO_HOST;
-  const port = process.env.MONGO_PORT || "27017";
-  const username = process.env.MONGO_USERNAME;
-  const password = process.env.MONGO_PASSWORD;
-  const database = process.env.MONGO_NAME;
-
-  return `mongodb://${username}:${password}@${host}:${port}/${database}?authSource=admin`;
+  throw new Error("MONGODB_URI is not defined");
 }
 
 const MONGODB_URI = getMongoDBURI();
