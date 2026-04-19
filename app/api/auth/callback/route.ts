@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { exchangeCodeForToken, getUserInfo, parseOAuthState } from "@/lib/oauth";
+import {
+  exchangeCodeForToken,
+  getUserInfo,
+  requireOAuthRedirectPath,
+} from "@/lib/oauth";
 import { generateToken } from "@/lib/auth";
 import { API_CONSTANTS } from "@/lib/constants";
 import { getBaseURL, isProduction } from "@/lib/config";
@@ -7,21 +11,13 @@ import { getBaseURL, isProduction } from "@/lib/config";
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const code = searchParams.get("code");
-    const error = searchParams.get("error");
+    const code = searchParams.get("code") ?? "";
     const state = searchParams.get("state");
 
     // Get the base URL from config
     const baseUrl = getBaseURL();
 
-    if (error === "access_denied" || !code) {
-      return NextResponse.redirect(new URL("/?error=auth_failed", baseUrl));
-    }
-
-    const redirectPath = state ? parseOAuthState(state) : null;
-    if (!redirectPath) {
-      return NextResponse.redirect(new URL("/?error=auth_failed", baseUrl));
-    }
+    const redirectPath = requireOAuthRedirectPath(state);
 
     // Exchange code for access token
     const tokenInfo = await exchangeCodeForToken(code);

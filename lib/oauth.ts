@@ -91,6 +91,19 @@ export function parseOAuthState(state: string): string | null {
   return sanitizeRedirectPath(payload.redirect);
 }
 
+export function requireOAuthRedirectPath(state: string | null): string {
+  if (!state) {
+    throw new Error("Missing OAuth state");
+  }
+
+  const redirectPath = parseOAuthState(state);
+  if (!redirectPath) {
+    throw new Error("Invalid OAuth state");
+  }
+
+  return redirectPath;
+}
+
 export function getAuthorizationURL(redirect?: string): string {
   const OAUTH_CLIENT_ID = getRequiredEnvVar("OAUTH_CLIENT_ID");
   const OAUTH_CALLBACK_URL = getRequiredEnvVar("OAUTH_CALLBACK_URL");
