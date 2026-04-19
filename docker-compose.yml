@@ -29,8 +29,6 @@ services:
     container_name: voting-app
     ports:
       - "${PORT:-3000}:3000"
-    env_file:
-      - .env.production
     environment:
       MONGODB_URI: ${MONGODB_URI:-mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@db:27017/${MONGO_INITDB_DATABASE}?authSource=admin}
     depends_on:
