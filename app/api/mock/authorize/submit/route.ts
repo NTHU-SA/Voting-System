@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     // Store the mock data in the in-memory store
     mockAuthStore.set(code, mockData);
-    console.log(
+    console.warn(
       "[Mock Authorize Submit] Stored data for code:",
       code,
       "data:",

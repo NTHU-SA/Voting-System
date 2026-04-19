@@ -105,17 +105,19 @@ export default function VotingPage() {
   useEffect(() => {
     // Initialize vote state for choose_all when activity loads (only if no existing vote)
     if (activity && activity.rule === "choose_all" && !hasExistingVote && !loadingVote) {
-      const initialVotes: Record<string, string> = {};
-      activity.options.forEach((option) => {
-        // Only set default if not already set
-        if (!chooseAllVotes[option._id]) {
-          initialVotes[option._id] = "我沒有意見";
-        }
+      setChooseAllVotes((prev) => {
+        const nextVotes = { ...prev };
+        let changed = false;
+
+        activity.options.forEach((option) => {
+          if (!nextVotes[option._id]) {
+            nextVotes[option._id] = "我沒有意見";
+            changed = true;
+          }
+        });
+
+        return changed ? nextVotes : prev;
       });
-      // Only update if we have new initialVotes to set
-      if (Object.keys(initialVotes).length > 0) {
-        setChooseAllVotes((prev) => ({ ...prev, ...initialVotes }));
-      }
     }
   }, [activity, hasExistingVote, loadingVote]);
 
