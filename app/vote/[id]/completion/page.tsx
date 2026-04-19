@@ -15,9 +15,7 @@ export default function CompletionPage() {
   const searchParams = useSearchParams();
   const activityId = params.id as string;
   const voteToken = searchParams.get("token") || "";
-  const activityName = searchParams.get("name")
-    ? decodeURIComponent(searchParams.get("name") as string)
-    : "";
+  const activityName = searchParams.get("name") || "";
   const votedActivityIds = useMemo(() => getVotedActivityIds(), []);
 
   const { user } = useUser();

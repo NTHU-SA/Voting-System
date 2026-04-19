@@ -27,7 +27,7 @@ Anonymous voting system for National Tsing Hua University Student Association.
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 18.18+
 - MongoDB 7+
 - npm 9+
 
@@ -69,13 +69,13 @@ cp .env.production.example .env.production
 # Edit .env.production with production values
 
 # 2. Build and run
-docker-compose up -d
+docker compose --env-file .env.production up -d
 
 # 3. View logs
-docker-compose logs -f app
+docker compose --env-file .env.production logs -f app
 
 # 4. Stop
-docker-compose down
+docker compose --env-file .env.production down
 ```
 
 #### Environment Variables
@@ -84,15 +84,13 @@ docker-compose down
 
 ```env
 # MongoDB Connection (use one of these methods)
-# Method 1: Full URI (recommended)
-MONGODB_URI=mongodb://username:password@host:27017/database?authSource=admin
+# Method 1: Full URI (recommended for external/managed MongoDB)
+# MONGODB_URI=mongodb://username:password@host:27017/database?authSource=admin
 
-# Method 2: Individual parameters
-MONGO_HOST=your-mongodb-host
-MONGO_PORT=27017
-MONGO_USERNAME=your-username
-MONGO_PASSWORD=your-password
-MONGO_NAME=voting_sa
+# Method 2: Docker Compose built-in MongoDB credentials
+MONGO_INITDB_ROOT_USERNAME=your-mongodb-root-username
+MONGO_INITDB_ROOT_PASSWORD=your-strong-mongodb-password
+MONGO_INITDB_DATABASE=voting_sa
 
 # Security
 TOKEN_SECRET=your-strong-random-secret-here
@@ -324,7 +322,7 @@ Before deploying to production:
 - Verify OAuth credentials are correct
 - Ensure `OAUTH_CALLBACK_URL` matches registered redirect URI
 - Check OAuth provider is accessible
-- Review error logs: `docker-compose logs -f app`
+- Review error logs: `docker compose --env-file .env.production logs -f app`
 
 **Vote submission fails**
 

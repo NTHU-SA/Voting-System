@@ -104,11 +104,9 @@ export function getAuthorizationURL(redirect?: string): string {
     scope: OAUTH_SCOPE,
   });
 
-  // Add state parameter to preserve redirect URL through OAuth flow
-  if (redirect) {
-    const state = createOAuthState(redirect);
-    params.set("state", state);
-  }
+  // Always include signed state to prevent OAuth callback CSRF/login bypass
+  const state = createOAuthState(redirect ?? "/vote");
+  params.set("state", state);
 
   return `${OAUTH_AUTHORIZE}?${params.toString()}`;
 }

@@ -18,13 +18,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL("/?error=auth_failed", baseUrl));
     }
 
-    // Parse state to get redirect URL
-    let redirectPath = "/vote"; // Default redirect
-    if (state) {
-      const parsedState = parseOAuthState(state);
-      if (parsedState) {
-        redirectPath = parsedState;
-      }
+    const redirectPath = state ? parseOAuthState(state) : null;
+    if (!redirectPath) {
+      return NextResponse.redirect(new URL("/?error=auth_failed", baseUrl));
     }
 
     // Exchange code for access token

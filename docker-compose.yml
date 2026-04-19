@@ -6,16 +6,16 @@ services:
     container_name: voting-db
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-password}
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:-voting_sa}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:?MONGO_INITDB_ROOT_USERNAME is required}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:?MONGO_INITDB_ROOT_PASSWORD is required}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:?MONGO_INITDB_DATABASE is required}
     volumes:
       - mongo_data:/data/db
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "mongosh --quiet mongodb://${MONGO_INITDB_ROOT_USERNAME:-root}:${MONGO_INITDB_ROOT_PASSWORD:-password}@localhost:27017/admin --eval \"db.runCommand({ ping: 1 }).ok\" | grep 1",
+          "mongosh --quiet mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@localhost:27017/admin --eval \"db.runCommand({ ping: 1 }).ok\" | grep 1",
         ]
       interval: 10s
       timeout: 5s
@@ -32,7 +32,7 @@ services:
     env_file:
       - .env.production
     environment:
-      MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME:-root}:${MONGO_INITDB_ROOT_PASSWORD:-password}@db:27017/${MONGO_INITDB_DATABASE:-voting_sa}?authSource=admin
+      MONGODB_URI: ${MONGODB_URI:-mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@db:27017/${MONGO_INITDB_DATABASE}?authSource=admin}
     depends_on:
       db:
         condition: service_healthy
