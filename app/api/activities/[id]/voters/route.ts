@@ -41,6 +41,8 @@ function isTransactionUnsupportedError(error: unknown): boolean {
 
 const TRANSACTION_SUPPORT_CACHE_TTL_MS = 5 * 60 * 1000;
 const TRANSACTION_SUPPORT_ERROR_CACHE_TTL_MS = 30 * 1000;
+const MAX_NON_TRANSACTIONAL_RETRIES = 3;
+const INITIAL_NON_TRANSACTIONAL_RETRY_BACKOFF_MS = 20;
 let transactionSupportCache:
   | {
       value: boolean;
@@ -228,7 +230,6 @@ export async function POST(
 
     const replaceVotersWithoutTransaction = async () => {
       const now = new Date();
-      const maxRetries = 3;
       const upsertOperations = studentIds.map((studentId) => ({
         updateOne: {
           filter: { activity_id: id, student_id: studentId },
@@ -261,16 +262,17 @@ export async function POST(
         );
       };
 
-      for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+      for (let attempt = 0; attempt <= MAX_NON_TRANSACTIONAL_RETRIES; attempt += 1) {
         try {
           await applyReplacement();
           return;
         } catch (error: unknown) {
-          const isFinalAttempt = attempt === maxRetries;
+          const isFinalAttempt = attempt === MAX_NON_TRANSACTIONAL_RETRIES;
           if (!isRetryableNonTransactionalError(error) || isFinalAttempt) {
             throw error;
           }
-          const backoffMs = 20 * 2 ** attempt;
+          const backoffMs =
+            INITIAL_NON_TRANSACTIONAL_RETRY_BACKOFF_MS * 2 ** attempt;
           await new Promise((resolve) => setTimeout(resolve, backoffMs));
         }
       }
