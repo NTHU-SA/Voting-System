@@ -61,14 +61,14 @@ function VerificationPageContent() {
 
       if (!authData.authenticated || !authData.user?.isAdmin) {
         // Not authenticated or not an admin, redirect to home
-        window.location.href = "/?error=admin_required";
+        globalThis.location.href = "/?error=admin_required";
         return;
       }
 
       fetchVerificationData();
     } catch (err) {
       console.error("Error checking admin access:", err);
-      window.location.href = "/?error=auth_failed";
+      globalThis.location.href = "/?error=auth_failed";
     }
   };
 
@@ -135,7 +135,7 @@ function VerificationPageContent() {
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    link.remove();
   };
 
   if (loading) {

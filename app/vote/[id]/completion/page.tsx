@@ -29,6 +29,76 @@ export default function CompletionPage() {
     allActivities.length > 0 &&
     allActivities.every((act) => votedActivityIds.includes(act._id));
 
+  const nextStepContent = allVoted ? (
+    <div className="space-y-4">
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="p-6 text-center">
+          <CheckCircle2 className="mx-auto mb-3 h-12 w-12 text-primary" />
+          <h3 className="mb-2 text-xl font-bold">🎉 恭喜！您已完成所有投票活動</h3>
+          <p className="text-sm text-muted-foreground">
+            您已經投完所有開放中的投票活動，感謝您的參與！
+          </p>
+        </CardContent>
+      </Card>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Button
+          size="lg"
+          variant="outline"
+          className="flex-1"
+          onClick={() => router.push("/vote")}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          返回投票列表
+        </Button>
+        <Button
+          size="lg"
+          className="flex-1"
+          onClick={() => router.push("/vote/certificate")}
+        >
+          查看投票證明
+        </Button>
+      </div>
+    </div>
+  ) : nextActivity ? (
+    <div className="space-y-4">
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="p-6 text-center">
+          <h3 className="mb-2 text-lg font-bold">下一個投票活動</h3>
+          <p className="text-base font-medium text-muted-foreground">
+            {nextActivity.name}
+          </p>
+        </CardContent>
+      </Card>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Button
+          size="lg"
+          variant="outline"
+          className="flex-1"
+          onClick={() => router.push("/vote")}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          返回投票列表
+        </Button>
+        <Button
+          size="lg"
+          className="flex-1"
+          onClick={() => router.push(`/vote/${nextActivity._id}`)}
+        >
+          繼續投票
+        </Button>
+      </div>
+    </div>
+  ) : (
+    <Button
+      size="lg"
+      className="w-full"
+      onClick={() => router.push("/vote")}
+    >
+      <ArrowLeft className="mr-2 h-4 w-4" />
+      返回投票列表
+    </Button>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -104,77 +174,7 @@ export default function CompletionPage() {
         )}
 
         {/* Next Steps */}
-        {allVoted ? (
-          <div className="space-y-4">
-            <Card className="border-primary/20 bg-primary/5">
-              <CardContent className="p-6 text-center">
-                <CheckCircle2 className="mx-auto mb-3 h-12 w-12 text-primary" />
-                <h3 className="mb-2 text-xl font-bold">
-                  🎉 恭喜！您已完成所有投票活動
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  您已經投完所有開放中的投票活動，感謝您的參與！
-                </p>
-              </CardContent>
-            </Card>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button
-                size="lg"
-                variant="outline"
-                className="flex-1"
-                onClick={() => router.push("/vote")}
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                返回投票列表
-              </Button>
-              <Button
-                size="lg"
-                className="flex-1"
-                onClick={() => router.push("/vote/certificate")}
-              >
-                查看投票證明
-              </Button>
-            </div>
-          </div>
-        ) : nextActivity ? (
-          <div className="space-y-4">
-            <Card className="border-primary/20 bg-primary/5">
-              <CardContent className="p-6 text-center">
-                <h3 className="mb-2 text-lg font-bold">下一個投票活動</h3>
-                <p className="text-base font-medium text-muted-foreground">
-                  {nextActivity.name}
-                </p>
-              </CardContent>
-            </Card>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button
-                size="lg"
-                variant="outline"
-                className="flex-1"
-                onClick={() => router.push("/vote")}
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                返回投票列表
-              </Button>
-              <Button
-                size="lg"
-                className="flex-1"
-                onClick={() => router.push(`/vote/${nextActivity._id}`)}
-              >
-                繼續投票
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <Button
-            size="lg"
-            className="w-full"
-            onClick={() => router.push("/vote")}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            返回投票列表
-          </Button>
-        )}
+        {nextStepContent}
       </main>
     </div>
   );

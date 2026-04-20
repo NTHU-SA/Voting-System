@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
   let mockData = null;
 
-  if (authHeader && authHeader.startsWith("Bearer ")) {
+  if (authHeader?.startsWith("Bearer ")) {
     const accessToken = authHeader.substring(7);
     // Retrieve mock data from store using access token
     mockData = mockAuthStore.get(accessToken);

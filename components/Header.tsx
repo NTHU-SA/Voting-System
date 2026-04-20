@@ -62,11 +62,94 @@ export default function Header() {
         method: "GET",
         credentials: "include",
       });
-      window.location.href = "/";
+      globalThis.location.href = "/";
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
+
+  const authContent = loading ? (
+    <div className="h-10 w-24 animate-pulse rounded-xl bg-muted" />
+  ) : user ? (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="gap-2">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="bg-primary text-primary-foreground">
+              <User className="h-4 w-4" />
+            </AvatarFallback>
+          </Avatar>
+          <span className="hidden sm:inline">
+            {user.isAdmin && "[管理員] "}
+            {user.name}
+          </span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel>
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">
+              {user.isAdmin && "[管理員] "}
+              {user.name}
+            </p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {user.student_id}
+            </p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/vote">
+            <Vote className="mr-2 h-4 w-4" />
+            投票活動
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/vote/certificate">
+            <ClipboardCheck className="mr-2 h-4 w-4" />
+            投票證明
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/verify">
+            <ClipboardCheck className="mr-2 h-4 w-4" />
+            公開驗票
+          </Link>
+        </DropdownMenuItem>
+        {user.isAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/admin">
+                <Shield className="mr-2 h-4 w-4" />
+                管理後台
+              </Link>
+            </DropdownMenuItem>
+            {user.isRootAdmin && (
+              <DropdownMenuItem asChild>
+                <Link href="/admin/settings">
+                  <Settings className="mr-2 h-4 w-4" />
+                  管理員設定
+                </Link>
+              </DropdownMenuItem>
+            )}
+          </>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="text-destructive focus:text-destructive"
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          登出
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  ) : (
+    <Button asChild>
+      <Link href="/login">登入</Link>
+    </Button>
+  );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-sm">
@@ -84,90 +167,7 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-4">
-          {loading ? (
-            <div className="h-10 w-24 animate-pulse rounded-xl bg-muted" />
-          ) : user ? (
-            <>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="gap-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-primary text-primary-foreground">
-                        <User className="h-4 w-4" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="hidden sm:inline">
-                      {user.isAdmin && "[管理員] "}
-                      {user.name}
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        {user.isAdmin && "[管理員] "}
-                        {user.name}
-                      </p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {user.student_id}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/vote">
-                      <Vote className="mr-2 h-4 w-4" />
-                      投票活動
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/vote/certificate">
-                      <ClipboardCheck className="mr-2 h-4 w-4" />
-                      投票證明
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/verify">
-                      <ClipboardCheck className="mr-2 h-4 w-4" />
-                      公開驗票
-                    </Link>
-                  </DropdownMenuItem>
-                   {user.isAdmin && (
-                     <>
-                       <DropdownMenuSeparator />
-                       <DropdownMenuItem asChild>
-                         <Link href="/admin">
-                          <Shield className="mr-2 h-4 w-4" />
-                          管理後台
-                         </Link>
-                       </DropdownMenuItem>
-                       {user.isRootAdmin && (
-                         <DropdownMenuItem asChild>
-                           <Link href="/admin/settings">
-                             <Settings className="mr-2 h-4 w-4" />
-                             管理員設定
-                           </Link>
-                         </DropdownMenuItem>
-                       )}
-                     </>
-                   )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={handleLogout}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    登出
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </>
-          ) : (
-            <Button asChild>
-              <Link href="/login">登入</Link>
-            </Button>
-          )}
+          {authContent}
         </div>
       </div>
     </header>

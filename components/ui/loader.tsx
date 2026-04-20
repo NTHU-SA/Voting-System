@@ -4,7 +4,11 @@ interface LoaderProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: "sm" | "md" | "lg";
 }
 
-export function Loader({ className, size = "md", ...props }: LoaderProps) {
+export function Loader({
+  className,
+  size = "md",
+  ...props
+}: Readonly<LoaderProps>) {
   const sizeClasses = {
     sm: "h-4 w-4 border-2",
     md: "h-8 w-8 border-2",
@@ -32,7 +36,7 @@ interface LoadingProps {
   text?: string;
 }
 
-export function Loading({ text = "載入中..." }: LoadingProps) {
+export function Loading({ text = "載入中..." }: Readonly<LoadingProps>) {
   return (
     <div className="flex flex-col items-center justify-center p-8">
       <Loader size="lg" />

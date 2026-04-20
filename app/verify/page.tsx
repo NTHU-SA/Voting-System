@@ -38,7 +38,9 @@ export default function VerifyPage() {
       const response = await fetch(`/api/verify/${encodeURIComponent(uuid.trim())}`);
       const data = await response.json();
 
-      if (!data.success) {
+      if (data.success) {
+        setResult(data.data);
+      } else {
         if (response.status === 404) {
           setError("查無此 UUID 投票記錄");
         } else if (response.status === 400) {
@@ -46,8 +48,6 @@ export default function VerifyPage() {
         } else {
           setError(data.error || "查詢失敗");
         }
-      } else {
-        setResult(data.data);
       }
     } catch {
       setError("查詢時發生錯誤");
@@ -106,7 +106,7 @@ export default function VerifyPage() {
                 </p>
                 <ul className="list-inside list-disc text-sm">
                   {result.selections.map((selection, index) => (
-                    <li key={index}>{selection}</li>
+                    <li key={`${selection}-${index}`}>{selection}</li>
                   ))}
                 </ul>
               </div>

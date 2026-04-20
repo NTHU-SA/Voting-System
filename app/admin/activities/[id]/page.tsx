@@ -365,13 +365,13 @@ function ActivityDetailPageContent() {
         body: formData,
       });
       const data = await response.json();
-      if (!data.success) {
-        setError(data.error || "上傳選民名冊失敗");
-      } else {
+      if (data.success) {
         setSuccessMessage(`選民名冊上傳成功，共 ${data.data.eligible_voters_count} 人`);
         setVoterCsvFile(null);
         await fetchVoterStats();
         await refetch();
+      } else {
+        setError(data.error || "上傳選民名冊失敗");
       }
     } catch (err) {
       console.error("Error uploading voter list:", err);
@@ -670,9 +670,11 @@ function ActivityDetailPageContent() {
                             </div>
                           )}
 
-                          {option.vice &&
-                            option.vice.map((vice, viceIndex) => (
-                              <div key={viceIndex} className="ml-4 mb-1 text-sm">
+                          {option.vice?.map((vice, viceIndex) => (
+                              <div
+                                key={`${option._id}-${viceIndex}-${vice.name}-${vice.department}-${vice.college}`}
+                                className="ml-4 mb-1 text-sm"
+                              >
                                 <span className="text-muted-foreground">
                                   副選 {viceIndex + 1}:{" "}
                                 </span>

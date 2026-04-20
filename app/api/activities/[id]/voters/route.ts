@@ -12,6 +12,7 @@ import connectDB from "@/lib/db";
 import { Activity } from "@/lib/models/Activity";
 import { ActivityVoter } from "@/lib/models/ActivityVoter";
 import { API_CONSTANTS } from "@/lib/constants";
+import { getEligibleVotersCount } from "@/lib/activityVoterService";
 
 function extractStudentIds(csvText: string): string[] {
   const records = parse(csvText, {
@@ -151,7 +152,7 @@ export async function GET(
       return createErrorResponse(API_CONSTANTS.ERRORS.ACTIVITY_NOT_FOUND, 404);
     }
 
-    const count = await ActivityVoter.countDocuments({ activity_id: id });
+    const count = await getEligibleVotersCount(id);
 
     return createSuccessResponse({
       activity_id: id,
@@ -286,9 +287,7 @@ export async function POST(
 
     const supportsTransactions = await supportsMongoTransactions(db);
 
-    if (!supportsTransactions) {
-      await replaceVotersWithoutTransaction();
-    } else {
+    if (supportsTransactions) {
       const session = await db.startSession();
       try {
         await session.withTransaction(async () => {
@@ -302,6 +301,8 @@ export async function POST(
       } finally {
         await session.endSession();
       }
+    } else {
+      await replaceVotersWithoutTransaction();
     }
 
     return createSuccessResponse({

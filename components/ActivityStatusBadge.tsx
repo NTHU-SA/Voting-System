@@ -13,7 +13,9 @@ interface ActivityStatusBadgeProps {
  * ActivityStatusBadge component
  * Displays a badge showing the current status of an activity (upcoming, active, or ended)
  */
-export function ActivityStatusBadge({ activity }: ActivityStatusBadgeProps) {
+export function ActivityStatusBadge({
+  activity,
+}: Readonly<ActivityStatusBadgeProps>) {
   const status = getActivityStatus(activity);
 
   switch (status) {

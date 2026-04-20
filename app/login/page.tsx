@@ -11,7 +11,7 @@ function LoginContent() {
 
   useEffect(() => {
     // Auto-redirect to OAuth login
-    window.location.href =
+    globalThis.location.href =
       "/api/auth/login" +
       (redirect ? `?redirect=${encodeURIComponent(redirect)}` : "");
   }, [redirect]);
