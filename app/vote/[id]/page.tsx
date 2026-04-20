@@ -364,24 +364,48 @@ export default function VotingPage() {
 
         {/* Status Message */}
         {error && (
-          <Card className={cn(
-            "mb-6",
-            hasExistingVote 
-              ? "border-blue-200 bg-blue-50/50" 
-              : "border-destructive bg-destructive/10"
-          )}>
-            <CardContent className="flex items-start gap-2 py-4">
-              {hasExistingVote ? (
-                <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-              ) : (
-                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
-              )}
-              <p className={cn(
-                "whitespace-pre-line",
-                hasExistingVote ? "text-blue-900" : "text-destructive"
-              )}>{error}</p>
-            </CardContent>
-          </Card>
+          <>      
+            {/* 浮動提示框 */}
+            <div className="fixed top-8 left-1/2 z-50 w-[90%] max-w-md -translate-x-1/2 animate-in slide-in-from-top-8 fade-in duration-300">
+              <Card
+                className={cn(
+                  "shadow-2xl border-2",
+                  hasExistingVote
+                    ? "border-blue-400 bg-blue-50"
+                    : "border-destructive bg-white"
+                )}
+              >
+                <CardContent className="flex items-start gap-3 p-4 sm:p-5">
+                  {hasExistingVote ? (
+                    <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="h-6 w-6 text-destructive flex-shrink-0 mt-0.5" />
+                  )}
+                  
+                  <p
+                    className={cn(
+                      "flex-1 whitespace-pre-line font-medium",
+                      hasExistingVote ? "text-blue-900" : "text-destructive"
+                    )}
+                  >
+                    {error}
+                  </p>
+                  {!hasExistingVote && (
+                    <button
+                      onClick={() => setError("")}
+                      className="ml-auto -mr-1 -mt-1 flex-shrink-0 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                      type="button"
+                    >
+                      <span className="sr-only">關閉</span>
+                      <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </>
         )}
 
         {/* Options/Candidates */}
