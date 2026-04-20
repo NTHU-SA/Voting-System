@@ -672,7 +672,7 @@ function ActivityDetailPageContent() {
 
                           {option.vice?.map((vice, viceIndex) => (
                               <div
-                                key={`${option._id}-${vice.name}-${vice.department}-${vice.college}`}
+                                key={`${option._id}-${viceIndex}-${vice.name}-${vice.department}-${vice.college}`}
                                 className="ml-4 mb-1 text-sm"
                               >
                                 <span className="text-muted-foreground">

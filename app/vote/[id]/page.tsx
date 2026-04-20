@@ -418,8 +418,10 @@ export default function VotingPage() {
               <Separator />
               <CardContent className="pt-6">
                 {option.candidate && renderCandidate(option.candidate)}
-                {option.vice?.map((vice) => (
-                    <div key={`${option._id}-${vice.name}-${vice.department}-${vice.college}`}>
+                {option.vice?.map((vice, viceIndex) => (
+                    <div
+                      key={`${option._id}-${vice.name}-${vice.department}-${vice.college}-${viceIndex}`}
+                    >
                       {renderCandidate(vice)}
                     </div>
                   ))}

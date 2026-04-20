@@ -134,9 +134,7 @@ export function OptionFormSection({
           </h3>
           {options.map((option, index) => (
             <Card
-              key={`${option.label}-${option.candidate.name}-${option.vice
-                .map((v) => v.name)
-                .join("-")}`}
+              key={`option-${index}`}
               className={editingIndex === index ? "border-primary" : ""}
             >
               <CardContent className="flex items-center justify-between py-4">

@@ -105,8 +105,8 @@ export default function VerifyPage() {
                   投票內容
                 </p>
                 <ul className="list-inside list-disc text-sm">
-                  {result.selections.map((selection) => (
-                    <li key={selection}>{selection}</li>
+                  {result.selections.map((selection, index) => (
+                    <li key={`${selection}-${index}`}>{selection}</li>
                   ))}
                 </ul>
               </div>

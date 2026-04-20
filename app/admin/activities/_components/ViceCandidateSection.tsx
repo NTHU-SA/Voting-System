@@ -22,7 +22,7 @@ export function ViceCandidateSection({
     <div className="space-y-3">
       {vices.map((vice, index) => (
         <div
-          key={`${vice.name}-${vice.department}-${vice.college}`}
+          key={`vice-${index}-${vice.name ?? ""}-${vice.department ?? ""}-${vice.college ?? ""}`}
           className="relative rounded-lg border border-border p-4 bg-background"
         >
           <Button
