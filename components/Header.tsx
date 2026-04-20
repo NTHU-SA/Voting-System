@@ -13,12 +13,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, Shield, LogOut, Vote, ClipboardCheck } from "lucide-react";
+import {
+  User,
+  Shield,
+  LogOut,
+  Vote,
+  ClipboardCheck,
+  Settings,
+} from "lucide-react";
 
 interface UserData {
   student_id: string;
   name: string;
   isAdmin: boolean;
+  isRootAdmin?: boolean;
 }
 
 export default function Header() {
@@ -119,17 +127,31 @@ export default function Header() {
                       投票證明
                     </Link>
                   </DropdownMenuItem>
-                  {user.isAdmin && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link href="/admin">
+                  <DropdownMenuItem asChild>
+                    <Link href="/verify">
+                      <ClipboardCheck className="mr-2 h-4 w-4" />
+                      公開驗票
+                    </Link>
+                  </DropdownMenuItem>
+                   {user.isAdmin && (
+                     <>
+                       <DropdownMenuSeparator />
+                       <DropdownMenuItem asChild>
+                         <Link href="/admin">
                           <Shield className="mr-2 h-4 w-4" />
                           管理後台
-                        </Link>
-                      </DropdownMenuItem>
-                    </>
-                  )}
+                         </Link>
+                       </DropdownMenuItem>
+                       {user.isRootAdmin && (
+                         <DropdownMenuItem asChild>
+                           <Link href="/admin/settings">
+                             <Settings className="mr-2 h-4 w-4" />
+                             管理員設定
+                           </Link>
+                         </DropdownMenuItem>
+                       )}
+                     </>
+                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleLogout}

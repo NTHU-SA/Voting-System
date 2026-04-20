@@ -7,6 +7,7 @@ export interface IActivity {
   type: string; // Kept for backward compatibility
   subtitle?: string;
   description?: string; // New field for activity description
+  eligible_voters_count: number;
   rule: "choose_all" | "choose_one";
   users: string[]; // Student IDs who have voted
   options: (Types.ObjectId | string)[]; // Option IDs
@@ -31,6 +32,7 @@ export interface ICandidate {
   department?: string; // Optional
   college?: string; // Optional
   avatar_url?: string;
+  description?: string;
   personal_experiences?: string[];
   political_opinions?: string[];
 }
@@ -102,6 +104,23 @@ export interface UserData {
   student_id: string;
   name: string;
   isAdmin?: boolean;
+  isRootAdmin?: boolean;
+}
+
+export interface IActivityVoter {
+  _id: Types.ObjectId | string;
+  activity_id: Types.ObjectId | string;
+  student_id: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface IAdmin {
+  _id: Types.ObjectId | string;
+  student_id: string;
+  name?: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface AdminActivity extends Omit<

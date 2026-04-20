@@ -13,6 +13,7 @@ function buildCandidatePayload(candidate: CandidateForm): Record<string, unknown
   if (candidate.department) payload.department = candidate.department;
   if (candidate.college) payload.college = candidate.college;
   if (candidate.avatar_url) payload.avatar_url = candidate.avatar_url;
+  if (candidate.description) payload.description = candidate.description;
 
   if (candidate.experiences) {
     payload.personal_experiences = candidate.experiences

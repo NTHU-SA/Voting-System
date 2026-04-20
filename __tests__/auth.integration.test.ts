@@ -7,11 +7,13 @@ import { GET as checkGet } from "@/app/api/auth/check/route";
 jest.mock("@/lib/auth", () => ({
   verifyToken: jest.fn(),
   isAdmin: jest.fn(),
+  isRootAdmin: jest.fn(),
 }));
 
-const { verifyToken, isAdmin } = jest.requireMock("@/lib/auth") as {
+const { verifyToken, isAdmin, isRootAdmin } = jest.requireMock("@/lib/auth") as {
   verifyToken: jest.Mock;
   isAdmin: jest.Mock;
+  isRootAdmin: jest.Mock;
 };
 
 describe("auth routes integration", () => {
@@ -69,6 +71,7 @@ describe("auth routes integration", () => {
       name: "Test User",
     });
     isAdmin.mockResolvedValueOnce(true);
+    isRootAdmin.mockReturnValueOnce(false);
 
     const request = new NextRequest("http://localhost:3000/api/auth/check", {
       headers: { cookie: "service_token=good-token" },

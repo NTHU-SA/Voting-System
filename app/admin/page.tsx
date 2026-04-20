@@ -24,13 +24,15 @@ import {
   BarChart3,
   ClipboardCheck,
   AlertCircle,
+  Shield,
 } from "lucide-react";
-import { useAdminAccess, useAdminActivities } from "@/hooks";
+import { useAdminAccess, useAdminActivities, useUser } from "@/hooks";
 import { ActivityStatusBadge } from "@/components/ActivityStatusBadge";
 import { getActivityStatus } from "@/lib/activities";
 
 function AdminDashboardContent() {
   const { activities, loading, error, refetch } = useAdminActivities();
+  const { user } = useUser();
 
   // Check admin access and fetch activities on success
   useAdminAccess();
@@ -137,22 +139,32 @@ function AdminDashboardContent() {
           </CardHeader>
           <Separator />
           <CardContent className="pt-6">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Button size="lg" asChild>
+             <div
+               className={`grid grid-cols-1 gap-4 ${user?.isRootAdmin ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
+             >
+               <Button size="lg" asChild>
                 <Link href="/admin/activities/new">
                   <Plus className="mr-2 h-4 w-4" />
                   新增投票活動
                 </Link>
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => refetch()}
-              >
-                <RefreshCw className="mr-2 h-4 w-4" />
-                重新整理
-              </Button>
-            </div>
+               <Button
+                 size="lg"
+                 variant="outline"
+                 onClick={() => refetch()}
+               >
+                 <RefreshCw className="mr-2 h-4 w-4" />
+                 重新整理
+               </Button>
+               {user?.isRootAdmin && (
+                 <Button size="lg" variant="outline" asChild>
+                   <Link href="/admin/settings">
+                     <Shield className="mr-2 h-4 w-4" />
+                     管理員設定
+                   </Link>
+                 </Button>
+               )}
+             </div>
           </CardContent>
         </Card>
 

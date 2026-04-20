@@ -32,6 +32,7 @@ export function useUser(): UseUserReturn {
             student_id: data.user.student_id,
             name: data.user.name,
             isAdmin: data.user.isAdmin,
+            isRootAdmin: data.user.isRootAdmin,
           });
         } else {
           setUser(null);

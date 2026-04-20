@@ -18,6 +18,12 @@ const ActivitySchema = new Schema<IActivity>({
     type: String,
     required: false,
   },
+  eligible_voters_count: {
+    type: Number,
+    required: true,
+    default: 0,
+    min: 0,
+  },
   rule: {
     type: String,
     enum: ["choose_all", "choose_one"],

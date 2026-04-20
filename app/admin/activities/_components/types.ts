@@ -7,6 +7,7 @@ export interface CandidateForm {
   department: string;
   college: string;
   avatar_url: string;
+  description: string;
   experiences: string; // String for textarea input (one item per line)
   opinions: string; // String for textarea input (one item per line)
 }

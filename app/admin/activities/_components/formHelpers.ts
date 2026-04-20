@@ -8,6 +8,7 @@ export const createEmptyCandidate = (): CandidateForm => ({
   department: "",
   college: "",
   avatar_url: "",
+  description: "",
   experiences: "",
   opinions: "",
 });

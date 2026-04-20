@@ -1,8 +1,6 @@
 import "server-only";
-import { readFile } from "fs/promises";
-import { join } from "path";
-import { parse } from "csv-parse/sync";
-import { API_CONSTANTS } from "@/lib/constants";
+import connectDB from "@/lib/db";
+import { Admin } from "@/lib/models/Admin";
 
 // 1. 重新導出 JWT 相關功能 (保持 JWT 邏輯獨立是好的，因為它是純運算)
 export { generateToken, verifyToken } from "@/lib/jwt";
@@ -11,50 +9,28 @@ export { generateToken, verifyToken } from "@/lib/jwt";
 // 2. Admin 權限檢查邏輯 (原 adminConfig.ts 的內容)
 // --------------------------------------------------------
 
-// 快取機制
-let adminCache: string[] = [];
-let lastLoadTime = 0;
-
-/**
- * 從 CSV 讀取管理員名單 (包含快取邏輯)
- */
-async function loadAdmins(): Promise<string[]> {
-  const now = Date.now();
-
-  // Cache 檢查
-  if (
-    adminCache.length > 0 &&
-    now - lastLoadTime < API_CONSTANTS.ADMIN_CACHE_DURATION
-  ) {
-    return adminCache;
-  }
-
-  try {
-    const filePath = join(process.cwd(), "data", "adminList.csv");
-    const fileContent = await readFile(filePath, "utf-8");
-    const records = parse(fileContent, {
-      columns: true,
-      skip_empty_lines: true,
-      trim: true,
-    });
-
-    adminCache = records.map(
-      (record: { student_id: string }) => record.student_id,
-    );
-    lastLoadTime = now;
-
-    return adminCache;
-  } catch (error) {
-    console.error("Error loading adminList.csv:", error);
-    throw new Error("Failed to load adminList.csv", { cause: error });
-  }
+export function getRootAdminStudentId(): string | null {
+  const rootAdmin = process.env.ROOT_ADMIN?.trim();
+  return rootAdmin || null;
 }
 
 /**
- * 檢查學號是否為管理員
+ * 檢查學號是否為 ROOT_ADMIN
+ */
+export function isRootAdmin(studentId: string): boolean {
+  if (!studentId) return false;
+  const rootAdmin = getRootAdminStudentId();
+  return !!rootAdmin && rootAdmin === studentId;
+}
+
+/**
+ * 檢查學號是否為管理員（ROOT_ADMIN 或 Admin DB）
  */
 export async function isAdmin(studentId: string): Promise<boolean> {
   if (!studentId) return false;
-  const admins = await loadAdmins();
-  return admins.includes(studentId);
+  if (isRootAdmin(studentId)) return true;
+
+  await connectDB();
+  const admin = await Admin.findOne({ student_id: studentId }).select("_id");
+  return !!admin;
 }

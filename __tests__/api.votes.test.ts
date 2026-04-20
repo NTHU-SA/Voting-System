@@ -32,16 +32,21 @@ jest.mock("@/lib/middleware", () => ({
     NextResponse.json({ success: true, data }, { status }),
 }));
 
-jest.mock("@/lib/voterList", () => ({
-  loadVoterList: jest.fn(),
-  isStudentEligible: jest.fn(),
-}));
-
 jest.mock("@/lib/db", () => jest.fn());
 jest.mock("@/lib/votingService", () => ({ createVote: jest.fn() }));
+jest.mock("@/lib/models/ActivityVoter", () => ({
+  ActivityVoter: {
+    findOne: jest.fn(),
+  },
+}));
 jest.mock("@/lib/models/Vote", () => ({
   Vote: {
     countDocuments: jest.fn(),
+    find: jest.fn(),
+  },
+}));
+jest.mock("@/lib/models/Option", () => ({
+  Option: {
     find: jest.fn(),
   },
 }));
@@ -51,10 +56,13 @@ const middlewareMock = jest.requireMock("@/lib/middleware") as {
   requireAdmin: jest.Mock;
   requireAdminAuth: jest.Mock;
 };
-const voterListMock = jest.requireMock("@/lib/voterList") as {
-  loadVoterList: jest.Mock;
-  isStudentEligible: jest.Mock;
-};
+const activityVoterModelMock = (
+  jest.requireMock("@/lib/models/ActivityVoter") as {
+    ActivityVoter: {
+      findOne: jest.Mock;
+    };
+  }
+).ActivityVoter;
 const createVoteMock = (
   jest.requireMock("@/lib/votingService") as {
     createVote: jest.Mock;
@@ -68,6 +76,13 @@ const voteModelMock = (
     };
   }
 ).Vote;
+const optionModelMock = (
+  jest.requireMock("@/lib/models/Option") as {
+    Option: {
+      find: jest.Mock;
+    };
+  }
+).Option;
 
 describe("/api/votes route", () => {
   beforeEach(() => {
@@ -78,8 +93,9 @@ describe("/api/votes route", () => {
     middlewareMock.requireAdminAuth.mockResolvedValue({
       student_id: "111000111",
     });
-    voterListMock.loadVoterList.mockResolvedValue(["111000111"]);
-    voterListMock.isStudentEligible.mockReturnValue(true);
+    activityVoterModelMock.findOne.mockReturnValue({
+      select: jest.fn().mockResolvedValue({ _id: "eligible" }),
+    });
   });
 
   it("rejects choose_all empty array", async () => {
@@ -131,10 +147,23 @@ describe("/api/votes route", () => {
 
   it("returns votes list for admin", async () => {
     voteModelMock.countDocuments.mockResolvedValueOnce(1);
+    optionModelMock.find.mockReturnValueOnce({
+      select: () => ({
+        lean: async () => [],
+      }),
+    });
     voteModelMock.find.mockReturnValueOnce({
       limit: () => ({
         skip: () => ({
-          sort: async () => [{ token: "vote-token" }],
+          sort: async () => [
+            {
+              token: "vote-token",
+              activity_id: "507f1f77bcf86cd799439011",
+              rule: "choose_one",
+              choose_one: "507f1f77bcf86cd799439012",
+              toObject: () => ({ token: "vote-token" }),
+            },
+          ],
         }),
       }),
     });
@@ -146,7 +175,7 @@ describe("/api/votes route", () => {
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
     expect(body.data.total).toBe(1);
-    expect(body.data.data).toEqual([{ token: "vote-token" }]);
+    expect(body.data.data[0]).toMatchObject({ token: "vote-token" });
   });
 
   it("creates vote for eligible user", async () => {
