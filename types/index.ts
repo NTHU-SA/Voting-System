@@ -7,7 +7,7 @@ export interface IActivity {
   type: string; // Kept for backward compatibility
   subtitle?: string;
   description?: string; // New field for activity description
-  eligibleVotersCount: number;
+  eligible_voters_count: number;
   rule: "choose_all" | "choose_one";
   users: string[]; // Student IDs who have voted
   options: (Types.ObjectId | string)[]; // Option IDs

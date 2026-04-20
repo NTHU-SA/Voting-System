@@ -58,9 +58,7 @@ export async function POST(request: NextRequest) {
     const name = body.name?.trim() || undefined;
 
     if (!studentId) {
-      return createErrorResponse(
-        `${API_CONSTANTS.ERRORS.MISSING_FIELD}: student_id`,
-      );
+      return createErrorResponse(`${API_CONSTANTS.ERRORS.MISSING_FIELD}: student_id`);
     }
 
     if (isRootAdmin(studentId)) {
@@ -107,9 +105,7 @@ export async function DELETE(request: NextRequest) {
     await connectDB();
     const studentId = request.nextUrl.searchParams.get("student_id")?.trim();
     if (!studentId) {
-      return createErrorResponse(
-        `${API_CONSTANTS.ERRORS.MISSING_FIELD}: student_id`,
-      );
+      return createErrorResponse(`${API_CONSTANTS.ERRORS.MISSING_FIELD}: student_id`);
     }
 
     if (isRootAdmin(studentId)) {

@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       subtitle,
       description,
       rule,
-      eligibleVotersCount: 0,
+      eligible_voters_count: 0,
       open_from: openFrom,
       open_to: openTo,
       users: [],

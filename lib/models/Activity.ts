@@ -18,7 +18,7 @@ const ActivitySchema = new Schema<IActivity>({
     type: String,
     required: false,
   },
-  eligibleVotersCount: {
+  eligible_voters_count: {
     type: Number,
     required: true,
     default: 0,

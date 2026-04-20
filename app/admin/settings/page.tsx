@@ -116,7 +116,7 @@ export default function AdminSettingsPage() {
             <CardTitle>管理員設定（ROOT_ADMIN 專屬）</CardTitle>
           </CardHeader>
           <Separator />
-          <CardContent className="pt-6 space-y-2">
+          <CardContent className="space-y-2 pt-6">
             <p className="text-sm text-muted-foreground">ROOT_ADMIN：{rootAdmin || "未設定"}</p>
             {error && <p className="text-sm text-destructive">{error}</p>}
           </CardContent>

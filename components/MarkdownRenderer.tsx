@@ -42,10 +42,13 @@ export default function MarkdownRenderer({
       <ReactMarkdown
         rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema]]}
         components={{
-          a: (props) => {
-            const target = props.target || "_blank";
-            const rel = target === "_blank" ? "noopener noreferrer" : props.rel;
-            return <a {...props} target={target} rel={rel} />;
+          a: ({ node: _node, target, rel, ...anchorProps }) => {
+            const resolvedTarget = target || "_blank";
+            const resolvedRel =
+              resolvedTarget === "_blank" ? "noopener noreferrer" : rel;
+            return (
+              <a {...anchorProps} target={resolvedTarget} rel={resolvedRel} />
+            );
           },
         }}
       >

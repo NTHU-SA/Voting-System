@@ -124,7 +124,7 @@ openssl rand -base64 32
 ### Eligible Voters
 
 Each activity now has its own voter list in MongoDB.
-Upload CSV from admin activity page (`/admin/activities/:id`) to overwrite that activity's eligible voter roster and update `eligibleVotersCount`.
+Upload CSV from admin activity page (`/admin/activities/:id`) to overwrite that activity's eligible voter roster and update `eligible_voters_count`.
 
 ### Administrators
 

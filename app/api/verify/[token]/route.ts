@@ -19,7 +19,7 @@ export async function GET(
 
     const { token } = await params;
     if (!token?.trim()) {
-      return createErrorResponse("UUID is required", 400);
+      return createErrorResponse("UUID 為必填欄位", 400);
     }
 
     const vote = await Vote.findOne({ token: token.trim() }).lean();

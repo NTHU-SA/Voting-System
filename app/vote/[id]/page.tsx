@@ -256,7 +256,7 @@ export default function VotingPage() {
                   <Briefcase className="h-4 w-4 text-primary" />
                   <p className="text-sm font-bold">經歷</p>
                 </div>
-                <ul className="space-y-1">
+                <ul className="list-inside list-disc space-y-1">
                   {candidate.personal_experiences.map(
                     (exp: string, idx: number) => (
                       <li key={idx} className="text-sm">
@@ -278,7 +278,7 @@ export default function VotingPage() {
                   <FileText className="h-4 w-4 text-primary" />
                   <p className="text-sm font-bold">政見</p>
                 </div>
-                <ul className="space-y-1">
+                <ul className="list-inside list-disc space-y-1">
                   {candidate.political_opinions.map(
                     (opinion: string, idx: number) => (
                       <li key={idx} className="text-sm">

@@ -49,7 +49,7 @@ export async function GET(
     }
 
     const activity = await Activity.findById(id).select(
-      "_id name eligibleVotersCount",
+      "_id name eligible_voters_count",
     );
     if (!activity) {
       return createErrorResponse(API_CONSTANTS.ERRORS.ACTIVITY_NOT_FOUND, 404);
@@ -61,7 +61,7 @@ export async function GET(
       activity_id: id,
       activity_name: activity.name,
       eligible_voters_count: count,
-      stored_eligible_voters_count: activity.eligibleVotersCount || 0,
+      stored_eligible_voters_count: activity.eligible_voters_count || 0,
     });
   } catch (error: unknown) {
     return createInternalErrorResponse(
@@ -126,7 +126,7 @@ export async function POST(
           { _id: id },
           {
             $set: {
-              eligibleVotersCount: studentIds.length,
+              eligible_voters_count: studentIds.length,
               updated_at: new Date(),
             },
           },

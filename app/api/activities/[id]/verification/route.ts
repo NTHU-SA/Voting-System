@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   requireAdminAuth,
+  createErrorResponse,
   createSuccessResponse,
   validateObjectIdOrError,
   createInternalErrorResponse,
@@ -9,6 +10,7 @@ import { Vote } from "@/lib/models/Vote";
 import { Option } from "@/lib/models/Option";
 import { Activity } from "@/lib/models/Activity";
 import connectDB from "@/lib/db";
+import { validatePagination } from "@/lib/validation";
 
 // GET /api/activities/[id]/verification - Get voted UUIDs for verification (Admin only)
 export async function GET(
@@ -24,6 +26,11 @@ export async function GET(
     await connectDB();
 
     const { id } = await params;
+    const searchParams = request.nextUrl.searchParams;
+    const { limit, skip } = validatePagination({
+      limit: searchParams.get("limit"),
+      skip: searchParams.get("skip"),
+    });
 
     const invalidIdResponse = validateObjectIdOrError(id);
     if (invalidIdResponse) {
@@ -32,12 +39,7 @@ export async function GET(
 
     const activity = await Activity.findById(id).select("name").lean();
     if (!activity) {
-      return createSuccessResponse({
-        activity_id: id,
-        activity_name: "",
-        total_votes: 0,
-        voted_tokens: [],
-      });
+      return createErrorResponse("Activity not found", 404);
     }
 
     const options = await Option.find({ activity_id: id })
@@ -50,9 +52,12 @@ export async function GET(
       optionMap.set(option._id.toString(), displayName);
     });
 
+    const totalVotes = await Vote.countDocuments({ activity_id: id });
     const votes = await Vote.find({ activity_id: id })
       .select("token created_at rule choose_one choose_all")
       .sort({ created_at: -1 })
+      .skip(skip)
+      .limit(limit)
       .lean();
 
     const votedTokens = votes.map((vote) => {
@@ -82,7 +87,12 @@ export async function GET(
     return createSuccessResponse({
       activity_id: id,
       activity_name: activity.name,
-      total_votes: votes.length,
+      total_votes: totalVotes,
+      pagination: {
+        limit,
+        skip,
+        returned: votedTokens.length,
+      },
       voted_tokens: votedTokens,
     });
   } catch (error: unknown) {

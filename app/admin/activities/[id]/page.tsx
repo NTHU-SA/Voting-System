@@ -77,7 +77,7 @@ function ActivityDetailPageContent() {
         open_from: toDateTimeLocalString(activity.open_from),
         open_to: toDateTimeLocalString(activity.open_to),
       });
-      setVoterCount(activity.eligibleVotersCount || 0);
+      setVoterCount(activity.eligible_voters_count || 0);
     }
   }, [activity]);
 
@@ -205,25 +205,25 @@ function ActivityDetailPageContent() {
     setEditingOptionId(option._id);
     setCurrentOption({
       label: option.label || "",
-        candidate: {
-          name: option.candidate?.name || "",
-          department: option.candidate?.department || "",
-          college: option.candidate?.college || "",
-          avatar_url: option.candidate?.avatar_url || "",
-          description: option.candidate?.description || "",
-          experiences: option.candidate?.personal_experiences?.join("\n") || "",
-          opinions: option.candidate?.political_opinions?.join("\n") || "",
-        },
-        vice: (option.vice || []).map((v) => ({
-          name: v.name || "",
-          department: v.department || "",
-          college: v.college || "",
-          avatar_url: v.avatar_url || "",
-          description: v.description || "",
-          experiences: v.personal_experiences?.join("\n") || "",
-          opinions: v.political_opinions?.join("\n") || "",
-        })),
-      });
+      candidate: {
+        name: option.candidate?.name || "",
+        department: option.candidate?.department || "",
+        college: option.candidate?.college || "",
+        avatar_url: option.candidate?.avatar_url || "",
+        description: option.candidate?.description || "",
+        experiences: option.candidate?.personal_experiences?.join("\n") || "",
+        opinions: option.candidate?.political_opinions?.join("\n") || "",
+      },
+      vice: (option.vice || []).map((v) => ({
+        name: v.name || "",
+        department: v.department || "",
+        college: v.college || "",
+        avatar_url: v.avatar_url || "",
+        description: v.description || "",
+        experiences: v.personal_experiences?.join("\n") || "",
+        opinions: v.political_opinions?.join("\n") || "",
+      })),
+    });
   };
 
   const handleSaveOption = async (e: React.FormEvent) => {
@@ -422,9 +422,14 @@ function ActivityDetailPageContent() {
 
           <div className="flex gap-2">
             <Button variant="outline" asChild className="shrink-0">
-              <Link href={`/vote/${activityId}`} target="_blank" rel="noopener noreferrer">
+              <Link
+                href={`/vote/${activityId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="預覽活動（新視窗開啟）"
+              >
                 <Eye className="sm:mr-2 h-4 w-4" />
-                <span className="sm:inline">預覽活動</span>
+                <span className="sm:inline">預覽活動（新視窗）</span>
               </Link>
             </Button>
             <Button variant="outline" asChild className="shrink-0">
