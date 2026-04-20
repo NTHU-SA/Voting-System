@@ -221,7 +221,6 @@ export default function CompletionPage() {
           <CardContent className="p-6">
             <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-amber-900">
               <span className="text-xl">📌</span>
-              {" "}
               重要提醒
             </h3>
             <ul className="space-y-2 text-sm text-amber-900/80">

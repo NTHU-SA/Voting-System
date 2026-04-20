@@ -356,7 +356,6 @@ export default function VotingPage() {
                   className="w-full justify-start text-sm"
                 >
                   <strong className="mr-2">投票說明：</strong>
-                  {" "}
                   請對每位候選人表達您的意見（支持、反對或無意見）
                 </Badge>
               </CardContent>
