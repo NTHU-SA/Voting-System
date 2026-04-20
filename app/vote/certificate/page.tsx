@@ -276,7 +276,7 @@ export default function CompletionPage() {
         </div>
       </main>
 
-      <style jsx global>{String.raw`
+      <style jsx global>{`
         @media print {
           body {
             print-color-adjust: exact;
