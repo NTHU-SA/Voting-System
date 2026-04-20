@@ -37,29 +37,28 @@ export function OptionFormSection({
   editOption,
   removeOption,
   resetForm,
-}: OptionFormSectionProps) {
+}: Readonly<OptionFormSectionProps>) {
   const handleAddOrUpdate = () => {
-    if (!currentOption.candidate.name) {
-      return;
+    if (currentOption.candidate.name) {
+      addOrUpdateOption();
     }
-    addOrUpdateOption();
   };
 
   const handleRemove = (index: number) => {
     removeOption(index);
   };
 
+  const cardTitle =
+    editingIndex === null
+      ? `新增候選人組合 #${options.length + 1}`
+      : `編輯候選人 #${editingIndex + 1}`;
+
   return (
     <div className="space-y-6">
       {/* Current option form */}
       <Card className="border-primary/20 bg-primary/5">
         <CardHeader>
-          <CardTitle className="text-lg">
-            {editingIndex !== null 
-              ? `編輯候選人 #${editingIndex + 1}`
-              : `新增候選人組合 #${options.length + 1}`
-            }
-          </CardTitle>
+          <CardTitle className="text-lg">{cardTitle}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -134,7 +133,12 @@ export function OptionFormSection({
             已新增的候選人 ({options.length})
           </h3>
           {options.map((option, index) => (
-            <Card key={index} className={editingIndex === index ? "border-primary" : ""}>
+            <Card
+              key={`${option.label}-${option.candidate.name}-${option.vice
+                .map((v) => v.name)
+                .join("-")}`}
+              className={editingIndex === index ? "border-primary" : ""}
+            >
               <CardContent className="flex items-center justify-between py-4">
                 <div>
                   <p className="font-medium">
@@ -176,5 +180,4 @@ export function OptionFormSection({
   );
 }
 
-// Export the hook for external use
-export { useOptionForm };
+export { useOptionForm } from "./useOptionForm";

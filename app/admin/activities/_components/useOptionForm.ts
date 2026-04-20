@@ -50,14 +50,16 @@ export function useOptionForm() {
   };
 
   const addOrUpdateOption = () => {
-    if (editingIndex !== null) {
-      const newOptions = [...options];
-      newOptions[editingIndex] = currentOption;
-      setOptions(newOptions);
-      setEditingIndex(null);
-    } else {
+    if (editingIndex === null) {
       setOptions([...options, currentOption]);
+      resetForm();
+      return;
     }
+
+    const newOptions = [...options];
+    newOptions[editingIndex] = currentOption;
+    setOptions(newOptions);
+    setEditingIndex(null);
     resetForm();
   };
 

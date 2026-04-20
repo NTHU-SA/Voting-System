@@ -98,6 +98,35 @@ export default function AdminSettingsPage() {
     }
   };
 
+  const adminListContent = loading ? (
+    <p className="text-sm text-muted-foreground">載入中...</p>
+  ) : admins.length === 0 ? (
+    <p className="text-sm text-muted-foreground">尚無資料</p>
+  ) : (
+    <div className="space-y-2">
+      {admins.map((admin) => (
+        <div
+          key={admin.student_id}
+          className="flex items-center justify-between rounded-md border p-3"
+        >
+          <div>
+            <p className="font-medium">{admin.student_id}</p>
+            {admin.name && (
+              <p className="text-sm text-muted-foreground">{admin.name}</p>
+            )}
+          </div>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => handleDelete(admin.student_id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -162,34 +191,7 @@ export default function AdminSettingsPage() {
           </CardHeader>
           <Separator />
           <CardContent className="pt-6">
-            {loading ? (
-              <p className="text-sm text-muted-foreground">載入中...</p>
-            ) : admins.length === 0 ? (
-              <p className="text-sm text-muted-foreground">尚無資料</p>
-            ) : (
-              <div className="space-y-2">
-                {admins.map((admin) => (
-                  <div
-                    key={admin.student_id}
-                    className="flex items-center justify-between rounded-md border p-3"
-                  >
-                    <div>
-                      <p className="font-medium">{admin.student_id}</p>
-                      {admin.name && (
-                        <p className="text-sm text-muted-foreground">{admin.name}</p>
-                      )}
-                    </div>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(admin.student_id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
+            {adminListContent}
           </CardContent>
         </Card>
       </main>

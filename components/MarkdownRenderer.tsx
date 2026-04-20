@@ -1,6 +1,7 @@
 "use client";
 
 import ReactMarkdown from "react-markdown";
+import type { Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 
@@ -8,7 +9,7 @@ const sanitizeSchema = {
   ...defaultSchema,
   tagNames: [...(defaultSchema.tagNames || []), "img"],
   attributes: {
-    ...(defaultSchema.attributes || {}),
+    ...defaultSchema.attributes,
     "*": ["className", "class", "style"],
     img: [
       ...(defaultSchema.attributes?.img || []),
@@ -23,9 +24,17 @@ const sanitizeSchema = {
     a: [...(defaultSchema.attributes?.a || []), "target", "rel"],
   },
   protocols: {
-    ...(defaultSchema.protocols || {}),
+    ...defaultSchema.protocols,
     src: ["http", "https", "data"],
     href: ["http", "https", "mailto", "tel"],
+  },
+};
+
+const markdownComponents: Components = {
+  a: ({ node: _node, target, rel, ...anchorProps }) => {
+    const resolvedTarget = target || "_blank";
+    const resolvedRel = resolvedTarget === "_blank" ? "noopener noreferrer" : rel;
+    return <a {...anchorProps} target={resolvedTarget} rel={resolvedRel} />;
   },
 };
 
@@ -37,21 +46,12 @@ interface MarkdownRendererProps {
 export default function MarkdownRenderer({
   content,
   className,
-}: MarkdownRendererProps) {
+}: Readonly<MarkdownRendererProps>) {
   return (
     <div className={className}>
       <ReactMarkdown
         rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema]]}
-        components={{
-          a: ({ node: _node, target, rel, ...anchorProps }) => {
-            const resolvedTarget = target || "_blank";
-            const resolvedRel =
-              resolvedTarget === "_blank" ? "noopener noreferrer" : rel;
-            return (
-              <a {...anchorProps} target={resolvedTarget} rel={resolvedRel} />
-            );
-          },
-        }}
+        components={markdownComponents}
       >
         {content}
       </ReactMarkdown>

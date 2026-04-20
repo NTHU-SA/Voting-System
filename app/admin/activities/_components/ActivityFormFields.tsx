@@ -25,7 +25,7 @@ export function ActivityFormFields({
   formData,
   onChange,
   disabled = false,
-}: ActivityFormFieldsProps) {
+}: Readonly<ActivityFormFieldsProps>) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

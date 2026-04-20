@@ -41,22 +41,22 @@ function MockAuthContent() {
       const uuid = formData.uuid || `mock-uuid-${Date.now()}`;
 
       // Prepare data based on requested scope
-      const scopeFields = scope.split(" ");
+      const scopeFields = new Set(scope.split(" "));
       const mockData: Record<string, string> = {
         timestamp: Date.now().toString(),
       };
 
       // Only include fields that are in the requested scope
-      if (scopeFields.includes("userid")) {
+      if (scopeFields.has("userid")) {
         mockData.Userid = formData.userid;
       }
-      if (scopeFields.includes("name")) {
+      if (scopeFields.has("name")) {
         mockData.name = formData.name;
       }
-      if (scopeFields.includes("inschool")) {
+      if (scopeFields.has("inschool")) {
         mockData.inschool = formData.inschool;
       }
-      if (scopeFields.includes("uuid")) {
+      if (scopeFields.has("uuid")) {
         mockData.uuid = uuid;
       }
 
@@ -82,7 +82,7 @@ function MockAuthContent() {
       if (state) {
         callbackUrl.searchParams.set("state", state);
       }
-      window.location.href = callbackUrl.toString();
+      globalThis.location.href = callbackUrl.toString();
     } catch (error) {
       console.error("Error during mock OAuth:", error);
       setIsSubmitting(false);
@@ -119,7 +119,7 @@ function MockAuthContent() {
     );
   }
 
-  const scopeFields = scope.split(" ");
+  const scopeFields = new Set(scope.split(" "));
 
   return (
     <Card className="w-full max-w-md">
@@ -134,7 +134,7 @@ function MockAuthContent() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {scopeFields.includes("userid") && (
+          {scopeFields.has("userid") && (
             <div className="space-y-2">
               <Label htmlFor="userid">學號 (Userid) *</Label>
               <Input
@@ -150,7 +150,7 @@ function MockAuthContent() {
             </div>
           )}
 
-          {scopeFields.includes("name") && (
+          {scopeFields.has("name") && (
             <div className="space-y-2">
               <Label htmlFor="name">姓名 (Name)</Label>
               <Input
@@ -165,7 +165,7 @@ function MockAuthContent() {
             </div>
           )}
 
-          {scopeFields.includes("inschool") && (
+          {scopeFields.has("inschool") && (
             <div className="space-y-2">
               <Label htmlFor="inschool">在學狀態 (Inschool)</Label>
               <select
@@ -182,7 +182,7 @@ function MockAuthContent() {
             </div>
           )}
 
-          {scopeFields.includes("uuid") && (
+          {scopeFields.has("uuid") && (
             <div className="space-y-2">
               <Label htmlFor="uuid">UUID (選填)</Label>
               <Input
@@ -211,7 +211,7 @@ function MockAuthContent() {
                 if (redirectUri) {
                   const callbackUrl = new URL(redirectUri);
                   callbackUrl.searchParams.set("error", "access_denied");
-                  window.location.href = callbackUrl.toString();
+                  globalThis.location.href = callbackUrl.toString();
                 }
               }}
             >

@@ -12,8 +12,7 @@ import { ActivityVoter } from "@/lib/models/ActivityVoter";
 import { Option } from "@/lib/models/Option";
 import connectDB from "@/lib/db";
 import { createVote } from "@/lib/votingService";
-import { isValidRule } from "@/lib/validation";
-import { validatePagination } from "@/lib/validation";
+import { isValidRule, validatePagination } from "@/lib/validation";
 import { API_CONSTANTS } from "@/lib/constants";
 
 export async function POST(request: NextRequest) {

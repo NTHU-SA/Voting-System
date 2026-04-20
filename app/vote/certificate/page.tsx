@@ -28,12 +28,12 @@ export default function CompletionPage() {
   };
 
   const handlePrint = () => {
-    window.print();
+    globalThis.print();
   };
 
   const handleClearHistory = () => {
     if (
-      window.confirm(API_CONSTANTS.MESSAGES.CONFIRM_CLEAR_ALL_HISTORY)
+      globalThis.confirm(API_CONSTANTS.MESSAGES.CONFIRM_CLEAR_ALL_HISTORY)
     ) {
       clearVotingHistory();
       setVotingHistory({ votedActivityIds: [], votes: [] });
@@ -42,7 +42,7 @@ export default function CompletionPage() {
 
   const handleRemoveVote = (token: string, activityName: string) => {
     if (
-      window.confirm(API_CONSTANTS.MESSAGES.CONFIRM_REMOVE_VOTE(activityName))
+      globalThis.confirm(API_CONSTANTS.MESSAGES.CONFIRM_REMOVE_VOTE(activityName))
     ) {
       const updatedHistory = removeVoteRecordByToken(token);
       setVotingHistory(updatedHistory);
@@ -139,7 +139,7 @@ export default function CompletionPage() {
             <div className="space-y-4">
               {votingHistory.votes.map((vote, index) => (
                 <div
-                  key={index}
+                  key={vote.token}
                   className="rounded-lg border bg-card p-4 transition-colors hover:bg-muted/30"
                 >
                   <div className="mb-4 flex items-start justify-between">
@@ -221,6 +221,7 @@ export default function CompletionPage() {
           <CardContent className="p-6">
             <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-amber-900">
               <span className="text-xl">📌</span>
+              {" "}
               重要提醒
             </h3>
             <ul className="space-y-2 text-sm text-amber-900/80">
@@ -276,7 +277,7 @@ export default function CompletionPage() {
         </div>
       </main>
 
-      <style jsx global>{`
+      <style jsx global>{String.raw`
         @media print {
           body {
             print-color-adjust: exact;

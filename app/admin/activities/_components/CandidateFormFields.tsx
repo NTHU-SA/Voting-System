@@ -16,7 +16,7 @@ export function CandidateFormFields({
   onChange,
   label,
   required = false,
-}: CandidateFormFieldsProps) {
+}: Readonly<CandidateFormFieldsProps>) {
   return (
     <div className="space-y-3">
       <h4 className="font-semibold">{label}</h4>

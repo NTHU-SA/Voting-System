@@ -17,12 +17,12 @@ export function ViceCandidateSection({
   onAddVice,
   onRemoveVice,
   onViceChange,
-}: ViceCandidateSectionProps) {
+}: Readonly<ViceCandidateSectionProps>) {
   return (
     <div className="space-y-3">
       {vices.map((vice, index) => (
         <div
-          key={index}
+          key={`${vice.name}-${vice.department}-${vice.college}`}
           className="relative rounded-lg border border-border p-4 bg-background"
         >
           <Button

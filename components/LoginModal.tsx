@@ -8,7 +8,10 @@ interface LoginModalProps {
   onClose?: () => void;
 }
 
-export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
+export default function LoginModal({
+  isOpen,
+  onClose,
+}: Readonly<LoginModalProps>) {
   const [isLoading, setIsLoading] = useState(false);
   const isDev = isDevelopment();
 
@@ -30,11 +33,11 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
     if (isDev) {
       // In development, redirect to mock OAuth page
-      const redirectUri = `${window.location.origin}/api/auth/callback`;
-      window.location.href = `/login?redirect_uri=${encodeURIComponent(redirectUri)}`;
+      const redirectUri = `${globalThis.location.origin}/api/auth/callback`;
+      globalThis.location.href = `/login?redirect_uri=${encodeURIComponent(redirectUri)}`;
     } else {
       // In production, redirect to OAuth login
-      window.location.href = "/api/auth/login";
+      globalThis.location.href = "/api/auth/login";
     }
   };
 

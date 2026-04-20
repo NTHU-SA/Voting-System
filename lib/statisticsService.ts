@@ -2,6 +2,7 @@ import { Activity } from "@/lib/models/Activity";
 import { Option } from "@/lib/models/Option";
 import { Vote } from "@/lib/models/Vote";
 import { Document, Types } from "mongoose";
+import { getEligibleVotersCount } from "@/lib/activityVoterService";
 
 interface OptionStat {
   option_id: string;
@@ -48,7 +49,6 @@ interface ActivityDocument extends Document {
   name: string;
   type: string;
   rule: string;
-  users: string[];
   open_from: Date;
   open_to: Date;
 }
@@ -85,7 +85,7 @@ export async function calculateActivityStatistics(
 
     // Calculate basic statistics
     const totalVotes = votes.length;
-    const totalEligibleVoters = activity.users.length;
+    const totalEligibleVoters = await getEligibleVotersCount(activity_id);
     const turnoutRate =
       totalEligibleVoters > 0
         ? ((totalVotes / totalEligibleVoters) * 100).toFixed(2)

@@ -106,7 +106,7 @@ export default function VotingPage() {
 
   useEffect(() => {
     // Initialize vote state for choose_all when activity loads (only if no existing vote)
-    if (activity && activity.rule === "choose_all" && !hasExistingVote && !loadingVote) {
+    if (activity?.rule === "choose_all" && !hasExistingVote && !loadingVote) {
       setChooseAllVotes((prev) => {
         const nextVotes = { ...prev };
         let changed = false;
@@ -183,13 +183,11 @@ export default function VotingPage() {
         router.push(
           `/vote/${activityId}/completion?token=${data.data.token}&name=${encodeURIComponent(activity.name)}`,
         );
-      } else {
+      } else if (data.error === "User has already voted") {
         // Check if user has already voted
-        if (data.error === "User has already voted") {
-          setError(API_CONSTANTS.MESSAGES.VOTE_ALREADY_VOTED_NO_TOKEN.join("\n"));
-        } else {
-          setError(data.error || "投票失敗");
-        }
+        setError(API_CONSTANTS.MESSAGES.VOTE_ALREADY_VOTED_NO_TOKEN.join("\n"));
+      } else {
+        setError(data.error || "投票失敗");
       }
     } catch (err) {
       console.error("Error submitting vote:", err);
@@ -258,8 +256,8 @@ export default function VotingPage() {
                 </div>
                 <ul className="list-inside list-disc space-y-1">
                   {candidate.personal_experiences.map(
-                    (exp: string, idx: number) => (
-                      <li key={idx} className="text-sm">
+                    (exp: string) => (
+                      <li key={`${candidate.name}-exp-${exp}`} className="text-sm">
                         <MarkdownRenderer
                           content={exp}
                           className="break-words"
@@ -280,8 +278,11 @@ export default function VotingPage() {
                 </div>
                 <ul className="list-inside list-disc space-y-1">
                   {candidate.political_opinions.map(
-                    (opinion: string, idx: number) => (
-                      <li key={idx} className="text-sm">
+                    (opinion: string) => (
+                      <li
+                        key={`${candidate.name}-opinion-${opinion}`}
+                        className="text-sm"
+                      >
                         <MarkdownRenderer
                           content={opinion}
                           className="break-words"
@@ -355,6 +356,7 @@ export default function VotingPage() {
                   className="w-full justify-start text-sm"
                 >
                   <strong className="mr-2">投票說明：</strong>
+                  {" "}
                   請對每位候選人表達您的意見（支持、反對或無意見）
                 </Badge>
               </CardContent>
@@ -364,48 +366,45 @@ export default function VotingPage() {
 
         {/* Status Message */}
         {error && (
-          <>      
-            {/* 浮動提示框 */}
-            <div className="fixed top-8 left-1/2 z-50 w-[90%] max-w-md -translate-x-1/2 animate-in slide-in-from-top-8 fade-in duration-300">
-              <Card
-                className={cn(
-                  "shadow-2xl border-2",
-                  hasExistingVote
-                    ? "border-blue-400 bg-blue-50"
-                    : "border-destructive bg-white"
+          <div className="fixed top-8 left-1/2 z-50 w-[90%] max-w-md -translate-x-1/2 animate-in slide-in-from-top-8 fade-in duration-300">
+            <Card
+              className={cn(
+                "shadow-2xl border-2",
+                hasExistingVote
+                  ? "border-blue-400 bg-blue-50"
+                  : "border-destructive bg-white"
+              )}
+            >
+              <CardContent className="flex items-start gap-3 p-4 sm:p-5">
+                {hasExistingVote ? (
+                  <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                ) : (
+                  <AlertCircle className="h-6 w-6 text-destructive flex-shrink-0 mt-0.5" />
                 )}
-              >
-                <CardContent className="flex items-start gap-3 p-4 sm:p-5">
-                  {hasExistingVote ? (
-                    <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  ) : (
-                    <AlertCircle className="h-6 w-6 text-destructive flex-shrink-0 mt-0.5" />
+
+                <p
+                  className={cn(
+                    "flex-1 whitespace-pre-line font-medium",
+                    hasExistingVote ? "text-blue-900" : "text-destructive"
                   )}
-                  
-                  <p
-                    className={cn(
-                      "flex-1 whitespace-pre-line font-medium",
-                      hasExistingVote ? "text-blue-900" : "text-destructive"
-                    )}
+                >
+                  {error}
+                </p>
+                {!hasExistingVote && (
+                  <button
+                    onClick={() => setError("")}
+                    className="ml-auto -mr-1 -mt-1 flex-shrink-0 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                    type="button"
                   >
-                    {error}
-                  </p>
-                  {!hasExistingVote && (
-                    <button
-                      onClick={() => setError("")}
-                      className="ml-auto -mr-1 -mt-1 flex-shrink-0 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                      type="button"
-                    >
-                      <span className="sr-only">關閉</span>
-                      <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </>
+                    <span className="sr-only">關閉</span>
+                    <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {/* Options/Candidates */}
@@ -420,9 +419,8 @@ export default function VotingPage() {
               <Separator />
               <CardContent className="pt-6">
                 {option.candidate && renderCandidate(option.candidate)}
-                {option.vice &&
-                  option.vice.map((vice, viceIndex) => (
-                    <div key={viceIndex}>
+                {option.vice?.map((vice) => (
+                    <div key={`${option._id}-${vice.name}-${vice.department}-${vice.college}`}>
                       {renderCandidate(vice)}
                     </div>
                   ))}
