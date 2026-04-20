@@ -228,6 +228,7 @@ export async function POST(
 
     const replaceVotersWithoutTransaction = async () => {
       const now = new Date();
+      const maxRetries = 3;
       const upsertOperations = studentIds.map((studentId) => ({
         updateOne: {
           filter: { activity_id: id, student_id: studentId },
@@ -260,13 +261,18 @@ export async function POST(
         );
       };
 
-      try {
-        await applyReplacement();
-      } catch (error: unknown) {
-        if (!isRetryableNonTransactionalError(error)) {
-          throw error;
+      for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+        try {
+          await applyReplacement();
+          return;
+        } catch (error: unknown) {
+          const isFinalAttempt = attempt === maxRetries;
+          if (!isRetryableNonTransactionalError(error) || isFinalAttempt) {
+            throw error;
+          }
+          const backoffMs = 20 * 2 ** attempt;
+          await new Promise((resolve) => setTimeout(resolve, backoffMs));
         }
-        await applyReplacement();
       }
     };
 
