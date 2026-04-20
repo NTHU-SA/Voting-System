@@ -48,11 +48,19 @@ async function supportsMongoTransactions(
     return false;
   }
 
-  const hello = (await db.connection.db.admin().command({ hello: 1 })) as {
-    setName?: string;
-    msg?: string;
-  };
-  return Boolean(hello.setName) || hello.msg === "isdbgrid";
+  try {
+    const hello = (await db.connection.db.admin().command({ hello: 1 })) as {
+      setName?: string;
+      msg?: string;
+    };
+    return Boolean(hello.setName) || hello.msg === "isdbgrid";
+  } catch (error: unknown) {
+    console.warn(
+      "Could not determine MongoDB transaction support; using non-transactional voter upload.",
+      error,
+    );
+    return false;
+  }
 }
 
 // GET /api/activities/[id]/voters - Get activity voter stats (Admin only)
