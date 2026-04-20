@@ -41,7 +41,7 @@ function isTransactionUnsupportedError(error: unknown): boolean {
 
 const TRANSACTION_SUPPORT_CACHE_TTL_MS = 5 * 60 * 1000;
 const TRANSACTION_SUPPORT_ERROR_CACHE_TTL_MS = 30 * 1000;
-const MAX_NON_TRANSACTIONAL_RETRIES = 3;
+const MAX_NON_TRANSACTIONAL_ATTEMPTS = 4;
 const INITIAL_NON_TRANSACTIONAL_RETRY_BACKOFF_MS = 20;
 let transactionSupportCache:
   | {
@@ -230,14 +230,17 @@ export async function POST(
 
     const replaceVotersWithoutTransaction = async () => {
       const now = new Date();
-      const upsertOperations = studentIds.map((studentId) => ({
+      const upsertOperations = voterDocuments.map((voterDocument) => ({
         updateOne: {
-          filter: { activity_id: id, student_id: studentId },
+          filter: {
+            activity_id: voterDocument.activity_id,
+            student_id: voterDocument.student_id,
+          },
           update: {
             $set: { updated_at: now },
             $setOnInsert: {
-              activity_id: id,
-              student_id: studentId,
+              activity_id: voterDocument.activity_id,
+              student_id: voterDocument.student_id,
               created_at: now,
             },
           },
@@ -262,12 +265,12 @@ export async function POST(
         );
       };
 
-      for (let attempt = 0; attempt <= MAX_NON_TRANSACTIONAL_RETRIES; attempt += 1) {
+      for (let attempt = 0; attempt < MAX_NON_TRANSACTIONAL_ATTEMPTS; attempt += 1) {
         try {
           await applyReplacement();
           return;
         } catch (error: unknown) {
-          const isFinalAttempt = attempt === MAX_NON_TRANSACTIONAL_RETRIES;
+          const isFinalAttempt = attempt === MAX_NON_TRANSACTIONAL_ATTEMPTS - 1;
           if (!isRetryableNonTransactionalError(error) || isFinalAttempt) {
             throw error;
           }
