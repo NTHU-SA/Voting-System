@@ -15,6 +15,7 @@ import {
   ArrowLeft,
   AlertCircle,
   Info,
+  Brush,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { saveVotingRecord, getVotesByActivityId } from "@/lib/votingHistory";
@@ -235,9 +236,12 @@ export default function VotingPage() {
             </div>
           </div>
 
-          {candidate.description && (
+          {candidate.description && candidate.description.length > 0 && (
             <div className="mb-3 rounded-lg bg-white/80 p-3">
-              <p className="mb-2 text-sm font-bold">候選人介紹</p>
+              <div className="mb-2 flex items-center gap-2">
+                <Brush className="h-4 w-4 text-primary" />
+                <p className="text-sm font-bold">介紹</p>
+              </div>
               <MarkdownRenderer
                 content={candidate.description}
                 className="space-y-2 text-sm break-words"

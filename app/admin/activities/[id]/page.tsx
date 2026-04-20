@@ -422,7 +422,7 @@ function ActivityDetailPageContent() {
 
           <div className="flex gap-2">
             <Button variant="outline" asChild className="shrink-0">
-              <Link href={`/vote/${activityId}`}>
+              <Link href={`/vote/${activityId}`} target="_blank" rel="noopener noreferrer">
                 <Eye className="sm:mr-2 h-4 w-4" />
                 <span className="sm:inline">預覽活動</span>
               </Link>
