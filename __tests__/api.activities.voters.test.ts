@@ -165,7 +165,7 @@ describe("/api/activities/[id]/voters POST", () => {
     const { db, session } = createDbMock({ setName: "rs0" });
     session.withTransaction.mockRejectedValueOnce(
       new MongoServerError({
-        errmsg:
+        message:
           "Transaction numbers are only allowed on a replica set member or mongos",
       }),
     );

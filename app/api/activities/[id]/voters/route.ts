@@ -31,11 +31,11 @@ function extractStudentIds(csvText: string): string[] {
 }
 
 function isTransactionUnsupportedError(error: unknown): boolean {
+  const unsupportedTransactionMessage =
+    "Transaction numbers are only allowed on a replica set member or mongos";
   return (
     error instanceof MongoServerError &&
-    /Transaction numbers are only allowed on a replica set member or mongos/i.test(
-      error.message,
-    )
+    error.message.includes(unsupportedTransactionMessage)
   );
 }
 
