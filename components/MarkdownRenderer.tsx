@@ -9,6 +9,7 @@ const sanitizeSchema = {
   tagNames: [...(defaultSchema.tagNames || []), "img"],
   attributes: {
     ...(defaultSchema.attributes || {}),
+    "*": ["className", "class", "style"],
     img: [
       ...(defaultSchema.attributes?.img || []),
       "src",
