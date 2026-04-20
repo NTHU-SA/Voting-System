@@ -43,6 +43,7 @@ const TRANSACTION_SUPPORT_CACHE_TTL_MS = 5 * 60 * 1000;
 const TRANSACTION_SUPPORT_ERROR_CACHE_TTL_MS = 30 * 1000;
 const MAX_NON_TRANSACTIONAL_ATTEMPTS = 4;
 const INITIAL_NON_TRANSACTIONAL_RETRY_BACKOFF_MS = 20;
+const MAX_NON_TRANSACTIONAL_RETRY_BACKOFF_MS = 500;
 let transactionSupportCache:
   | {
       value: boolean;
@@ -265,17 +266,19 @@ export async function POST(
         );
       };
 
-      for (let attempt = 0; attempt < MAX_NON_TRANSACTIONAL_ATTEMPTS; attempt += 1) {
+      for (let attempt = 1; attempt <= MAX_NON_TRANSACTIONAL_ATTEMPTS; attempt += 1) {
         try {
           await applyReplacement();
           return;
         } catch (error: unknown) {
-          const isFinalAttempt = attempt === MAX_NON_TRANSACTIONAL_ATTEMPTS - 1;
+          const isFinalAttempt = attempt === MAX_NON_TRANSACTIONAL_ATTEMPTS;
           if (!isRetryableNonTransactionalError(error) || isFinalAttempt) {
             throw error;
           }
-          const backoffMs =
-            INITIAL_NON_TRANSACTIONAL_RETRY_BACKOFF_MS * 2 ** attempt;
+          const backoffMs = Math.min(
+            INITIAL_NON_TRANSACTIONAL_RETRY_BACKOFF_MS * 2 ** (attempt - 1),
+            MAX_NON_TRANSACTIONAL_RETRY_BACKOFF_MS,
+          );
           await new Promise((resolve) => setTimeout(resolve, backoffMs));
         }
       }
