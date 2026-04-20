@@ -41,28 +41,18 @@ function isTransactionUnsupportedError(error: unknown): boolean {
   );
 }
 
-let supportsMongoTransactionsCache: boolean | null = null;
-
 async function supportsMongoTransactions(
   db: Awaited<ReturnType<typeof connectDB>>,
 ): Promise<boolean> {
-  if (supportsMongoTransactionsCache !== null) {
-    return supportsMongoTransactionsCache;
-  }
-
   if (!db.connection.db) {
-    supportsMongoTransactionsCache = true;
-    return supportsMongoTransactionsCache;
+    return false;
   }
 
   const hello = (await db.connection.db.admin().command({ hello: 1 })) as {
     setName?: string;
     msg?: string;
   };
-  supportsMongoTransactionsCache =
-    Boolean(hello.setName) || hello.msg === "isdbgrid";
-
-  return supportsMongoTransactionsCache;
+  return Boolean(hello.setName) || hello.msg === "isdbgrid";
 }
 
 // GET /api/activities/[id]/voters - Get activity voter stats (Admin only)
