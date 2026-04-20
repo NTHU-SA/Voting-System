@@ -145,20 +145,34 @@ export async function POST(
       );
     };
 
-    const session = await db.startSession();
-    try {
+    let supportsTransactions = true;
+    if (db.connection.db) {
+      const hello = (await db.connection.db.admin().command({ hello: 1 })) as {
+        setName?: string;
+        msg?: string;
+      };
+      supportsTransactions =
+        Boolean(hello.setName) || hello.msg === "isdbgrid";
+    }
+
+    if (!supportsTransactions) {
+      await replaceVoters();
+    } else {
+      const session = await db.startSession();
       try {
-        await session.withTransaction(async () => {
-          await replaceVoters({ session });
-        });
-      } catch (error: unknown) {
-        if (!isTransactionUnsupportedError(error)) {
-          throw error;
+        try {
+          await session.withTransaction(async () => {
+            await replaceVoters({ session });
+          });
+        } catch (error: unknown) {
+          if (!isTransactionUnsupportedError(error)) {
+            throw error;
+          }
+          await replaceVoters();
         }
-        await replaceVoters();
+      } finally {
+        await session.endSession();
       }
-    } finally {
-      await session.endSession();
     }
 
     return createSuccessResponse({
