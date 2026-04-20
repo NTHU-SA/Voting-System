@@ -266,7 +266,7 @@ export async function POST(
         );
       };
 
-      for (let attempt = 1; attempt <= MAX_NON_TRANSACTIONAL_ATTEMPTS; attempt += 1) {
+      for (let attempt = 1; attempt <= MAX_NON_TRANSACTIONAL_ATTEMPTS; attempt++) {
         try {
           await applyReplacement();
           return;
