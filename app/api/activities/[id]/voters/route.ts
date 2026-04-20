@@ -41,6 +41,30 @@ function isTransactionUnsupportedError(error: unknown): boolean {
   );
 }
 
+let supportsMongoTransactionsCache: boolean | null = null;
+
+async function supportsMongoTransactions(
+  db: Awaited<ReturnType<typeof connectDB>>,
+): Promise<boolean> {
+  if (supportsMongoTransactionsCache !== null) {
+    return supportsMongoTransactionsCache;
+  }
+
+  if (!db.connection.db) {
+    supportsMongoTransactionsCache = true;
+    return supportsMongoTransactionsCache;
+  }
+
+  const hello = (await db.connection.db.admin().command({ hello: 1 })) as {
+    setName?: string;
+    msg?: string;
+  };
+  supportsMongoTransactionsCache =
+    Boolean(hello.setName) || hello.msg === "isdbgrid";
+
+  return supportsMongoTransactionsCache;
+}
+
 // GET /api/activities/[id]/voters - Get activity voter stats (Admin only)
 export async function GET(
   request: NextRequest,
@@ -141,35 +165,27 @@ export async function POST(
             updated_at: new Date(),
           },
         },
-        options?.session ? { session: options.session } : undefined,
+        {
+          ...(options?.session ? { session: options.session } : {}),
+        },
       );
     };
 
-    let supportsTransactions = true;
-    if (db.connection.db) {
-      const hello = (await db.connection.db.admin().command({ hello: 1 })) as {
-        setName?: string;
-        msg?: string;
-      };
-      supportsTransactions =
-        Boolean(hello.setName) || hello.msg === "isdbgrid";
-    }
+    const supportsTransactions = await supportsMongoTransactions(db);
 
     if (!supportsTransactions) {
       await replaceVoters();
     } else {
       const session = await db.startSession();
       try {
-        try {
-          await session.withTransaction(async () => {
-            await replaceVoters({ session });
-          });
-        } catch (error: unknown) {
-          if (!isTransactionUnsupportedError(error)) {
-            throw error;
-          }
-          await replaceVoters();
+        await session.withTransaction(async () => {
+          await replaceVoters({ session });
+        });
+      } catch (error: unknown) {
+        if (!isTransactionUnsupportedError(error)) {
+          throw error;
         }
+        await replaceVoters();
       } finally {
         await session.endSession();
       }
