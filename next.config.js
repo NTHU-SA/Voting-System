@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 
 module.exports = {
+  allowedDevOrigins: process.env.ALLOWED_DEV_ORIGINS
+    ? process.env.ALLOWED_DEV_ORIGINS.split(",").map((origin) => origin.trim())
+    : ["http://localhost:3000", "http://127.0.0.1:3000"],
   // Rewrite /callback to /api/auth/callback
   async rewrites() {
     return [

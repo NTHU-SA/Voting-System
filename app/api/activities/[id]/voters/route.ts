@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parse } from "csv-parse/sync";
+import { MongoServerError, type ClientSession } from "mongodb";
 import {
   requireAdminAuth,
   createErrorResponse,
@@ -27,6 +28,17 @@ function extractStudentIds(csvText: string): string[] {
   }
 
   return [...new Set(result)];
+}
+
+function isTransactionUnsupportedError(error: unknown): boolean {
+  return (
+    error instanceof MongoServerError &&
+    (error.code === 20 ||
+      error.codeName === "IllegalOperation" ||
+      /Transaction numbers are only allowed on a replica set member or mongos/i.test(
+        error.message,
+      ))
+  );
 }
 
 // GET /api/activities/[id]/voters - Get activity voter stats (Admin only)
@@ -108,31 +120,43 @@ export async function POST(
       return createErrorResponse("CSV does not contain valid student IDs", 400);
     }
 
+    const voterDocuments = studentIds.map((studentId) => ({
+      activity_id: id,
+      student_id: studentId,
+      created_at: new Date(),
+      updated_at: new Date(),
+    }));
+
+    const replaceVoters = async (options?: { session?: ClientSession }) => {
+      await ActivityVoter.deleteMany({ activity_id: id }, options);
+      await ActivityVoter.insertMany(voterDocuments, {
+        ordered: false,
+        ...(options?.session ? { session: options.session } : {}),
+      });
+      await Activity.updateOne(
+        { _id: id },
+        {
+          $set: {
+            eligible_voters_count: studentIds.length,
+            updated_at: new Date(),
+          },
+        },
+        options?.session ? { session: options.session } : undefined,
+      );
+    };
+
     const session = await db.startSession();
     try {
-      await session.withTransaction(async () => {
-        await ActivityVoter.deleteMany({ activity_id: id }, { session });
-        await ActivityVoter.insertMany(
-          studentIds.map((studentId) => ({
-            activity_id: id,
-            student_id: studentId,
-            created_at: new Date(),
-            updated_at: new Date(),
-          })),
-          { ordered: false, session },
-        );
-
-        await Activity.updateOne(
-          { _id: id },
-          {
-            $set: {
-              eligible_voters_count: studentIds.length,
-              updated_at: new Date(),
-            },
-          },
-          { session },
-        );
-      });
+      try {
+        await session.withTransaction(async () => {
+          await replaceVoters({ session });
+        });
+      } catch (error: unknown) {
+        if (!isTransactionUnsupportedError(error)) {
+          throw error;
+        }
+        await replaceVoters();
+      }
     } finally {
       await session.endSession();
     }
