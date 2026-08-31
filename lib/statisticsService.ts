@@ -49,6 +49,7 @@ interface ActivityDocument extends Document {
   type: string;
   rule: string;
   users: string[];
+  eligible_voters_count: number;
   open_from: Date;
   open_to: Date;
 }
@@ -85,7 +86,8 @@ export async function calculateActivityStatistics(
 
     // Calculate basic statistics
     const totalVotes = votes.length;
-    const totalEligibleVoters = activity.users.length;
+    // 分母是名冊人數（上傳選舉人 CSV 時寫入），不是已投票人數
+    const totalEligibleVoters = activity.eligible_voters_count ?? 0;
     const turnoutRate =
       totalEligibleVoters > 0
         ? ((totalVotes / totalEligibleVoters) * 100).toFixed(2)
