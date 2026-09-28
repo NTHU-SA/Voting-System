@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, Github, Mail, Facebook, Instagram } from "lucide-react";
+import { Heart, GitBranch, Mail, Users, Camera } from "lucide-react";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -73,7 +73,7 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <Facebook className="h-4 w-4" />
+                  <Users className="h-4 w-4" />
                   <span>Facebook</span>
                 </a>
               </li>
@@ -84,7 +84,7 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <Instagram className="h-4 w-4" />
+                  <Camera className="h-4 w-4" />
                   <span>Instagram</span>
                 </a>
               </li>
@@ -95,7 +95,7 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <Github className="h-4 w-4" />
+                  <GitBranch className="h-4 w-4" />
                   <span>GitHub</span>
                 </a>
               </li>
