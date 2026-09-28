@@ -12,8 +12,11 @@ const customJestConfig = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
   },
-  modulePathIgnorePatterns: ["<rootDir>/.next/"],
-  testPathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/.next/"],
+  modulePathIgnorePatterns: ["[/\\\\]\\.next[/\\\\]"],
+  testPathIgnorePatterns: [
+    "[/\\\\]node_modules[/\\\\]",
+    "[/\\\\]\\.next[/\\\\]",
+  ],
   // Transform ESM modules from bson, mongodb, and mongoose packages
   // These packages use ESM exports which need to be transformed for Jest
   transformIgnorePatterns: ["/node_modules/(?!(bson|mongodb|mongoose)/)"],

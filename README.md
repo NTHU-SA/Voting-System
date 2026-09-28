@@ -27,7 +27,7 @@ Anonymous voting system for National Tsing Hua University Student Association.
 
 ### Prerequisites
 
-- Node.js 18.18+
+- Node.js 22+ (Docker uses Node.js 24)
 - MongoDB 7+
 - npm 9+
 

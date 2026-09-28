@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,11 +12,19 @@ import { VotingHistory } from "@/types";
 import { useUser } from "@/hooks";
 import { API_CONSTANTS } from "@/lib/constants";
 
+const subscribeToHydration = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
+
 export default function CompletionPage() {
   const router = useRouter();
-  const [votingHistory, setVotingHistory] = useState<VotingHistory | null>(
-    () => loadVotingHistory(),
+  const isHydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getClientSnapshot,
+    getServerSnapshot,
   );
+  const [savedHistory, setVotingHistory] = useState<VotingHistory | null>(null);
+  const votingHistory = savedHistory ?? (isHydrated ? loadVotingHistory() : null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   
   const { user: userInfo } = useUser();
